@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zhy.autolayout.AutoRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/id_recycler_view_app_all"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical"/>
+    <!--只在已下载应用中显示-->
+    <Button
+        android:id="@+id/id_btn_delete_app"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="删除应用"
+        android:textSize="60px"
+        android:background="@color/colorPrimary"
+        android:textColor="@color/colorGray"
+        android:visibility="gone"
+        android:layout_alignParentBottom="true"/>
+</com.zhy.autolayout.AutoRelativeLayout>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zhy.autolayout.AutoLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    >
+    <com.zhy.autolayout.AutoFrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        >
+        <TextView
+            android:id="@+id/id_tv_app_name"
+            android:layout_margin="50px"
+            android:layout_width="match_parent"
+            android:layout_height="600px"
+            android:background="@color/colorGray"
+            android:text="银行卡"
+            android:textSize="80px"
+            android:textColor="@color/colorAccent"
+            android:gravity="bottom|center"
+
+            />
+        <ImageView
+            android:id="@+id/id_iv_app_icon"
+            android:layout_width="300px"
+            android:layout_height="300px"
+            android:src="@drawable/card"
+            android:scaleType="fitCenter"
+            android:layout_gravity="center"/>
+    </com.zhy.autolayout.AutoFrameLayout>
+
+
+</com.zhy.autolayout.AutoLinearLayout>

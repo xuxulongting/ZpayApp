@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.zhy.autolayout.AutoFrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="200px">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorPrimary"
+            android:text="ZPAY"
+            android:textSize="150px"
+            android:textColor="@color/colorWhite"
+            android:gravity="center_horizontal"/>
+        <Button
+            android:id="@+id/id_btn_more"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="更多"
+            android:textSize="100px"
+            android:background="@color/colorPrimary"
+            android:layout_gravity="right"
+            />
+    </com.zhy.autolayout.AutoFrameLayout>
+
+</LinearLayout>
