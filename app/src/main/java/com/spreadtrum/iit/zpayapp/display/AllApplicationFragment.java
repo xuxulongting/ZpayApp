@@ -1,11 +1,7 @@
-package com.spreadtrum.iit.zpayapp;
+package com.spreadtrum.iit.zpayapp.display;
 
 import android.app.Fragment;
-import android.app.Notification;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.Paint;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
@@ -15,6 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
+
+import com.spreadtrum.iit.zpayapp.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -122,7 +120,7 @@ public class AllApplicationFragment extends Fragment {
     public  List<AppParameter> getItemDataFromSE(){
         AppParameter app1 = new AppParameter();
         //app1.setBitmapDrawable(getResources().getDrawable(R.drawable.bus,));
-        app1.setAppType("公交车");
+        app1.setAppType("公交卡");
         AppParameter app2 = new AppParameter();
         app2.setAppType("银行卡");
 //        AppParameter app3 = new AppParameter();
