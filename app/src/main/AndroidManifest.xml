@@ -9,22 +9,22 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".LoginActivity">
+        <activity android:name=".register.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".RegisterActivity"></activity>
+        <activity android:name=".register.RegisterActivity"></activity>
         <activity android:name=".RegisterActivity_1"></activity>
         <activity android:name=".RegisterActivity_2"></activity>
         <activity android:name=".RegisterActivity_3"></activity>
         <activity android:name=".RegisterActivity_4"></activity>
-        <activity android:name=".UserDigitalPwdLoginActivity"></activity>
-        <activity android:name=".UserZhiwenLoginActivity"></activity>
-        <activity android:name=".ApplicationActivity"></activity>
-        <activity android:name=".SpecialApplicationActivity"></activity>
+        <activity android:name=".login.UserDigitalPwdLoginActivity"></activity>
+        <activity android:name=".login.UserZhiwenLoginActivity"></activity>
+        <activity android:name=".display.ApplicationActivity"></activity>
+        <activity android:name=".display.SpecialApplicationActivity"></activity>
         <meta-data android:name="design_width" android:value="1440">
         </meta-data>
         <meta-data android:name="design_height" android:value="2560">

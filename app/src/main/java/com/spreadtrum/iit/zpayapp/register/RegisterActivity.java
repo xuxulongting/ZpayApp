@@ -1,4 +1,4 @@
-package com.spreadtrum.iit.zpayapp;
+package com.spreadtrum.iit.zpayapp.register;
 
 import android.app.Dialog;
 import android.app.Fragment;
@@ -10,16 +10,17 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.view.Window;
 
-import com.spreadtrum.iit.zpayapp.RegisterFragment_1;
+import com.spreadtrum.iit.zpayapp.display.ApplicationActivity;
+import com.spreadtrum.iit.zpayapp.R;
+
 /**
  * Created by SPREADTRUM\ting.long on 16-7-26.
  */
 public class RegisterActivity extends AppCompatActivity implements RegisterFragment_1.NextStep_1ClickListener,
         RegisterFragment_2.NextStep_2ClickListener,RegisterFragment_3.NextStep_3ClickListener,
         RegisterFragment_4.NextStep_4ClickListener,
-        TitleFragment.BackBtnClickListener{
+        TitleFragment.BackBtnClickListener {
     private Fragment registerFragment_1=null;
     private Fragment registerFragment_2=null;
     private Fragment registerFragment_3=null;

@@ -1,13 +1,14 @@
 package com.spreadtrum.iit.zpayapp;
 
 import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+
+import com.spreadtrum.iit.zpayapp.register.TitleFragment;
+
 /**
  * Created by SPREADTRUM\ting.long on 16-7-25.
  */

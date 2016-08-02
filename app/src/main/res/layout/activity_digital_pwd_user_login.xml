@@ -4,7 +4,7 @@
     android:layout_height="match_parent">
     <fragment
         android:id="@+id/id_frg_title"
-        android:name="com.spreadtrum.iit.zpayapp.TitleFragment2"
+        android:name="com.spreadtrum.iit.zpayapp.login.TitleFragment2"
         android:layout_width="match_parent"
         android:layout_height="45dp"/>
     <com.zhy.autolayout.AutoLinearLayout

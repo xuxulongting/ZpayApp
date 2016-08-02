@@ -1,4 +1,4 @@
-package com.spreadtrum.iit.zpayapp;
+package com.spreadtrum.iit.zpayapp.display;
 
 import android.widget.ImageView;
 
@@ -7,16 +7,16 @@ import android.widget.ImageView;
  */
 public class Card {
     public Card(String cardType,int cardViewId,String cardName){
-       this.cardType = cardType;
+       this.appType = cardType;
         this.cardViewId = cardViewId;
         this.cardName = cardName;
     }
-    public String getCardType() {
-        return cardType;
+    public String getAppType() {
+        return appType;
     }
 
-    public void setCardType(String cardType) {
-        this.cardType = cardType;
+    public void setAppType(String cardType) {
+        this.appType = cardType;
     }
 
     public int getCardView() {
@@ -35,7 +35,7 @@ public class Card {
         this.cardName = cardName;
     }
 
-    private String cardType;
+    private String appType;
     private int cardViewId;
     private String cardName;
 }

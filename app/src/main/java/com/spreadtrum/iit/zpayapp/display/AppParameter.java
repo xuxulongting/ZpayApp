@@ -1,4 +1,4 @@
-package com.spreadtrum.iit.zpayapp;
+package com.spreadtrum.iit.zpayapp.display;
 
 import android.graphics.drawable.BitmapDrawable;
 

@@ -6,6 +6,8 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
+import com.spreadtrum.iit.zpayapp.register.TitleFragment;
+
 /**
  * Created by SPREADTRUM\ting.long on 16-7-25.
  */

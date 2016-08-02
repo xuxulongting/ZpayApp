@@ -1,15 +1,16 @@
-package com.spreadtrum.iit.zpayapp;
+package com.spreadtrum.iit.zpayapp.display;
 
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.spreadtrum.iit.zpayapp.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +44,7 @@ public class SpecialApplicationFragment extends Fragment {
         //Textview
         TextView tvTitle = (TextView) view.findViewById(R.id.id_tv_title);
         //创建adapter
-        if(appType.compareTo("公交车")==0){
+        if(appType.compareTo("公交卡")==0){
             specialApplicationAdapter = new SpecialApplicationAdapter(getCardListData(appType));
             tvTitle.setText(appType);
         }
@@ -57,9 +58,9 @@ public class SpecialApplicationFragment extends Fragment {
 
     private List<Card> getCardListData(String cardType) {
         List<Card> cardListData = new ArrayList<Card>();
-        if(cardType.compareTo("公交车")==0){
-            Card busCard1 = new Card("公交车",R.drawable.bus,"北京公交一卡通");
-            Card busCard2 = new Card("公交车",R.drawable.bus,"上海公交一卡通");
+        if(cardType.compareTo("公交卡")==0){
+            Card busCard1 = new Card("公交卡",R.drawable.bus,"北京公交一卡通");
+            Card busCard2 = new Card("公交卡",R.drawable.bus,"上海公交一卡通");
             cardListData.add(busCard1);
             cardListData.add(busCard2);
         }

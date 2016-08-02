@@ -1,8 +1,10 @@
-package com.spreadtrum.iit.zpayapp;
+package com.spreadtrum.iit.zpayapp.display;
 
 import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+
+import com.spreadtrum.iit.zpayapp.R;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-7-29.
