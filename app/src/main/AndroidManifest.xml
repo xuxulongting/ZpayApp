@@ -10,11 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".register.LoginActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity android:name=".register.RegisterActivity"></activity>
         <activity android:name=".RegisterActivity_1"></activity>
@@ -25,10 +21,18 @@
         <activity android:name=".login.UserZhiwenLoginActivity"></activity>
         <activity android:name=".display.ApplicationActivity"></activity>
         <activity android:name=".display.SpecialApplicationActivity"></activity>
+        <activity android:name=".network.SimpleClientActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <meta-data android:name="design_width" android:value="1440">
         </meta-data>
         <meta-data android:name="design_height" android:value="2560">
         </meta-data>
-    </application>
 
+    </application>
+    <uses-permission android:name="android.permission.INTERNET"/>
 </manifest>
