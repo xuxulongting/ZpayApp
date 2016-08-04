@@ -25,4 +25,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:24.1.0'
     compile 'com.zhy:autolayout:1.4.3'
     compile 'com.android.support:recyclerview-v7:24.1.0'
+
+    //compile project(':base-adapter-library')
+    compile project(':baseadapter-recyclerview')
 }

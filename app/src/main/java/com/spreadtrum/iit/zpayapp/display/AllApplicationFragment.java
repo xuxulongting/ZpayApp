@@ -2,6 +2,9 @@ package com.spreadtrum.iit.zpayapp.display;
 
 import android.app.Fragment;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
@@ -13,6 +16,8 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.spreadtrum.iit.zpayapp.R;
+import com.zhy.adapter.recyclerview.CommonAdapter;
+import com.zhy.adapter.recyclerview.base.ViewHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,10 +29,12 @@ public class AllApplicationFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private GridLayoutManager gridLayoutManager;
-    private ApplicationAdapter appAdapterAll;
-    private ApplicationAdapter appAdapterLocal;
+    private com.zhy.adapter.recyclerview.CommonAdapter appAdapterAll;
+    private CommonAdapter<AppParameter> appAdapterLocal;
     private int tabItem = -1;
     private Button btnDeleteApp;
+    private List<AppParameter> appAllListData = new ArrayList<>();
+    private List<AppParameter> appLocalListData = new ArrayList<>();
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,6 +42,9 @@ public class AllApplicationFragment extends Fragment {
         if(bundle!=null){
             tabItem = bundle.getInt(ARGUMENT);
         }
+        //初始化数据
+        getItemDataFromSE();
+        getItemDataFromTSM();
     }
 
     @Nullable
@@ -51,51 +61,56 @@ public class AllApplicationFragment extends Fragment {
         recyclerView.setHasFixedSize(true);
         //创建并设置Adapter
         if (tabItem==ApplicationActivity.TAB_LOCAL_APP){
-            appAdapterLocal = new ApplicationAdapter(getItemDataFromSE());
-            recyclerView.setAdapter(appAdapterLocal);
-//            //删除应用按钮
-//            btnDeleteApp = (Button) view.findViewById(R.id.id_btn_delete_app);
-//            btnDeleteApp.setVisibility(View.VISIBLE);
-//            btnDeleteApp.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//
-//                }
-//            });
-            //已下载应用中的点击事件
-            appAdapterLocal.setOnItemClickListener(new ApplicationAdapter.OnItemClickListener() {
+            appAdapterLocal = new CommonAdapter<AppParameter>(frgview.getContext(), R.layout.item_app, appLocalListData) {
                 @Override
-                public void onItemClick(View view, AppParameter appData) {
+                protected void convert(ViewHolder viewHolder, AppParameter item, int position) {
+                    //viewHolder.setImageDrawable(R.id.id_iv_app_icon,item.getBitmapDrawable());
+                    viewHolder.setText(R.id.id_tv_app_name,item.getAppType());
+                }
+            };
+            recyclerView.setAdapter(appAdapterLocal);
+            //已下载应用中的点击事件
+            appAdapterLocal.setOnItemClickListener(new CommonAdapter.OnItemClickListener() {
+                @Override
+                public void onItemClick(View view, RecyclerView.ViewHolder holder, int position) {
                     Intent intent = new Intent(frgview.getContext(),SpecialApplicationActivity.class);
                     Bundle bundle = new Bundle();
-                    bundle.putString(ARGUMENT_APPTYPE,appData.getAppType());
+                    bundle.putString(ARGUMENT_APPTYPE,appLocalListData.get(position).getAppType());
                     intent.putExtras(bundle);
                     startActivity(intent);
                 }
 
                 @Override
-                public void onItemLongClick(View view, AppParameter appData) {
-
+                public boolean onItemLongClick(View view, RecyclerView.ViewHolder holder, int position) {
+                    return false;
                 }
             });
+
         }
         else  {
-            appAdapterAll = new ApplicationAdapter(getItemDataFromTSM());
-            recyclerView.setAdapter(appAdapterAll);
-            //添加点击事件
-            //全部应用中的点击事件
-            appAdapterAll.setOnItemClickListener(new ApplicationAdapter.OnItemClickListener() {
-                @Override
-                public void onItemClick(View view, AppParameter appData) {
-                    Toast.makeText(view.getContext(),appData.getAppType(),Toast.LENGTH_LONG).show();
+            appAdapterAll = new CommonAdapter<AppParameter>(frgview.getContext(),R.layout.item_app, appAllListData) {
 
+                @Override
+                protected void convert(ViewHolder holder, AppParameter appParameter, int position) {
+                    holder.setImageDrawable(R.id.id_iv_app_icon,appParameter.getBitmapDrawable());
+                    holder.setText(R.id.id_tv_app_name,appParameter.getAppType());
+
+                }
+            };
+            //全部应用中的点击事件
+            appAdapterAll.setOnItemClickListener(new CommonAdapter.OnItemClickListener() {
+                @Override
+                public void onItemClick(View view, RecyclerView.ViewHolder holder, int position) {
+                    Toast.makeText(view.getContext(),appAllListData.get(position).getAppType(),Toast.LENGTH_LONG).show();
                 }
 
                 @Override
-                public void onItemLongClick(View view, AppParameter appData) {
-
+                public boolean onItemLongClick(View view, RecyclerView.ViewHolder holder, int position) {
+                    return false;
                 }
             });
+            recyclerView.setAdapter(appAdapterAll);
+
         }
 
 
@@ -105,16 +120,23 @@ public class AllApplicationFragment extends Fragment {
     public List<AppParameter> getItemDataFromTSM(){
         AppParameter app1 = new AppParameter();
         //app1.setBitmapDrawable(getResources().getDrawable(R.drawable.bus,));
+        Resources res=getResources();
+        Drawable drawable = res.getDrawable(R.drawable.bus);
         app1.setAppType("公交卡");
+        app1.setBitmapDrawable((BitmapDrawable) drawable);
         AppParameter app2 = new AppParameter();
+        drawable = res.getDrawable(R.drawable.card);
         app2.setAppType("银行卡");
+        app2.setBitmapDrawable((BitmapDrawable) drawable);
         AppParameter app3 = new AppParameter();
+        drawable = res.getDrawable(R.drawable.card);
         app3.setAppType("酒店");
-        ArrayList<AppParameter> listData = new ArrayList<AppParameter>();
-        listData.add(0,app1);
-        listData.add(1,app2);
-        listData.add(2,app3);
-        return listData;
+        app3.setBitmapDrawable((BitmapDrawable) drawable);
+        //ArrayList<AppParameter> listData = new ArrayList<AppParameter>();
+        appAllListData.add(0,app1);
+        appAllListData.add(1,app2);
+        appAllListData.add(2,app3);
+        return appAllListData;
     }
 
     public  List<AppParameter> getItemDataFromSE(){
@@ -125,11 +147,11 @@ public class AllApplicationFragment extends Fragment {
         app2.setAppType("银行卡");
 //        AppParameter app3 = new AppParameter();
 //        app3.setAppText("酒店");
-        ArrayList<AppParameter> listData = new ArrayList<AppParameter>();
-        listData.add(0,app1);
-        listData.add(1,app2);
+//        ArrayList<AppParameter> listData = new ArrayList<AppParameter>();
+        appLocalListData.add(0,app1);
+        appLocalListData.add(1,app2);
 //        listData.add(2,app3);
-        return listData;
+        return appLocalListData;
     }
 
     public static AllApplicationFragment newInstance(int arg){

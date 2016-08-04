@@ -11,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.spreadtrum.iit.zpayapp.R;
+import com.zhy.adapter.recyclerview.CommonAdapter;
+import com.zhy.adapter.recyclerview.base.ViewHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +24,7 @@ public class SpecialApplicationFragment extends Fragment {
     private static final String ARGUMENT = "ARGUMENT";
     private RecyclerView recyclerView;
     private LinearLayoutManager linearLayoutManager;
-    private SpecialApplicationAdapter specialApplicationAdapter;
+    private CommonAdapter specialApplicationAdapter;
     private String appType;
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -45,11 +47,24 @@ public class SpecialApplicationFragment extends Fragment {
         TextView tvTitle = (TextView) view.findViewById(R.id.id_tv_title);
         //创建adapter
         if(appType.compareTo("公交卡")==0){
-            specialApplicationAdapter = new SpecialApplicationAdapter(getCardListData(appType));
+
+            specialApplicationAdapter = new CommonAdapter<Card>(view.getContext(), R.layout.item_card, getCardListData(appType)) {
+                @Override
+                protected void convert(ViewHolder holder, Card card, int position) {
+                    holder.setImageResource(R.id.id_iv_card_image,card.getCardView());
+                    holder.setText(R.id.id_tv_card_name,card.getCardName());
+                }
+            };
             tvTitle.setText(appType);
         }
         else if(appType.compareTo("银行卡")==0){
-            specialApplicationAdapter = new SpecialApplicationAdapter(getCardListData(appType));
+            specialApplicationAdapter = new CommonAdapter<Card>(view.getContext(),R.layout.item_card,getCardListData(appType)) {
+                @Override
+                protected void convert(ViewHolder holder, Card card, int position) {
+                    holder.setImageResource(R.id.id_iv_card_image,card.getCardView());
+                    holder.setText(R.id.id_tv_card_name,card.getCardName());
+                }
+            };
             tvTitle.setText(appType);
         }
         recyclerView.setAdapter(specialApplicationAdapter);
