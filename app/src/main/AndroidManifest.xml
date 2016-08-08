@@ -3,6 +3,7 @@
     package="com.spreadtrum.iit.zpayapp">
 
 
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -22,12 +23,22 @@
         <activity android:name=".display.ApplicationActivity"></activity>
         <activity android:name=".display.SpecialApplicationActivity"></activity>
         <activity android:name=".network.SimpleClientActivity">
+
+        </activity>
+        <activity android:name=".network.bluetooth.BluetoothTestActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".network.bluetooth.BluetoothActivity">
+
+        </activity>
+        <activity android:name=".network.bluetooth.DeviceControlActivity"></activity>
+        <activity android:name=".network.bluetooth.DeviceScanActivity"></activity>
+
+        <service android:name=".network.bluetooth.BluetoothService"></service>
         <meta-data android:name="design_width" android:value="1440">
         </meta-data>
         <meta-data android:name="design_height" android:value="2560">
@@ -35,4 +46,7 @@
 
     </application>
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"></uses-feature>
 </manifest>
