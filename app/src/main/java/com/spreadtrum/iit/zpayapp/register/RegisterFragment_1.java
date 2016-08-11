@@ -17,7 +17,7 @@ public class RegisterFragment_1 extends Fragment implements View.OnClickListener
     @Override
     public void onClick(View view) {
         if(getActivity() instanceof NextStep_1ClickListener)
-        ((NextStep_1ClickListener)getActivity()).nextStep_1BtnClick();
+            ((NextStep_1ClickListener)getActivity()).nextStep_1BtnClick();
     }
 
     public interface NextStep_1ClickListener{

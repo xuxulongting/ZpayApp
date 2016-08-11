@@ -161,6 +161,7 @@ public class DeviceControlActivity extends Activity {
 					mNotifyCharacteristic = characteristic;
 					mBluetoothService.setCharacteristicNotification(
 							characteristic, true);
+					Toast.makeText(DeviceControlActivity.this,"Notify",Toast.LENGTH_SHORT).show();
 				}
 
 				if(characteristic.getUuid().toString().equals("0003cdd2-0000-1000-8000-00805f9b0131")){
@@ -297,6 +298,7 @@ public class DeviceControlActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		LogUtil.debug(TAG,"onResume");
 		registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
 		if (mBluetoothService != null) {
 			final boolean result = mBluetoothService.connect(mDeviceAddress);

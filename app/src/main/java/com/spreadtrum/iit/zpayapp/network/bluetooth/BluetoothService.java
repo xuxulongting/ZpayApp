@@ -57,7 +57,7 @@ public class BluetoothService extends android.app.Service{
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 intentAction = ACTION_GATT_CONNECTED;
                 connectionState = STATE_CONNECTED;
-                broadcastUpdate(intentAction);
+                //broadcastUpdate(intentAction);
                 LogUtil.info(TAG, "Connected to GATT server.");
                 // Attempts to discover services after successful connection.
                 LogUtil.info(TAG, "Attempting to start service discovery:"
@@ -100,6 +100,7 @@ public class BluetoothService extends android.app.Service{
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             //super.onCharacteristicChanged(gatt, characteristic);
+
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
             if (characteristic.getValue() != null) {
 
@@ -203,6 +204,7 @@ public class BluetoothService extends android.app.Service{
             Log.d(TAG, String.format("Received heart rate: %d", heartRate));
             intent.putExtra(EXTRA_DATA, String.valueOf(heartRate));
         } else {
+            LogUtil.debug(TAG,"send broadcase ACTION_DATA_AVAILABLE");
             // For all other profiles, writes the data formatted in HEX.
             final byte[] data = characteristic.getValue();
             if (data != null && data.length > 0) {
@@ -211,10 +213,10 @@ public class BluetoothService extends android.app.Service{
                 for (byte byteChar : data)
                     stringBuilder.append(String.format("%02X ", byteChar));
 
-                System.out.println("ppp" + new String(data) + "\n"
-                        + stringBuilder.toString());
-                intent.putExtra(EXTRA_DATA, new String(data) + "\n"
-                        + stringBuilder.toString());
+                //System.out.println("ppp" + new String(data) + "\n" + stringBuilder.toString());
+                //LogUtil.debug(TAG,new String(data) + "\n" + stringBuilder.toString());
+                //intent.putExtra(EXTRA_DATA, new String(data) + "\n" + stringBuilder.toString());
+                intent.putExtra(EXTRA_DATA,data);
             }
         }
         sendBroadcast(intent);
@@ -244,6 +246,17 @@ public class BluetoothService extends android.app.Service{
         }
 
         return true;
+    }
+
+
+
+//    public void scanBLEDevice(){
+//        Intent scanDevice = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+//        startActivityForResult(scanDevice);
+//    }
+
+    public void stopBLEDevice(){
+
     }
 
 

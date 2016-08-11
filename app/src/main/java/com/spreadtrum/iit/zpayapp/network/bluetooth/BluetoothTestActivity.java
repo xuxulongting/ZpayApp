@@ -101,12 +101,12 @@ public class BluetoothTestActivity extends AppCompatActivity implements View.OnC
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.id_btn_turnon:
-                blueToothOn();
+                bluetoothEnable();
                 break;
             case R.id.id_btn_turnoff:
                 break;
             case R.id.id_btn_getvisible:
-                blueToothGetVisible();
+                bluetoothGetVisible();
                 break;
             case R.id.id_btn_listdevices:
                 blueToothDevicesList();
@@ -126,13 +126,13 @@ public class BluetoothTestActivity extends AppCompatActivity implements View.OnC
         commonAdapter.notifyDataSetChanged();
     }
 
-    public void blueToothGetVisible(){
+    public void bluetoothGetVisible(){
         Intent getVisible = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
         startActivityForResult(getVisible,0);
         btAdapter.startDiscovery();
     }
 
-    void blueToothOn(){
+    void bluetoothEnable(){
         if(!btAdapter.enable()){
             Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(turnOn, 0);
@@ -152,6 +152,7 @@ public class BluetoothTestActivity extends AppCompatActivity implements View.OnC
         public void onReceive(Context context, Intent intent)
         {
             // TODO Auto-generated method stub
+            LogUtil.debug(TAG,"onReceive");
             //接受intent
             String action = intent.getAction();
             //从intent取出远程蓝牙设备

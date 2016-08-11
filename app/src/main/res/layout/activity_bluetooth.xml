@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+       <Button
+           android:id="@+id/id_btn_turnon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+           android:text="Turn On"/>
+
+    <Button
+        android:id="@+id/id_btn_turnoff"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Turn Off"/>
+
+    <Button
+        android:id="@+id/id_btn_getvisible"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Get Visible"/>
+
+    <Button
+        android:id="@+id/id_btn_listdevices"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="List Device"/>
+
+    <ListView
+        android:id="@+id/id_lv_devices"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </ListView>
+
+    <!--<EditText
+        android:id="@+id/id_et_bluetooth"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/id_recyclerview_bluetooth"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    </android.support.v7.widget.RecyclerView>-->
+
+</LinearLayout>
