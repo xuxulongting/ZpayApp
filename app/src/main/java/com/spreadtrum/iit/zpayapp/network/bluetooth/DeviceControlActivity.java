@@ -152,6 +152,21 @@ public class DeviceControlActivity extends Activity {
 				//System.out.println("charaProp = " + charaProp + ",UUID = " + characteristic.getUuid().toString());
 				LogUtil.info(TAG,"charaProp = " + charaProp + ",UUID = " + characteristic.getUuid().toString());
 				Random r = new Random();
+				LogUtil.debug(TAG,"Position: "+groupPosition+","+childPosition+",property:"+charaProp);
+
+				if ((charaProp & BluetoothGattCharacteristic.PROPERTY_READ) > 0) {
+						// If there is an active notification on a
+						// characteristic, clear
+						// it first so it doesn't update the data field on the
+						// user interface.
+						LogUtil.info(TAG,"PROPERTY_READ");
+						if (mNotifyCharacteristic != null) {
+							mBluetoothService.setCharacteristicNotification(
+									mNotifyCharacteristic, false);
+							mNotifyCharacteristic = null;
+						}
+						mBluetoothService.readCharacteristic(characteristic);
+					}
 
 				if(characteristic.getUuid().toString().equals("0003cdd1-0000-1000-8000-00805f9b0131")){
 					//BluetoothGattCharacteristic readCharacteristic;

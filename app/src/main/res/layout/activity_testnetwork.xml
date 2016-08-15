@@ -16,5 +16,11 @@
         android:layout_height="wrap_content"
         android:text="与SE交互"/>
 
+    <Button
+        android:id="@+id/id_btn_tsm_and_se"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="连接TSM与SE"/>
+
 
 </LinearLayout>

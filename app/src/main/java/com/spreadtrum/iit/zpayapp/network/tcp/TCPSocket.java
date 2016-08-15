@@ -19,14 +19,15 @@ import java.net.Socket;
 /**
  * Created by SPREADTRUM\ting.long on 16-8-8.
  */
-public class TCPSocket {
+public class TCPSocket implements Runnable{
     private Socket socket;
     private static TCPSocket tcpSocket;
+
     private TCPSocket(String netAddr,int netPort) throws IOException {
         socket = new Socket(netAddr,netPort);
     }
 
-    private TCPSocket(String netAddr,int netPort,int timeout){
+    private TCPSocket(String netAddr, int netPort, int timeout){
         try {
             socket = new Socket(netAddr,netPort);
             socket.setSoTimeout(timeout);
@@ -48,6 +49,19 @@ public class TCPSocket {
         }
         return tcpSocket;
     }
+
+    public void closeSocket(){
+        if(socket!=null){
+            try {
+                socket.close();
+                socket=null;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
 
     public boolean tcpSocketWrite(byte[] bData) throws IOException {
         if(socket!=null) {
@@ -107,11 +121,31 @@ public class TCPSocket {
 //                count = bufferedReader.read(readBuf);
             } catch (IOException e) {
                 e.printStackTrace();
-                LogUtil.error(TAG,e.getMessage());
+                LogUtil.error("BLE",e.getMessage());
             }
         }
         return count;
     }
+
+    @Override
+    public void run() {
+        int count = 0;
+        byte[] readBuf = new byte[100];
+        if (socket != null) {
+
+            try {
+                InputStream inputStream = socket.getInputStream();
+                count = inputStream.read(readBuf);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                LogUtil.error("BLE",e.getMessage());
+            }
+        }
+    }
+
+
+
 
     class ClientThread extends Thread{
         BufferedReader bufferedReader=null;

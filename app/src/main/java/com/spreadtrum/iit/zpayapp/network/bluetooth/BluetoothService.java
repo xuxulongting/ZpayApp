@@ -11,6 +11,7 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ProviderInfo;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -18,7 +19,11 @@ import android.util.Log;
 
 import com.spreadtrum.iit.zpayapp.LogUtil;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 import static com.spreadtrum.iit.zpayapp.network.bluetooth.SampleGattAttributes.*;
@@ -48,6 +53,16 @@ public class BluetoothService extends android.app.Service{
     private BluetoothAdapter bluetoothAdapter;
     private String bluetoothDeviceAddress;
     private BluetoothManager bluetoothManager;
+
+    private SECallbackTSMListener callbackTSMListener;
+
+    private byte[] seResponseData = new byte[256];
+    private int seDataLength=0;
+
+    public void setSeCallbackTSMListener(SECallbackTSMListener listener){
+        this.callbackTSMListener = listener;
+    }
+
     private final BluetoothGattCallback bluetoothGattCallback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -58,6 +73,8 @@ public class BluetoothService extends android.app.Service{
                 intentAction = ACTION_GATT_CONNECTED;
                 connectionState = STATE_CONNECTED;
                 //broadcastUpdate(intentAction);
+                //修改MTU size
+                //bluetoothGatt.requestMtu(103);
                 LogUtil.info(TAG, "Connected to GATT server.");
                 // Attempts to discover services after successful connection.
                 LogUtil.info(TAG, "Attempting to start service discovery:"
@@ -74,11 +91,52 @@ public class BluetoothService extends android.app.Service{
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             //super.onServicesDiscovered(gatt, status);
+//            if (status == BluetoothGatt.GATT_SUCCESS) {
+//                LogUtil.info(TAG,"services discovered");
+//                broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
+//            } else {
+//                Log.w(TAG, "onServicesDiscovered received: " + status);
+//            }
+//            if (status != 0) {
+//                bluetoothAdapter.disable();
+//
+//                Timer single_timer = new Timer();
+//                single_timer.schedule(new TimerTask() {
+//                    @Override
+//                    public void run() {
+//                        bluetoothAdapter.enable();
+//                    }
+//                }, 1000);
+//
+//
+//                Timer second_timer = new Timer();
+//                second_timer.schedule(new TimerTask() {
+//                    @Override
+//                    public void run() {
+//                        //gattServiceIntent = new Intent(context, BluetoothLeService.class);
+//                        //bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+//                        //mBluetoothLeService.initialize();
+//                        //mBluetoothLeService.connect(mDeviceAddress);
+//                        initialize();
+//                        connect()
+//                        //maybe you need wait 0.5-1 second to call connect() after called initialize()
+//                    }
+//                }, 2000);
+//
+//
+//                Log.e(TAG, "An error code get at onServicesDiscovered= " + status);
+//            }
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                LogUtil.info(TAG,"services discovered");
                 broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
             } else {
-                Log.w(TAG, "onServicesDiscovered received: " + status);
+                LogUtil.warn(TAG, "onServicesDiscovered received: " + status);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                bluetoothGatt.discoverServices();
             }
         }
 
@@ -100,13 +158,13 @@ public class BluetoothService extends android.app.Service{
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             //super.onCharacteristicChanged(gatt, characteristic);
-
-            broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
-            if (characteristic.getValue() != null) {
-
-                LogUtil.debug(TAG,characteristic.getStringValue(0));
-            }
             LogUtil.info(TAG,"--------onCharacteristicChanged-----");
+            broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+//            if (characteristic.getValue() != null) {
+//
+//                LogUtil.debug(TAG,characteristic.getStringValue(0));
+//            }
+
         }
 
         @Override
@@ -204,9 +262,24 @@ public class BluetoothService extends android.app.Service{
             Log.d(TAG, String.format("Received heart rate: %d", heartRate));
             intent.putExtra(EXTRA_DATA, String.valueOf(heartRate));
         } else {
-            LogUtil.debug(TAG,"send broadcase ACTION_DATA_AVAILABLE");
+            //LogUtil.debug(TAG,"send broadcase ACTION_DATA_AVAILABLE");
             // For all other profiles, writes the data formatted in HEX.
             final byte[] data = characteristic.getValue();
+            LogUtil.debug(TAG,bytesToHexString(data));
+            System.arraycopy(data,1,seResponseData,seDataLength,data.length-1);
+            seDataLength+=(data.length-1);
+            if(data[0]!=0x0){
+                //
+            }
+            else{
+                //LogUtil.debug(TAG,"callbackTSM:"+bytesToHexString(seResponseData));
+                callbackTSMListener.callbackTSM(seResponseData,seDataLength);
+                //将长度清零
+                seDataLength=0;
+                //将byte数组清零
+                //Arrays.fill(seResponseData,(byte) 0);
+            }
+
             if (data != null && data.length > 0) {
                 final StringBuilder stringBuilder = new StringBuilder(
                         data.length);
@@ -216,10 +289,31 @@ public class BluetoothService extends android.app.Service{
                 //System.out.println("ppp" + new String(data) + "\n" + stringBuilder.toString());
                 //LogUtil.debug(TAG,new String(data) + "\n" + stringBuilder.toString());
                 //intent.putExtra(EXTRA_DATA, new String(data) + "\n" + stringBuilder.toString());
-                intent.putExtra(EXTRA_DATA,data);
+                //intent.putExtra(EXTRA_DATA,data);
+
+                //callbackTSMListener.callbackTSM(data);
+
             }
         }
-        sendBroadcast(intent);
+        //sendBroadcast(intent);
+    }
+
+    public void seResponseDataToZero()
+    {
+        Arrays.fill(seResponseData,(byte)0);
+        seDataLength = 0;
+    }
+
+    public static String bytesToHexString(byte[] bytes) {
+        String result = "";
+        for (int i = 0; i < bytes.length; i++) {
+            String hexString = Integer.toHexString(bytes[i] & 0xFF);
+            if (hexString.length() == 1) {
+                hexString = '0' + hexString;
+            }
+            result += hexString.toUpperCase();
+        }
+        return result;
     }
 
     /**
@@ -305,6 +399,7 @@ public class BluetoothService extends android.app.Service{
         Log.d(TAG, "Trying to create a new connection.");
         bluetoothDeviceAddress = address;
         connectionState = STATE_CONNECTING;
+
         return true;
     }
 
@@ -326,7 +421,7 @@ public class BluetoothService extends android.app.Service{
      * After using a given BLE device, the app must call this method to ensure
      * resources are released properly.
      */
-    public void close() {
+    public void closeBluetoothGatt() {
         if (bluetoothGatt == null) {
             return;
         }
@@ -381,6 +476,7 @@ public class BluetoothService extends android.app.Service{
                 .fromString(SampleGattAttributes.CLIENT_CHARACTERISTIC_CONFIG));
         if (descriptor != null) {
             System.out.println("write descriptor");
+
             descriptor
                     .setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
             bluetoothGatt.writeDescriptor(descriptor);

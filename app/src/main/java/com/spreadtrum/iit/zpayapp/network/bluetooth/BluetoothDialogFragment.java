@@ -60,6 +60,7 @@ public class BluetoothDialogFragment extends DialogFragment {
         bluetoothGetVisible();
     }
 
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         //LogUtil.debug(TAG,"onCreateDialog");
@@ -69,6 +70,7 @@ public class BluetoothDialogFragment extends DialogFragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Toast.makeText(getActivity(),btDevicesNameList.get(i),Toast.LENGTH_LONG).show();
                 SelectBluetoothDeviceListener listener = (SelectBluetoothDeviceListener) getActivity();
                 listener.onBluetoothDeviceSelected(btDeviceAddressList.get(i));
                 bluetoothStopDiscover();
@@ -101,6 +103,12 @@ public class BluetoothDialogFragment extends DialogFragment {
                     }
                 })
                 .create();
+    }
+
+    public void unRegisterReceiverBLEFound(){
+        //取消注册Receiver
+        //getActivity().unregisterReceiver();
+
     }
 
     public void bluetoothGetVisible(){

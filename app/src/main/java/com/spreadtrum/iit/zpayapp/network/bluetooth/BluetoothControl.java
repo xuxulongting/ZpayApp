@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.os.ParcelUuid;
 import android.widget.Toast;
 
 import com.spreadtrum.iit.zpayapp.LogUtil;
@@ -22,6 +21,7 @@ import java.util.List;
  * Created by SPREADTRUM\ting.long on 16-8-10.
  */
 public class BluetoothControl {
+
 
     private BluetoothService bluetoothService;
     private Context mContext;
@@ -36,6 +36,7 @@ public class BluetoothControl {
     public interface SEResponseDataAvilableListener{
         void onSeResponseDataAviable(byte []responseData);
     }
+
     public static String SE_SERVICE = "0003cdd0-0000-1000-8000-00805f9b0131";
     public static String NOTIFY_CHARACTERISTIC = "0003cdd1-0000-1000-8000-00805f9b0131";
     public static String WRITE_CHARACTERISTIC = "0003cdd2-0000-1000-8000-00805f9b0131";
@@ -55,13 +56,23 @@ public class BluetoothControl {
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            bluetoothService = null;
+            //关闭连接 gatt can only handle sevral connections at a time (BluetoothGatt documentation)
+            if(bluetoothService!=null) {
+                bluetoothService.closeBluetoothGatt();
+                bluetoothService = null;
+            }
 
         }
     };
 
     public void setSeResponseAvilableListerner(SEResponseDataAvilableListener listerner){
         this.listener = listerner;
+    }
+
+    public void setSeCallbackTSMListener(SECallbackTSMListener listener){
+        if(bluetoothService!=null){
+            bluetoothService.setSeCallbackTSMListener(listener);
+        }
     }
 
     private BroadcastReceiver gattUpdateReceiver = new BroadcastReceiver() {
@@ -72,6 +83,7 @@ public class BluetoothControl {
                 case BluetoothService.ACTION_GATT_CONNECTED:
                     break;
                 case BluetoothService.ACTION_GATT_DISCONNECTED:
+                    bluetoothService.connect(selBluetoothDevAddr);
                     break;
                 case BluetoothService.ACTION_GATT_SERVICES_DISCOVERED:
                     gattServiceList = bluetoothService.getSupportedGattServices();
@@ -85,9 +97,11 @@ public class BluetoothControl {
                 case BluetoothService.ACTION_DATA_AVAILABLE:
                     byte []responseData = intent.getByteArrayExtra(BluetoothService.EXTRA_DATA);
                     int responseDataLen = responseData.length;
-                    LogUtil.debug(TAG,"ACTION_DATA_AVAILABLE: "+responseDataLen);
+                    //LogUtil.debug(TAG,"ACTION_DATA_AVAILABLE: "+responseDataLen);
                     LogUtil.debug(TAG,bytesToHexString(responseData));
-                    listener.onSeResponseDataAviable(responseData);
+                    //
+                    //listener.onSeResponseDataAviable(responseData);
+                    //callbackTSMListener.callbackTSM(responseData);
                     break;
             }
         }
@@ -101,6 +115,18 @@ public class BluetoothControl {
         if(bBind==false){
             Toast.makeText(context,"bind service failed",Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public void bluetoothUnregisterReceiver(){
+
+        mContext.unregisterReceiver(gattUpdateReceiver);
+    }
+
+    public void bluetoothUnbindService()
+    {
+        mContext.unbindService(serviceConnection);
+
+        bluetoothService = null;
     }
 
     public BluetoothGattService getSpecialGattService(List<BluetoothGattService> listGattService,String strUuid){
