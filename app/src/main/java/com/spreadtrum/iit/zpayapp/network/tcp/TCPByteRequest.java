@@ -32,7 +32,7 @@ public class TCPByteRequest extends Thread{
     public void run() {
         try {
             if(mTCPSocket.tcpSocketWrite(mRequest)){
-                byte []readBuf = new byte[1024];
+                byte []readBuf = new byte[280];
                 int readCount = mTCPSocket.tcpSocketReadByte(readBuf);
                 mListener.onResponse(readBuf,readCount);
             }

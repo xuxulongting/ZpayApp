@@ -53,7 +53,7 @@ public class BluetoothDialogFragment extends DialogFragment {
         super.onActivityCreated(savedInstanceState);
 //        //LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(getActivity());
         IntentFilter intentFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        BluetoothReceiver bluetoothReceiver = new BluetoothReceiver();
+        bluetoothReceiver = new BluetoothReceiver();
         getActivity().registerReceiver(bluetoothReceiver,intentFilter);
         //LogUtil.debug(TAG,"onActivityCreated");
         bluetoothEnable();
@@ -72,7 +72,9 @@ public class BluetoothDialogFragment extends DialogFragment {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Toast.makeText(getActivity(),btDevicesNameList.get(i),Toast.LENGTH_LONG).show();
                 SelectBluetoothDeviceListener listener = (SelectBluetoothDeviceListener) getActivity();
+                //回调
                 listener.onBluetoothDeviceSelected(btDeviceAddressList.get(i));
+                //停止发现蓝牙设备
                 bluetoothStopDiscover();
             }
         });
@@ -90,16 +92,18 @@ public class BluetoothDialogFragment extends DialogFragment {
         return new AlertDialog.Builder(getActivity())
                 .setTitle("正在查找蓝牙设备...")
                 .setView(view)
-                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                    }
-                })
+//                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialogInterface, int i) {
+//                        //停止发现蓝牙设备
+//                        bluetoothStopDiscover();
+//                    }
+//                })
                 .setNegativeButton("取消", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-
+                        //停止发现蓝牙设备
+                        bluetoothStopDiscover();
                     }
                 })
                 .create();
@@ -108,7 +112,7 @@ public class BluetoothDialogFragment extends DialogFragment {
     public void unRegisterReceiverBLEFound(){
         //取消注册Receiver
         //getActivity().unregisterReceiver();
-
+        //unregisterReceiver(bluetoothReceiver);
     }
 
     public void bluetoothGetVisible(){
@@ -138,6 +142,13 @@ public class BluetoothDialogFragment extends DialogFragment {
         }
     }
 
+    public void bluetoothDisable(){
+        if(btAdapter==null)
+            return;
+        btAdapter.disable();
+        return;
+    }
+
     private class BluetoothReceiver extends BroadcastReceiver{
 
         @Override
@@ -150,7 +161,7 @@ public class BluetoothDialogFragment extends DialogFragment {
         }
     }
 
-    public BluetoothReceiver bluetoothReceiver=null;
+    private BluetoothReceiver bluetoothReceiver=null;
 
     public BluetoothReceiver getBluetoothReceiverInstance(){
         if(bluetoothReceiver==null){
@@ -158,5 +169,19 @@ public class BluetoothDialogFragment extends DialogFragment {
         }
         else
             return bluetoothReceiver;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        LogUtil.debug(TAG,"DialogFragment onDestroy");
+        if(bluetoothReceiver!=null)
+            getActivity().unregisterReceiver(bluetoothReceiver);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
     }
 }

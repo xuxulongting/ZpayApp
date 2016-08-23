@@ -3,6 +3,8 @@
     package="com.spreadtrum.iit.zpayapp">
 
 
+    <uses-permission android:name="android.permission.NFC" />
+    <uses-permission android:name="android.permission.NFC" />
 
     <application
         android:allowBackup="true"
@@ -37,6 +39,10 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".network.nfc.NFCDemoActivity">
+
+        </activity>
+
         <service android:name=".network.bluetooth.BluetoothService"></service>
         <meta-data android:name="design_width" android:value="1440">
         </meta-data>
@@ -45,7 +51,11 @@
 
     </application>
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!--允许应用程序发现蓝牙设备-->
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <!--允许应用程序连接蓝牙设备-->
     <uses-permission android:name="android.permission.BLUETOOTH" />
+    <!--允许访问NFC-->
+    <uses-permission android:name="android.permission.NFC"/>
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"></uses-feature>
 </manifest>

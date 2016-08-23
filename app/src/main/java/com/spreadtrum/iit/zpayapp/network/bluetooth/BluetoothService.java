@@ -11,11 +11,13 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.spreadtrum.iit.zpayapp.LogUtil;
 
@@ -56,8 +58,19 @@ public class BluetoothService extends android.app.Service{
 
     private SECallbackTSMListener callbackTSMListener;
 
+    private BLECallbackListener bleCallbackListener;
+
     private byte[] seResponseData = new byte[256];
     private int seDataLength=0;
+
+    public interface BLECallbackListener{
+        void onResponseWrite(int sendTime);
+        void onResponseRead(int receiveTime);
+    }
+
+    public void setBleCallbackListener(BLECallbackListener listener){
+        this.bleCallbackListener = listener;
+    }
 
     public void setSeCallbackTSMListener(SECallbackTSMListener listener){
         this.callbackTSMListener = listener;
@@ -159,6 +172,7 @@ public class BluetoothService extends android.app.Service{
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             //super.onCharacteristicChanged(gatt, characteristic);
             LogUtil.info(TAG,"--------onCharacteristicChanged-----");
+
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
 //            if (characteristic.getValue() != null) {
 //
@@ -175,7 +189,7 @@ public class BluetoothService extends android.app.Service{
         @Override
         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
             //super.onDescriptorWrite(gatt, descriptor, status);
-            System.out.println("onDescriptorWriteonDescriptorWrite = " + status
+            LogUtil.debug(TAG,"onDescriptorWrite = " + status
                     + ", descriptor =" + descriptor.getUuid().toString());
         }
 
@@ -262,17 +276,30 @@ public class BluetoothService extends android.app.Service{
             Log.d(TAG, String.format("Received heart rate: %d", heartRate));
             intent.putExtra(EXTRA_DATA, String.valueOf(heartRate));
         } else {
-            //LogUtil.debug(TAG,"send broadcase ACTION_DATA_AVAILABLE");
             // For all other profiles, writes the data formatted in HEX.
             final byte[] data = characteristic.getValue();
-            LogUtil.debug(TAG,bytesToHexString(data));
+            LogUtil.debug(TAG,"receive from ble:"+bytesToHexString(data));
+            //判断是SE返回的数据，还是蓝牙响应数据
+            //收到蓝牙的2字节应答数据
+            if(data.length==2){
+                if(data[0]==((byte)(~data[1]))) {
+                    //LogUtil.debug(TAG,"BLE response data");
+                    bleCallbackListener.onResponseWrite((int)data[0]);
+                    return;
+                }
+            }
+            //SE返回数据
             System.arraycopy(data,1,seResponseData,seDataLength,data.length-1);
             seDataLength+=(data.length-1);
             if(data[0]!=0x0){
-                //
+                //给蓝牙发送2字节应答数据
+                bleCallbackListener.onResponseRead((int)data[0]);
             }
             else{
                 //LogUtil.debug(TAG,"callbackTSM:"+bytesToHexString(seResponseData));
+                //给蓝牙发送2字节应答数据
+                bleCallbackListener.onResponseRead(0);
+                //将数据发送给TSM处理
                 callbackTSMListener.callbackTSM(seResponseData,seDataLength);
                 //将长度清零
                 seDataLength=0;
@@ -280,20 +307,20 @@ public class BluetoothService extends android.app.Service{
                 //Arrays.fill(seResponseData,(byte) 0);
             }
 
-            if (data != null && data.length > 0) {
-                final StringBuilder stringBuilder = new StringBuilder(
-                        data.length);
-                for (byte byteChar : data)
-                    stringBuilder.append(String.format("%02X ", byteChar));
-
-                //System.out.println("ppp" + new String(data) + "\n" + stringBuilder.toString());
-                //LogUtil.debug(TAG,new String(data) + "\n" + stringBuilder.toString());
-                //intent.putExtra(EXTRA_DATA, new String(data) + "\n" + stringBuilder.toString());
-                //intent.putExtra(EXTRA_DATA,data);
-
-                //callbackTSMListener.callbackTSM(data);
-
-            }
+//            if (data != null && data.length > 0) {
+//                final StringBuilder stringBuilder = new StringBuilder(
+//                        data.length);
+//                for (byte byteChar : data)
+//                    stringBuilder.append(String.format("%02X ", byteChar));
+//
+//                //System.out.println("ppp" + new String(data) + "\n" + stringBuilder.toString());
+//                //LogUtil.debug(TAG,new String(data) + "\n" + stringBuilder.toString());
+//                //intent.putExtra(EXTRA_DATA, new String(data) + "\n" + stringBuilder.toString());
+//                //intent.putExtra(EXTRA_DATA,data);
+//
+//                //callbackTSMListener.callbackTSM(data);
+//
+//            }
         }
         //sendBroadcast(intent);
     }
@@ -322,6 +349,10 @@ public class BluetoothService extends android.app.Service{
      * @return Return true if the initialization is successful.
      */
     public boolean initialize() {
+        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+            Toast.makeText(this, "设备不支持蓝牙4.0", Toast.LENGTH_SHORT).show();
+            return false;
+        }
         // For API level 18 and above, get a reference to BluetoothAdapter
         // through
         // BluetoothManager.

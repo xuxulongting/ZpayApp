@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.ProviderInfo;
 import android.os.IBinder;
 import android.widget.Toast;
 
@@ -30,6 +31,9 @@ public class BluetoothControl {
     private BluetoothGattService seCommService;
     private BluetoothGattCharacteristic notifyCharacteristic;
     private BluetoothGattCharacteristic writeCharacteristic;
+
+    private int sendTime=0;
+    private int sendCount=0;
 
     private SEResponseDataAvilableListener listener;
 
@@ -151,12 +155,96 @@ public class BluetoothControl {
         bluetoothService.wirteCharacteristic(gattCharacteristic);
     }
 
-    public void communicateWithSe(byte []byteofdata){
+    public void communicateWithSe(final byte []byteofdata,final int length){
         if(notifyCharacteristic==null || writeCharacteristic==null)
             return;
         //bluetoothService.setCharacteristicNotification(notifyCharacteristic,true);
-        writeCharacteristic.setValue(byteofdata);
+        final byte []sendData = new byte[20];
+        final int mod = length%19;
+        //int sendTime;
+        if(mod>0)
+            sendTime = length/19+1;
+        else
+            sendTime = length/19;
+        //int sendCount=0;
+        //给BLE发送数据
+
+        sendData[0]=(byte)(sendTime-1);
+        if(length>19)
+            System.arraycopy(byteofdata,sendCount,sendData,1,19);
+        else
+            System.arraycopy(byteofdata,sendCount,sendData,1,length);
+        //sendCount+=19;
+        writeCharacteristic.setValue(sendData);
         bluetoothService.wirteCharacteristic(writeCharacteristic);
+        bluetoothService.setBleCallbackListener(new BluetoothService.BLECallbackListener() {
+            @Override
+            public void onResponseWrite(int receiveTime) {
+                if(receiveTime==sendTime){
+                    if(sendTime==0x0)
+                        return;
+                    sendTime-=1;
+                    sendCount+=19;
+                    if ((sendTime>1 && mod>0) || (sendTime>0 && mod==0)){
+                        sendData[0]=(byte)(sendTime-1);
+                        System.arraycopy(byteofdata,sendCount,sendData,1,19);
+                        writeCharacteristic.setValue(sendData);
+                        bluetoothService.wirteCharacteristic(writeCharacteristic);
+                        LogUtil.debug(TAG,"send to BLE:"+bytesToHexString(sendData));
+                    }
+                    else
+                    {
+                        //sendTime=0,mod>0,剩余字节数不足19,重新定义缓冲区
+                        byte []data=new byte[length-sendCount+1];
+                        data[0]=(byte)0;
+                        System.arraycopy(byteofdata,sendCount,data,1,length-sendCount);
+                        writeCharacteristic.setValue(data);
+                        bluetoothService.wirteCharacteristic(writeCharacteristic);
+                        LogUtil.debug(TAG,"send to BLE:"+bytesToHexString(data));
+                    }
+                }
+            }
+            //给蓝牙的2字节应答
+            @Override
+            public void onResponseRead(int receiveTime) {
+                byte []responseDataToBle = new byte[2];
+                responseDataToBle[0]=(byte)receiveTime;
+                responseDataToBle[1]=(byte)(~((byte)receiveTime));
+                writeCharacteristic.setValue(responseDataToBle);
+                bluetoothService.wirteCharacteristic(writeCharacteristic);
+                LogUtil.debug(TAG,"send to BLE:"+bytesToHexString(responseDataToBle));
+            }
+        });
+
+
+//        while((sendTime>1 && mod>0) || (sendTime>0 && mod==0)){
+//            sendData[0]=(byte)(sendTime-1);
+//            System.arraycopy(byteofdata,sendCount,sendData,1,19);
+//            sendCount+=19;
+//            writeCharacteristic.setValue(sendData);
+//            bluetoothService.wirteCharacteristic(writeCharacteristic);
+//            sendTime-=1;
+//            LogUtil.debug(TAG,"send to BLE:"+bytesToHexString(sendData));
+//        }
+//        //sendTime=0,mod>0,剩余字节数不足19,重新定义缓冲区
+//        if(sendTime==0){
+//            byte []data=new byte[length-sendCount+1];
+//            data[0]=(byte)0;
+//            System.arraycopy(byteofdata,sendCount,data,1,length-sendCount);
+//            writeCharacteristic.setValue(data);
+//            bluetoothService.wirteCharacteristic(writeCharacteristic);
+//            LogUtil.debug(TAG,"send to BLE:"+bytesToHexString(data));
+//        }
+//        writeCharacteristic.setValue(byteofdata);
+//        bluetoothService.wirteCharacteristic(writeCharacteristic);
+    }
+
+    public int getSendTime(){
+        return this.sendTime;
+    }
+
+    public void setSendTime(int time){
+        this.sendTime = time;
     }
 
     private static IntentFilter makeGattUpdateIntentFilter() {

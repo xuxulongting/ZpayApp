@@ -1,6 +1,8 @@
 package com.spreadtrum.iit.zpayapp.network;
 
+import android.app.Dialog;
 import android.app.FragmentManager;
+import android.app.Notification;
 import android.bluetooth.BluetoothDevice;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -92,7 +94,7 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
                             if(bluetoothControl!=null){
                                 byte[] seData = new byte[readCount - 17];
                                 System.arraycopy(buf, 17, seData, 0, readCount - 17);
-                                bluetoothControl.communicateWithSe(seData);
+                                bluetoothControl.communicateWithSe(seData,seData.length);
                             }
 
                         }else if(buf[14]==CMD_SERVER_END){
@@ -151,7 +153,7 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
                                         if(bluetoothControl!=null){
                                             byte[] seData = new byte[readCount - 17];
                                             System.arraycopy(buf, 17, seData, 0, readCount - 17);
-                                            bluetoothControl.communicateWithSe(seData);
+                                            bluetoothControl.communicateWithSe(seData,seData.length);
                                         }
 
                                     }else if(buf[14]==CMD_SERVER_END){
@@ -167,7 +169,7 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
                                     }else if(buf[14]==CMD_SERVER_RESET){
                                         tcpSocket.closeSocket();
                                     }
-                                    LogUtil.debug(TAG,bytesToHexString(buf));
+                                    LogUtil.debug(TAG,bytesToHexString(buf,buf.length));
                                 }
                             } catch (IOException e) {
                                 e.printStackTrace();
@@ -211,7 +213,7 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
                                             if(bluetoothControl!=null){
                                                 byte[] seData = new byte[readCount - 17];
                                                 System.arraycopy(buf, 17, seData, 0, readCount - 17);
-                                                bluetoothControl.communicateWithSe(seData);
+                                                bluetoothControl.communicateWithSe(seData,seData.length);
                                             }
 
                                         }else if(buf[14]==CMD_SERVER_END){
@@ -274,7 +276,7 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
                             bluetoothControl.setSeCallbackTSMListener(new SECallbackTSMListener() {
                                 @Override
                                 public void callbackTSM(byte[] responseData,int responseLen) {
-                                    LogUtil.debug(TAG,"callbackTSM:"+bytesToHexString(responseData));
+                                    //LogUtil.debug(TAG,"response from SE:"+bytesToHexString(responseData,responseLen));
 //                                    byte[] response = new byte[17 + responseData.length];
 //                                    response[0] = 0x12;
 //                                    response[1] = (byte) 0xab;
@@ -284,7 +286,7 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
 //                                    response[16] = (byte) (responseData.length);
 //                                    System.arraycopy(responseData, 0, response, 17, responseData.length);
                                     //testSeCmdCount++;
-                                    byte[] response = new byte[17 + responseData.length];
+                                    byte[] response = new byte[17 + responseLen];
                                     response[0] = 0x12;
                                     response[1] = (byte) 0xab;
                                     System.arraycopy(randomNum, 0, response, 2, randomNum.length);
@@ -321,8 +323,8 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
                     if(bluetoothControl!=null){
                         byte[] seData = new byte[responseLen - 17];
                         System.arraycopy(response, 17, seData, 0, responseLen - 17);
-                        LogUtil.debug(TAG,bytesToHexString(seData));
-                        bluetoothControl.communicateWithSe(seData);
+                        LogUtil.debug(TAG,"send to SE:"+bytesToHexString(seData,seData.length));
+                        bluetoothControl.communicateWithSe(seData,seData.length);
                         /////////////test////////////////////
 //                        if(testSeCmdCount==2) {
 //                            LogUtil.debug(TAG,bytesToHexString(seData));
@@ -345,7 +347,7 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
                     else
                         LogUtil.debug(TAG,"failed");
                     tcpSocket.closeSocket();
-                    LogUtil.debug(TAG,bytesToHexString(response));
+                    LogUtil.debug(TAG,bytesToHexString(response,responseLen));
                     return;
 
                 }else if(response[14]==CMD_SERVER_RESET){
@@ -388,9 +390,9 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
         randomNum = new byte[12];
     }
 
-    public static String bytesToHexString(byte[] bytes) {
+    public static String bytesToHexString(byte[] bytes,int byteOfLength) {
         String result = "";
-        for (int i = 0; i < bytes.length; i++) {
+        for (int i = 0; i < byteOfLength; i++) {
             String hexString = Integer.toHexString(bytes[i] & 0xFF);
             if (hexString.length() == 1) {
                 hexString = '0' + hexString;
@@ -399,6 +401,7 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
         }
         return result;
     }
+
 
     @Override
     protected void onPause() {
