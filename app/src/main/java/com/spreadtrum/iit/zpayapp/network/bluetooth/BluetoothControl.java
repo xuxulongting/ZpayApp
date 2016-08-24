@@ -159,38 +159,40 @@ public class BluetoothControl {
         if(notifyCharacteristic==null || writeCharacteristic==null)
             return;
         //bluetoothService.setCharacteristicNotification(notifyCharacteristic,true);
-        final byte []sendData = new byte[20];
-        final int mod = length%19;
+        final byte []sendData = new byte[BLE_MTU];
+        final int mod = length%BLE_MTU_DATA;
         //int sendTime;
+        sendCount=0;
         if(mod>0)
-            sendTime = length/19+1;
+            sendTime = length/BLE_MTU_DATA+1;
         else
-            sendTime = length/19;
+            sendTime = length/BLE_MTU_DATA;
         //int sendCount=0;
         //给BLE发送数据
 
         sendData[0]=(byte)(sendTime-1);
-        if(length>19)
-            System.arraycopy(byteofdata,sendCount,sendData,1,19);
+        if(length>BLE_MTU_DATA)
+            System.arraycopy(byteofdata,sendCount,sendData,1,BLE_MTU_DATA);
         else
             System.arraycopy(byteofdata,sendCount,sendData,1,length);
         //sendCount+=19;
         writeCharacteristic.setValue(sendData);
         bluetoothService.wirteCharacteristic(writeCharacteristic);
+        LogUtil.debug(TAG,"send to BLE:"+bytesToHexString(sendData));
         bluetoothService.setBleCallbackListener(new BluetoothService.BLECallbackListener() {
             @Override
             public void onResponseWrite(int receiveTime) {
-                if(receiveTime==sendTime){
-                    if(sendTime==0x0)
+                if(receiveTime == (sendTime-1)){
+                    if(receiveTime==0x0)
                         return;
                     sendTime-=1;
-                    sendCount+=19;
+                    sendCount+=BLE_MTU_DATA;
                     if ((sendTime>1 && mod>0) || (sendTime>0 && mod==0)){
                         sendData[0]=(byte)(sendTime-1);
-                        System.arraycopy(byteofdata,sendCount,sendData,1,19);
+                        System.arraycopy(byteofdata,sendCount,sendData,1,BLE_MTU_DATA);
                         writeCharacteristic.setValue(sendData);
                         bluetoothService.wirteCharacteristic(writeCharacteristic);
-                        LogUtil.debug(TAG,"send to BLE:"+bytesToHexString(sendData));
+                        LogUtil.debug(TAG,"onResponseWrite send to BLE:"+bytesToHexString(sendData));
                     }
                     else
                     {
@@ -200,7 +202,7 @@ public class BluetoothControl {
                         System.arraycopy(byteofdata,sendCount,data,1,length-sendCount);
                         writeCharacteristic.setValue(data);
                         bluetoothService.wirteCharacteristic(writeCharacteristic);
-                        LogUtil.debug(TAG,"send to BLE:"+bytesToHexString(data));
+                        LogUtil.debug(TAG,"onResponseWrite send to BLE:"+bytesToHexString(data));
                     }
                 }
             }
@@ -212,7 +214,7 @@ public class BluetoothControl {
                 responseDataToBle[1]=(byte)(~((byte)receiveTime));
                 writeCharacteristic.setValue(responseDataToBle);
                 bluetoothService.wirteCharacteristic(writeCharacteristic);
-                LogUtil.debug(TAG,"send to BLE:"+bytesToHexString(responseDataToBle));
+                LogUtil.debug(TAG,"onResponseRead send to BLE:"+bytesToHexString(responseDataToBle));
             }
         });
 
@@ -239,14 +241,6 @@ public class BluetoothControl {
 //        bluetoothService.wirteCharacteristic(writeCharacteristic);
     }
 
-    public int getSendTime(){
-        return this.sendTime;
-    }
-
-    public void setSendTime(int time){
-        this.sendTime = time;
-    }
-
     private static IntentFilter makeGattUpdateIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothService.ACTION_GATT_CONNECTED);
@@ -270,4 +264,7 @@ public class BluetoothControl {
     }
 
     public static String TAG = "BLE";
+
+    public static int BLE_MTU = 20;
+    public static int BLE_MTU_DATA = 19;
 }

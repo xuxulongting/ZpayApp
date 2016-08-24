@@ -64,7 +64,9 @@ public class BluetoothService extends android.app.Service{
     private int seDataLength=0;
 
     public interface BLECallbackListener{
+        //给SE发数据
         void onResponseWrite(int sendTime);
+        //给BLE应答
         void onResponseRead(int receiveTime);
     }
 
@@ -87,7 +89,7 @@ public class BluetoothService extends android.app.Service{
                 connectionState = STATE_CONNECTED;
                 //broadcastUpdate(intentAction);
                 //修改MTU size
-                //bluetoothGatt.requestMtu(103);
+                //bluetoothGatt.requestMtu(30);
                 LogUtil.info(TAG, "Connected to GATT server.");
                 // Attempts to discover services after successful connection.
                 LogUtil.info(TAG, "Attempting to start service discovery:"
@@ -171,7 +173,7 @@ public class BluetoothService extends android.app.Service{
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             //super.onCharacteristicChanged(gatt, characteristic);
-            LogUtil.info(TAG,"--------onCharacteristicChanged-----");
+            //LogUtil.info(TAG,"--------onCharacteristicChanged-----");
 
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
 //            if (characteristic.getValue() != null) {
@@ -205,7 +207,8 @@ public class BluetoothService extends android.app.Service{
 
         @Override
         public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
-            super.onMtuChanged(gatt, mtu, status);
+            //super.onMtuChanged(gatt, mtu, status);
+            LogUtil.debug(TAG,"onMtuChanged: "+mtu+",status:"+status);
         }
 
         @Override

@@ -238,6 +238,7 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
             public void onClick(View view) {
                 dialogFragment = new BluetoothDialogFragment();
                 dialogFragment.show(getFragmentManager(), "BLE DialogFragment");
+                LogUtil.debug(TAG,"Show dialogfragment.");
             }
         });
         btnTestTSMandSE.setOnClickListener(new View.OnClickListener() {
@@ -323,7 +324,7 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
                     if(bluetoothControl!=null){
                         byte[] seData = new byte[responseLen - 17];
                         System.arraycopy(response, 17, seData, 0, responseLen - 17);
-                        LogUtil.debug(TAG,"send to SE:"+bytesToHexString(seData,seData.length));
+                        //LogUtil.debug(TAG,"send to SE:"+bytesToHexString(seData,seData.length));
                         bluetoothControl.communicateWithSe(seData,seData.length);
                         /////////////test////////////////////
 //                        if(testSeCmdCount==2) {
@@ -413,8 +414,9 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(bluetoothControl!=null)
+        if(bluetoothControl!=null) {
             bluetoothControl.bluetoothUnregisterReceiver();
             bluetoothControl.bluetoothUnbindService();
+        }
     }
 }
