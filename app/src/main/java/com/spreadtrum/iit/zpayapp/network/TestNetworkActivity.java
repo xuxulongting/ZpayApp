@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.spreadtrum.iit.zpayapp.LogUtil;
 import com.spreadtrum.iit.zpayapp.R;
@@ -34,13 +35,14 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
     private Button btnTestNetwork;
     private Button btnSelBleDEv;
     private Button btnTestTSMandSE;
+    private Button btnDownloadApp;
+    private Button btnDeleteApp;
+    private Button btnTesthttp;
     private BluetoothControl bluetoothControl = null;
     BluetoothDialogFragment dialogFragment;
-    private TCPSocket tcpSocket = null;
+    private TCPSocket mTcpSocket = null;
 
     private SEResponse.Listener seListener;
-
-    private int testSeCmdCount = 0;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -49,190 +51,66 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
         btnTestNetwork = (Button) findViewById(R.id.id_btn_interact);
         btnSelBleDEv = (Button) findViewById(R.id.id_btn_sel_ble);
         btnTestTSMandSE = (Button) findViewById(R.id.id_btn_tsm_and_se);
-        btnTestNetwork.setOnClickListener(new View.OnClickListener() {
+        btnDownloadApp = (Button) findViewById(R.id.id_btn_downloadapp);
+        btnDeleteApp = (Button) findViewById(R.id.id_btn_deleteapp);
+        btnTesthttp = (Button) findViewById(R.id.id_btn_testhttp);
+        //测试http
+        btnTesthttp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+        //下载应用
+        btnDownloadApp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        if (tcpSocket == null) {
-                            try {
-                                tcpSocket = TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        String strSeId = "451000000000000020160328000000010003";
-                        byte[] maskId = {0x12, (byte) 0xab};
-                        //byte[] randomNum = {0x01,0x02,0x03,0x4,0x5,0x6,0x7,0x8,0x9,0xa,0xb,0xc};
-                        byte[] cmd = {0x01, 0x00, 0x39, 0x24};
-                        byte[] bSeNO = strSeId.getBytes();
-                        byte[] id = {0x2E, 0x6E};
-                        byte[] input = new byte[2 + 12 + 1 + 2 + 57];
+                        byte[] id = {0x2F, 0x7A};
+                        byte []bSeNO = strSeId.getBytes();
                         byte[] taskId = new byte[20];
-                        System.arraycopy(id, 0, taskId, 18, id.length);
-                        System.arraycopy(maskId, 0, input, 0, maskId.length);
-                        System.arraycopy(randomNum, 0, input, maskId.length, randomNum.length);
-                        System.arraycopy(cmd, 0, input, maskId.length + randomNum.length, cmd.length);
-                        System.arraycopy(bSeNO, 0, input, maskId.length + randomNum.length + cmd.length, bSeNO.length);
-                        System.arraycopy(taskId, 0, input, maskId.length + randomNum.length + cmd.length + bSeNO.length, taskId.length);
-                        try {
-                            tcpSocket.tcpSocketWrite(input);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        byte[] buf = new byte[100];
-                        int readCount = tcpSocket.tcpSocketReadByte(buf);
-
-                        int cmdParaLen = buf[15] << 8;
-                        cmdParaLen = cmdParaLen + buf[16];
-                        if (readCount == (cmdParaLen + 17))
-                            LogUtil.debug(TAG, "TCP response correct");
-                        else
-                            LogUtil.debug(TAG, "TCP response error");
-                        if(buf[14]==CMD_SERVER_APDU){
-                            if(bluetoothControl!=null){
-                                byte[] seData = new byte[readCount - 17];
-                                System.arraycopy(buf, 17, seData, 0, readCount - 17);
-                                bluetoothControl.communicateWithSe(seData,seData.length);
-                            }
-
-                        }else if(buf[14]==CMD_SERVER_END){
-                            LogUtil.debug(TAG,"end");
-                            if(cmdParaLen==1 && (buf[17]==0x00)){
-                                LogUtil.debug(TAG,"success");
-                            }
-                            else
-                                LogUtil.debug(TAG,"failed");
-                            tcpSocket.closeSocket();
-                            return;
-
-                        }else if(buf[14]==CMD_SERVER_RESET){
-                            LogUtil.debug(TAG,"reset");
-                            tcpSocket.closeSocket();
-                        }
-                        else
-                        {
-                            LogUtil.debug(TAG,"unknown cmd");
-                            tcpSocket.closeSocket();
-                        }
-                        if(false)
-                        {
-                            /////test without se////////////
-                            byte []responseData = {0x6A,(byte)0x82};
-                            byte[] response = new byte[17+responseData.length];
-                            response[0] = 0x12;
-                            response[1] = (byte) 0xab;
-                            System.arraycopy(randomNum, 0, response, 2, randomNum.length);
-                            response[14]=CMD_SE_RESPONSE;
-                            response[15]=(byte)(responseData.length>>8);
-                            response[16]=(byte)(responseData.length);
-                            System.arraycopy(responseData,0,response,17,responseData.length);
-                            if (tcpSocket == null) {
-                                try {
-                                    tcpSocket = TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
+                        System.arraycopy(id,0,taskId,18,2);
+                        byte[] input = genAppRequestByte(randomNum,bSeNO,taskId);
+                        if (mTcpSocket == null) {
                             try {
-                                if (tcpSocket.tcpSocketWrite(response)) {
-                                    //byte[] buf = new byte[1024];
-                                    readCount = tcpSocket.tcpSocketReadByte(buf);
-                                    cmdParaLen = buf[15] << 8;
-                                    cmdParaLen = cmdParaLen + buf[16];
-                                    if (readCount == (cmdParaLen + 17)) {
-                                        LogUtil.debug(TAG, "TCP response correct");
-                                    }
-                                    else {
-                                        LogUtil.debug(TAG, "TCP response error");
-                                        tcpSocket.closeSocket();
-                                        return;
-                                    }
-                                    if(buf[14]==CMD_SERVER_APDU){
-                                        if(bluetoothControl!=null){
-                                            byte[] seData = new byte[readCount - 17];
-                                            System.arraycopy(buf, 17, seData, 0, readCount - 17);
-                                            bluetoothControl.communicateWithSe(seData,seData.length);
-                                        }
-
-                                    }else if(buf[14]==CMD_SERVER_END){
-                                        LogUtil.debug(TAG,"end");
-                                        if(cmdParaLen==1 && (buf[17]==0x00)){
-                                            LogUtil.debug(TAG,"success");
-                                        }
-                                        else
-                                            LogUtil.debug(TAG,"failed");
-                                        tcpSocket.closeSocket();
-                                        return;
-
-                                    }else if(buf[14]==CMD_SERVER_RESET){
-                                        tcpSocket.closeSocket();
-                                    }
-                                    LogUtil.debug(TAG,bytesToHexString(buf,buf.length));
-                                }
+                                mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
                             } catch (IOException e) {
                                 e.printStackTrace();
-                                tcpSocket.closeSocket();
                             }
+                        }
+                        appRequest(mTcpSocket,input);
+                    }
+                }).start();
 
-                        }/////////////////test without se end//////////////////
-                        bluetoothControl.setSeResponseAvilableListerner(new BluetoothControl.SEResponseDataAvilableListener() {
-                            @Override
-                            public void onSeResponseDataAviable(byte[] responseData) {
-                                LogUtil.debug(TAG,"onSeResponseDataAviable");
-                                byte[] response = new byte[17+responseData.length];
-                                response[0] = 0x12;
-                                response[1] = (byte) 0xab;
-                                System.arraycopy(randomNum, 0, response, 2, randomNum.length);
-                                response[14]=CMD_SE_RESPONSE;
-                                response[15]=(byte)(responseData.length>>8);
-                                response[16]=(byte)(responseData.length);
-                                System.arraycopy(responseData,0,response,17,responseData.length);
-                                if (tcpSocket == null) {
-                                    try {
-                                        tcpSocket = TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                                try {
-                                    if (tcpSocket.tcpSocketWrite(response)) {
-                                        byte[] buf = new byte[100];
-                                        int readCount = tcpSocket.tcpSocketReadByte(buf);
-                                        int cmdParaLen = buf[15] << 8;
-                                        cmdParaLen = cmdParaLen + buf[16];
-                                        if (readCount == (cmdParaLen + 17)) {
-                                            LogUtil.debug(TAG, "TCP response correct");
-                                        }
-                                        else {
-                                            LogUtil.debug(TAG, "TCP response error");
-                                            return;
-                                        }
-                                        if(buf[14]==CMD_SERVER_APDU){
-                                            if(bluetoothControl!=null){
-                                                byte[] seData = new byte[readCount - 17];
-                                                System.arraycopy(buf, 17, seData, 0, readCount - 17);
-                                                bluetoothControl.communicateWithSe(seData,seData.length);
-                                            }
-
-                                        }else if(buf[14]==CMD_SERVER_END){
-                                            return;
-
-                                        }else if(buf[14]==CMD_SERVER_RESET){
-
-                                        }
-                                    }
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
+            }
+        });
+        //删除应用
+        btnDeleteApp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        byte[] id = {0x2F, 0x79};
+                        byte []bSeNO = strSeId.getBytes();
+                        byte[] taskId = new byte[20];
+                        System.arraycopy(id,0,taskId,18,2);
+                        byte[] input = genAppRequestByte(randomNum,bSeNO,taskId);
+                        if (mTcpSocket == null) {
+                            try {
+                                mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
+                            } catch (IOException e) {
+                                e.printStackTrace();
                             }
-                        });
-
+                        }
+                        appRequest(mTcpSocket,input);
                     }
                 }).start();
             }
         });
+        //选择蓝牙设备
         btnSelBleDEv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -241,17 +119,19 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
                 LogUtil.debug(TAG,"Show dialogfragment.");
             }
         });
+        //连接TSM与SE
         btnTestTSMandSE.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        if (tcpSocket == null) {
+                        if (mTcpSocket == null) {
                             try {
-                                tcpSocket = TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
+                                mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
                             } catch (IOException e) {
-                                e.printStackTrace();
+                                //e.printStackTrace();
+                                Toast.makeText(TestNetworkActivity.this,e.getMessage(),Toast.LENGTH_LONG).show();
                             }
                         }
                         //准备发给TSM的数据
@@ -271,22 +151,13 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
                         System.arraycopy(taskId, 0, input, maskId.length + randomNum.length + cmd.length + bSeNO.length, taskId.length);
                         //发给TSM处理，并通过回调获取返回结果
                         //testSeCmdCount++;
-                        handleTSMData(input);
+                        handleTSMData(mTcpSocket,input);
                         if(bluetoothControl!=null) {
                             //SE返回结果，再调用TSM
                             bluetoothControl.setSeCallbackTSMListener(new SECallbackTSMListener() {
                                 @Override
                                 public void callbackTSM(byte[] responseData,int responseLen) {
                                     //LogUtil.debug(TAG,"response from SE:"+bytesToHexString(responseData,responseLen));
-//                                    byte[] response = new byte[17 + responseData.length];
-//                                    response[0] = 0x12;
-//                                    response[1] = (byte) 0xab;
-//                                    System.arraycopy(randomNum, 0, response, 2, randomNum.length);
-//                                    response[14] = CMD_SE_RESPONSE;
-//                                    response[15] = (byte) (responseData.length >> 8);
-//                                    response[16] = (byte) (responseData.length);
-//                                    System.arraycopy(responseData, 0, response, 17, responseData.length);
-                                    //testSeCmdCount++;
                                     byte[] response = new byte[17 + responseLen];
                                     response[0] = 0x12;
                                     response[1] = (byte) 0xab;
@@ -295,7 +166,7 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
                                     response[15] = (byte) (responseLen >> 8);
                                     response[16] = (byte) (responseLen);
                                     System.arraycopy(responseData, 0, response, 17, responseLen);
-                                    handleTSMData(response);
+                                    handleTSMData(mTcpSocket,response);
                                 }
                             });
                         }
@@ -307,60 +178,78 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
 
     }
 
-    public void handleTSMData(byte []input){
+    public void appRequest(TCPSocket tcpSocket,byte[] input){
+        handleTSMData(tcpSocket,input);
+        if(bluetoothControl!=null){
+            bluetoothControl.setSeCallbackTSMListener(new SECallbackTSMListener() {
+                @Override
+                public void callbackTSM(byte[] responseData, int responseLen) {
+                    //LogUtil.debug(TAG,"response from SE:"+bytesToHexString(responseData,responseLen));
+                    byte[] response = new byte[17 + responseLen];
+                    response[0] = 0x12;
+                    response[1] = (byte) 0xab;
+                    System.arraycopy(randomNum, 0, response, 2, randomNum.length);
+                    response[14] = CMD_SE_RESPONSE;
+                    response[15] = (byte) (responseLen >> 8);
+                    response[16] = (byte) (responseLen);
+                    System.arraycopy(responseData, 0, response, 17, responseLen);
+                    handleTSMData(mTcpSocket,response);
+                }
+            });
+        }
+    }
+
+    public void handleTSMData(final TCPSocket tcpSocket,byte []input){
             //testSeCmdCount++;
             TCPByteRequest request = new TCPByteRequest(tcpSocket, input, new TCPResponse.Listener<byte[]>() {
             @Override
             public void onResponse(byte[] response, int responseLen) {
-                int cmdParaLen = response[15] << 8;
-                cmdParaLen = cmdParaLen + response[16];
+                int cmdParaLen = 0;
+                cmdParaLen = (response[15] << 8) + response[16];
+                //byte类型是有符号数据，范围-128~127，当大于127时，需要取补
+                if(cmdParaLen<0)
+                    cmdParaLen+=256;
+                //cmdParaLen += cmdParaLen + ;
                 if (responseLen == (cmdParaLen + 17))
-                    LogUtil.debug(TAG, "TCP response correct");
-                else
-                    LogUtil.debug(TAG, "TCP response error");
+                    LogUtil.warn(TAG, "TCP response correct");
+                else {
+                    LogUtil.warn(TAG, "TCP response error");
+                    return;
+                }
                 if(response[14]==CMD_SERVER_APDU){
-                    LogUtil.debug(TAG,"CMD_SERVER_APDU");
+                    LogUtil.warn(TAG,"CMD_SERVER_APDU");
                     //将APDU指令发给SE处理，并通过回调获取返回结果
                     if(bluetoothControl!=null){
                         byte[] seData = new byte[responseLen - 17];
                         System.arraycopy(response, 17, seData, 0, responseLen - 17);
                         //LogUtil.debug(TAG,"send to SE:"+bytesToHexString(seData,seData.length));
                         bluetoothControl.communicateWithSe(seData,seData.length);
-                        /////////////test////////////////////
-//                        if(testSeCmdCount==2) {
-//                            LogUtil.debug(TAG,bytesToHexString(seData));
-//                            bluetoothControl.communicateWithSe(seData);
-//                        }
-//                        else {
-//                            //byte[] testSeData = new byte[]{0x00, (byte) 0xA4, 0x04, 0x00};//,0x07,(byte)0xA0,0x00,0x00,0x01,0x51,0x00,0x00};
-//                            byte[] testSeData = new byte[]{(byte)0x80,0x50,0x00,0x00,0x08,(byte)0xAD,0x37,0x08,0x08,0x6A,0x2A,(byte)0xFC,(byte)0x82};
-//                            LogUtil.debug(TAG,bytesToHexString(testSeData));
-//                            bluetoothControl.communicateWithSe(testSeData);
-//                        }
-
                     }
 
                 }else if(response[14]==CMD_SERVER_END){
                     LogUtil.debug(TAG,"CMD_SERVER_END");
                     if(cmdParaLen==1 && (response[17]==0x00)){
-                        LogUtil.debug(TAG,"success");
+                        LogUtil.warn(TAG,"success");
                     }
                     else
-                        LogUtil.debug(TAG,"failed");
+                        LogUtil.warn(TAG,"failed");
                     tcpSocket.closeSocket();
-                    LogUtil.debug(TAG,bytesToHexString(response,responseLen));
+                    mTcpSocket = null;
+                    LogUtil.warn(TAG,bytesToHexString(response,responseLen));
                     return;
 
                 }else if(response[14]==CMD_SERVER_RESET){
-                    LogUtil.debug(TAG,"CMD_SERVER_RESET");
+                    LogUtil.warn(TAG,"CMD_SERVER_RESET");
                     tcpSocket.closeSocket();
+                    mTcpSocket=null;
                 }
                 else
                 {
-                    LogUtil.debug(TAG,"unknown cmd");
+                    LogUtil.warn(TAG,"unknown cmd");
                     tcpSocket.closeSocket();
+                    mTcpSocket=null;
                 }
-                //LogUtil.debug(TAG,bytesToHexString(response));
+                //LogUtil.debug(TAG,bytesToHexString(response,responseLen));
             }
         }, new TCPResponse.ErrorListener() {
             @Override
@@ -386,9 +275,27 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
     public static byte CMD_SERVER_END = 0x04;
     public static byte CMD_SERVER_RESET = 0x05;
     public byte[] randomNum = {0x01, 0x02, 0x03, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0xb, 0xc};
-
+    String strSeId = "451000000000000020160328000000010003";
+    byte[] maskId = {0x12, (byte) 0xab};
     private void generateRandomData() {
         randomNum = new byte[12];
+    }
+
+    public byte[] genAppRequestByte(byte[] random,byte[] bSeId,byte[] taskId){
+        byte[] input = new byte[38+bSeId.length];
+        byte[] cmd = {0x01, 0x00, 0x39, 0x24};
+        byte[] bSeNO = strSeId.getBytes();
+        int paraLength = 1+bSeId.length+20;
+        System.arraycopy(maskId, 0, input, 0, maskId.length);
+        System.arraycopy(randomNum, 0, input, maskId.length, randomNum.length);
+        input[maskId.length+randomNum.length]=CMD_APP_REQUEST;
+        input[maskId.length+randomNum.length+1]=(byte)((paraLength>>8) & 0xFF);
+        input[maskId.length+randomNum.length+2]=(byte)(paraLength & 0xFF);
+        input[maskId.length+randomNum.length+3]=(byte)bSeId.length;
+        System.arraycopy(bSeNO, 0, input, 14 + 1+2+1, bSeNO.length);
+        System.arraycopy(taskId, 0, input, 14 + 1+2+1+bSeNO.length, taskId.length);
+        return input;
+
     }
 
     public static String bytesToHexString(byte[] bytes,int byteOfLength) {

@@ -92,8 +92,8 @@ public class BluetoothService extends android.app.Service{
                 //bluetoothGatt.requestMtu(30);
                 LogUtil.info(TAG, "Connected to GATT server.");
                 // Attempts to discover services after successful connection.
-                LogUtil.info(TAG, "Attempting to start service discovery:"
-                        + bluetoothGatt.discoverServices());
+                boolean bDiscoveryService = bluetoothGatt.discoverServices();
+                LogUtil.info(TAG, "Attempting to start service discovery:" + bDiscoveryService);//bluetoothGatt.discoverServices());
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 intentAction = ACTION_GATT_DISCONNECTED;
@@ -106,43 +106,9 @@ public class BluetoothService extends android.app.Service{
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             //super.onServicesDiscovered(gatt, status);
-//            if (status == BluetoothGatt.GATT_SUCCESS) {
-//                LogUtil.info(TAG,"services discovered");
-//                broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
-//            } else {
-//                Log.w(TAG, "onServicesDiscovered received: " + status);
-//            }
-//            if (status != 0) {
-//                bluetoothAdapter.disable();
-//
-//                Timer single_timer = new Timer();
-//                single_timer.schedule(new TimerTask() {
-//                    @Override
-//                    public void run() {
-//                        bluetoothAdapter.enable();
-//                    }
-//                }, 1000);
-//
-//
-//                Timer second_timer = new Timer();
-//                second_timer.schedule(new TimerTask() {
-//                    @Override
-//                    public void run() {
-//                        //gattServiceIntent = new Intent(context, BluetoothLeService.class);
-//                        //bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
-//                        //mBluetoothLeService.initialize();
-//                        //mBluetoothLeService.connect(mDeviceAddress);
-//                        initialize();
-//                        connect()
-//                        //maybe you need wait 0.5-1 second to call connect() after called initialize()
-//                    }
-//                }, 2000);
-//
-//
-//                Log.e(TAG, "An error code get at onServicesDiscovered= " + status);
-//            }
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
+
             } else {
                 LogUtil.warn(TAG, "onServicesDiscovered received: " + status);
                 try {
@@ -158,7 +124,6 @@ public class BluetoothService extends android.app.Service{
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             //super.onCharacteristicWrite(gatt, characteristic, status);
-            //System.out.println("--------write success----- status:" + status);
             LogUtil.info(TAG,"--------write Characteristic success----- status:" + status);
         }
 

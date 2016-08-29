@@ -72,7 +72,7 @@ public class TCPSocket implements Runnable{
         return false;
     }
 
-    public byte[] tcpSocketRead() throws IOException {
+    public String tcpSocketReadString() throws IOException {
         if(socket!=null) {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             //String content = bufferedReader.readLine();
@@ -84,7 +84,7 @@ public class TCPSocket implements Runnable{
                 stringBuilder.append(line);
             }
             content = stringBuilder.toString();
-            return content.getBytes("utf-8");
+            return content;
 
         }
         return null;
@@ -117,7 +117,6 @@ public class TCPSocket implements Runnable{
                 InputStream inputStream = socket.getInputStream();
                 count = inputStream.read(readBuf);
 //                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-//
 //                count = bufferedReader.read(readBuf);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -143,31 +142,5 @@ public class TCPSocket implements Runnable{
             }
         }
     }
-
-
-
-
-    class ClientThread extends Thread{
-        BufferedReader bufferedReader=null;
-        StringBuilder stringBuilder = new StringBuilder();
-        String content = null;
-        public ClientThread(BufferedReader bufferedReader){
-            this.bufferedReader = bufferedReader;
-        }
-        public void run(){
-            String line=null;
-            char []buf = new char[100];
-            int count = 0;
-            if(bufferedReader!=null){
-                    try {
-                        while ((line = bufferedReader.readLine())!=null)
-                            stringBuilder.append(line);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    content = stringBuilder.toString();
-                }
-            }
-        }
     public static String TAG = "BLE";
-    }
+}

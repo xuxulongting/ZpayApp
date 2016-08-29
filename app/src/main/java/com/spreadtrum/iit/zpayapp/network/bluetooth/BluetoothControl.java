@@ -96,13 +96,13 @@ public class BluetoothControl {
                     writeCharacteristic = getSpecialCharacteristic(seCommService,WRITE_CHARACTERISTIC);
                     bluetoothService.setCharacteristicNotification(notifyCharacteristic,true);
                     getAuthentication(writeCharacteristic,"123456");
-                    LogUtil.debug(TAG,"WRITE PWD");
+                    LogUtil.warn(TAG,"WRITE PWD");
                     break;
                 case BluetoothService.ACTION_DATA_AVAILABLE:
                     byte []responseData = intent.getByteArrayExtra(BluetoothService.EXTRA_DATA);
                     int responseDataLen = responseData.length;
                     //LogUtil.debug(TAG,"ACTION_DATA_AVAILABLE: "+responseDataLen);
-                    LogUtil.debug(TAG,bytesToHexString(responseData));
+                    //LogUtil.debug(TAG,bytesToHexString(responseData));
                     //
                     //listener.onSeResponseDataAviable(responseData);
                     //callbackTSMListener.callbackTSM(responseData);
