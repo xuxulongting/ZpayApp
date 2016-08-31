@@ -11,32 +11,31 @@ import android.util.Log;
 public class LogTestActivity extends Activity {
 
 	private LogWriter mLogWriter;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//setContentView(R.layout.activity_main);
-		
+
 		File logf = new File(Environment.getExternalStorageDirectory()
-        		+ File.separator + "DemoLog.txt");
-        
-        try {
+				+ File.separator + "DemoLog.txt");
+
+		try {
 			mLogWriter = LogWriter.open(logf.getAbsolutePath());
 		} catch (IOException e) {
 
 		}
-        
-        log("onCreate()");
+
+		log("onCreate()");
 	}
 
 	public void log(String msg) {
-    	Log.d("---test---", msg);
-    	
-    	try {
+		Log.d("---test---", msg);
+
+		try {
 			mLogWriter.print(LogTestActivity.class, msg);
 		} catch (IOException e) {
 
 		}
-    }
-
+	}
 }
