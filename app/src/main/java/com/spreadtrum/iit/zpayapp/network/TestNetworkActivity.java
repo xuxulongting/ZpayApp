@@ -1,20 +1,13 @@
 package com.spreadtrum.iit.zpayapp.network;
 
-import android.app.Dialog;
-import android.app.FragmentManager;
-import android.app.Notification;
-import android.bluetooth.BluetoothDevice;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.spreadtrum.iit.zpayapp.LogUtil;
+import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.R;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothDialogFragment;
@@ -25,7 +18,6 @@ import com.spreadtrum.iit.zpayapp.network.tcp.TCPByteRequest;
 import com.spreadtrum.iit.zpayapp.network.tcp.TCPResponse;
 import com.spreadtrum.iit.zpayapp.network.tcp.TCPSocket;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 
 /**
@@ -231,11 +223,12 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
                     if(cmdParaLen==1 && (response[17]==0x00)){
                         LogUtil.warn(TAG,"success");
                     }
-                    else
-                        LogUtil.warn(TAG,"failed");
-                    tcpSocket.closeSocket();
-                    mTcpSocket = null;
-                    LogUtil.warn(TAG,bytesToHexString(response,responseLen));
+                    else {
+                        tcpSocket.closeSocket();
+                        mTcpSocket = null;
+                        LogUtil.warn(TAG,bytesToHexString(response,responseLen));
+                        LogUtil.warn(TAG, "failed");
+                    }
                     return;
 
                 }else if(response[14]==CMD_SERVER_RESET){

@@ -1,4 +1,4 @@
-package com.spreadtrum.iit.zpayapp;
+package com.spreadtrum.iit.zpayapp.Log;
 
 import android.os.ParcelUuid;
 import android.util.Log;
@@ -14,7 +14,7 @@ public class LogUtil {
     public static final int WARN_LEVEL = 3;
     public static final int ERROR_LEVEL = 4;
 
-    public static int log_level = WARN_LEVEL;//VERBOSE_LEVEL;
+    public static int log_level = VERBOSE_LEVEL;
     public static void verbose(String tag,String msg){
         if(log_level<=VERBOSE_LEVEL)
             Log.v(tag,msg);

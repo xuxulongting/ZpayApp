@@ -37,7 +37,7 @@ import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.spreadtrum.iit.zpayapp.LogUtil;
+import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.R;
 
 import java.util.ArrayList;

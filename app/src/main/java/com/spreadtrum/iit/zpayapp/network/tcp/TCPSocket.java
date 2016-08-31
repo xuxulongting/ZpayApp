@@ -1,19 +1,12 @@
 package com.spreadtrum.iit.zpayapp.network.tcp;
 
-import android.support.v4.view.ViewPager;
-
-import com.spreadtrum.iit.zpayapp.LogUtil;
-
-import org.w3c.dom.ProcessingInstruction;
+import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 
 /**

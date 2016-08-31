@@ -8,11 +8,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.pm.ProviderInfo;
 import android.os.IBinder;
 import android.widget.Toast;
 
-import com.spreadtrum.iit.zpayapp.LogUtil;
+import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,12 +99,6 @@ public class BluetoothControl {
                     break;
                 case BluetoothService.ACTION_DATA_AVAILABLE:
                     byte []responseData = intent.getByteArrayExtra(BluetoothService.EXTRA_DATA);
-                    int responseDataLen = responseData.length;
-                    //LogUtil.debug(TAG,"ACTION_DATA_AVAILABLE: "+responseDataLen);
-                    //LogUtil.debug(TAG,bytesToHexString(responseData));
-                    //
-                    //listener.onSeResponseDataAviable(responseData);
-                    //callbackTSMListener.callbackTSM(responseData);
                     break;
             }
         }
@@ -179,6 +172,15 @@ public class BluetoothControl {
         writeCharacteristic.setValue(sendData);
         bluetoothService.wirteCharacteristic(writeCharacteristic);
         LogUtil.debug(TAG,"send to BLE:"+bytesToHexString(sendData));
+        //给蓝牙发送数据，倒计时开始
+        bluetoothService.countDowntimer.start();
+        bluetoothService.countDowntimer.setCountDownTimerListerner(new MyCountDowntimer.CountDownTimerListener() {
+            @Override
+            public void onTimeup() {
+                //重发时间到
+                bluetoothService.wirteCharacteristic(writeCharacteristic);
+            }
+        });
         bluetoothService.setBleCallbackListener(new BluetoothService.BLECallbackListener() {
             @Override
             public void onResponseWrite(int receiveTime) {
@@ -193,6 +195,15 @@ public class BluetoothControl {
                         writeCharacteristic.setValue(sendData);
                         bluetoothService.wirteCharacteristic(writeCharacteristic);
                         LogUtil.debug(TAG,"onResponseWrite send to BLE:"+bytesToHexString(sendData));
+                        //给蓝牙发送数据，倒计时开始
+                        bluetoothService.countDowntimer.start();
+                        bluetoothService.countDowntimer.setCountDownTimerListerner(new MyCountDowntimer.CountDownTimerListener() {
+                            @Override
+                            public void onTimeup() {
+                                //重发时间到
+                                bluetoothService.wirteCharacteristic(writeCharacteristic);
+                            }
+                        });
                     }
                     else
                     {

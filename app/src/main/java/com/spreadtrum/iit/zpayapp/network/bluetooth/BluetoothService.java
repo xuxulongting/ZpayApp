@@ -12,20 +12,16 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.ProviderInfo;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.spreadtrum.iit.zpayapp.LogUtil;
+import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.UUID;
 
 import static com.spreadtrum.iit.zpayapp.network.bluetooth.SampleGattAttributes.*;
@@ -59,9 +55,12 @@ public class BluetoothService extends android.app.Service{
     private SECallbackTSMListener callbackTSMListener;
 
     private BLECallbackListener bleCallbackListener;
-
+    //Se返回数据缓冲区，长度，及第一字节代表的次数
     private byte[] seResponseData = new byte[256];
     private int seDataLength=0;
+    private int recvTime=-1;
+
+    public MyCountDowntimer countDowntimer = new MyCountDowntimer(5000,1000);
 
     public interface BLECallbackListener{
         //给SE发数据
@@ -139,12 +138,7 @@ public class BluetoothService extends android.app.Service{
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             //super.onCharacteristicChanged(gatt, characteristic);
             //LogUtil.info(TAG,"--------onCharacteristicChanged-----");
-
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
-//            if (characteristic.getValue() != null) {
-//
-//                LogUtil.debug(TAG,characteristic.getStringValue(0));
-//            }
 
         }
 
@@ -244,19 +238,29 @@ public class BluetoothService extends android.app.Service{
             Log.d(TAG, String.format("Received heart rate: %d", heartRate));
             intent.putExtra(EXTRA_DATA, String.valueOf(heartRate));
         } else {
-            // For all other profiles, writes the data formatted in HEX.
+            //收到数据，倒计时结束
+            countDowntimer.cancel();
             final byte[] data = characteristic.getValue();
             LogUtil.debug(TAG,"receive from ble:"+bytesToHexString(data));
             //判断是SE返回的数据，还是蓝牙响应数据
-            //收到蓝牙的2字节应答数据
+            /*收到蓝牙的2字节应答数据*/
+            //当收到BLE的重发数据，在onResponseWrite中通过第一字节进行解析，如果是重发数据，则不用做处理
             if(data.length==2){
                 if(data[0]==((byte)(~data[1]))) {
                     //LogUtil.debug(TAG,"BLE response data");
+                    recvTime = -1;
                     bleCallbackListener.onResponseWrite((int)data[0]);
                     return;
                 }
             }
-            //SE返回数据
+            /*收到SE返回数据*/
+            //当收到BLE重发数据，通过第一个字节进行解析，直接发送两字节应答数据
+            if(data[0]==recvTime) {
+                LogUtil.debug(TAG,"BLE resend");
+                bleCallbackListener.onResponseRead((int)data[0]);
+                return;
+            }
+            recvTime = data[0];
             System.arraycopy(data,1,seResponseData,seDataLength,data.length-1);
             seDataLength+=(data.length-1);
             if(data[0]!=0x0){
