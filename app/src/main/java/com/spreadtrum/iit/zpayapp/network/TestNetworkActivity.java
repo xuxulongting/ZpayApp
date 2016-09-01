@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.R;
+import com.spreadtrum.iit.zpayapp.common.ByteUtil;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothDialogFragment;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.SECallbackTSMListener;
@@ -127,7 +128,7 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
                             }
                         }
                         //准备发给TSM的数据
-                        String strSeId = "451000000000000020160328000000010003";
+                        String strSeId = "451000000000000020160328000000010005";
                         byte[] maskId = {0x12, (byte) 0xab};
                         //byte[] randomNum = {0x01,0x02,0x03,0x4,0x5,0x6,0x7,0x8,0x9,0xa,0xb,0xc};
                         byte[] cmd = {0x01, 0x00, 0x39, 0x24};
@@ -210,12 +211,13 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
                 }
                 if(response[14]==CMD_SERVER_APDU){
                     LogUtil.warn(TAG,"CMD_SERVER_APDU");
+                    LogUtil.debug(TAG,ByteUtil.bytesToHexString(response,responseLen));
                     //将APDU指令发给SE处理，并通过回调获取返回结果
                     if(bluetoothControl!=null){
                         byte[] seData = new byte[responseLen - 17];
                         System.arraycopy(response, 17, seData, 0, responseLen - 17);
                         //LogUtil.debug(TAG,"send to SE:"+bytesToHexString(seData,seData.length));
-                        bluetoothControl.communicateWithSe(seData,seData.length);
+                        bluetoothControl.communicateWithJDSe(seData,seData.length);
                     }
 
                 }else if(response[14]==CMD_SERVER_END){
@@ -226,7 +228,7 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
                     else {
                         tcpSocket.closeSocket();
                         mTcpSocket = null;
-                        LogUtil.warn(TAG,bytesToHexString(response,responseLen));
+                        LogUtil.warn(TAG, ByteUtil.bytesToHexString(response,responseLen));
                         LogUtil.warn(TAG, "failed");
                     }
                     return;
@@ -268,7 +270,7 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
     public static byte CMD_SERVER_END = 0x04;
     public static byte CMD_SERVER_RESET = 0x05;
     public byte[] randomNum = {0x01, 0x02, 0x03, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0xb, 0xc};
-    String strSeId = "451000000000000020160328000000010003";
+    String strSeId = "451000000000000020160328000000010005";
     byte[] maskId = {0x12, (byte) 0xab};
     private void generateRandomData() {
         randomNum = new byte[12];
@@ -290,19 +292,6 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
         return input;
 
     }
-
-    public static String bytesToHexString(byte[] bytes,int byteOfLength) {
-        String result = "";
-        for (int i = 0; i < byteOfLength; i++) {
-            String hexString = Integer.toHexString(bytes[i] & 0xFF);
-            if (hexString.length() == 1) {
-                hexString = '0' + hexString;
-            }
-            result += hexString.toUpperCase();
-        }
-        return result;
-    }
-
 
     @Override
     protected void onPause() {

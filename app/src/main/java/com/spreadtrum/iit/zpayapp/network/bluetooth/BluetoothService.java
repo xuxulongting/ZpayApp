@@ -19,6 +19,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
+import com.spreadtrum.iit.zpayapp.common.ConditionCompile;
 
 import java.util.Arrays;
 import java.util.List;
@@ -55,10 +56,15 @@ public class BluetoothService extends android.app.Service{
     private SECallbackTSMListener callbackTSMListener;
 
     private BLECallbackListener bleCallbackListener;
-    //Se返回数据缓冲区，长度，及第一字节代表的次数
+    //Se返回数据缓冲区，已接收长度，及第一字节代表的次数
     private byte[] seResponseData = new byte[256];
     private int seDataLength=0;
     private int recvTime=-1;
+    //金电蓝牙APDU指令响应数据长度，总包数，包序号
+    private int seResponseLength=0;
+    private int totalPackage=0;
+    private int packageNum=0;
+    public boolean bWriteCharacteristic = false;
 
     public MyCountDowntimer countDowntimer = new MyCountDowntimer(5000,1000);
 
@@ -124,6 +130,7 @@ public class BluetoothService extends android.app.Service{
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             //super.onCharacteristicWrite(gatt, characteristic, status);
             LogUtil.info(TAG,"--------write Characteristic success----- status:" + status);
+            bWriteCharacteristic = true;
         }
 
         @Override
@@ -137,7 +144,7 @@ public class BluetoothService extends android.app.Service{
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             //super.onCharacteristicChanged(gatt, characteristic);
-            //LogUtil.info(TAG,"--------onCharacteristicChanged-----");
+            LogUtil.info(TAG,"--------onCharacteristicChanged-----");
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
 
         }
@@ -215,13 +222,16 @@ public class BluetoothService extends android.app.Service{
         final Intent intent = new Intent(action);
         sendBroadcast(intent);
     }
+
+    /**
+     * 处理蓝牙接收的数据，兼容展讯蓝牙和金电手环两种设备
+     * @param action
+     * @param characteristic
+     */
     private void broadcastUpdate(final String action,
                                  final BluetoothGattCharacteristic characteristic) {
         final Intent intent = new Intent(action);
-
-        // This is special handling for the Heart Rate Measurement profile. Data
-        // parsing is
-        // carried out as per profile specifications:
+        // This is special handling for the Heart Rate Measurement profile. Data parsing is carried out as per profile specifications:
         // http://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.heart_rate_measurement.xml
         if (UUID_HEART_RATE_MEASUREMENT.equals(characteristic.getUuid())) {
             int flag = characteristic.getProperties();
@@ -238,63 +248,98 @@ public class BluetoothService extends android.app.Service{
             Log.d(TAG, String.format("Received heart rate: %d", heartRate));
             intent.putExtra(EXTRA_DATA, String.valueOf(heartRate));
         } else {
-            //收到数据，倒计时结束
-            countDowntimer.cancel();
-            final byte[] data = characteristic.getValue();
-            LogUtil.debug(TAG,"receive from ble:"+bytesToHexString(data));
-            //判断是SE返回的数据，还是蓝牙响应数据
+            //使用金电手环
+            if (ConditionCompile.JDBLE) {
+                final byte[] data = characteristic.getValue();
+                LogUtil.debug(TAG, "receive from ble:" + bytesToHexString(data));
+                if(data[1]==BluetoothControl.SETPARA_RECV){
+                    //设置蓝牙参数返回数据
+                    if((data[4]+256)==0x90 && data[5]==0x00){
+                        LogUtil.debug(TAG,"open se success.");
+                    }
+                    else
+                        LogUtil.debug(TAG,"open se failed.");
+                }
+                else if(data[1]==BluetoothControl.APDU_RECV){
+                    totalPackage=data[0]>>4;
+                    packageNum=data[0]&0x0F;
+                    int totalLength = data[3];//(data[2]<<8) + //由于APDU指令长度最大为256,则data[2]应该一直是0x00
+                    if(totalLength<0)
+                        totalLength+=256;   //java中byte表示范围-128~127
+                    seResponseLength = data[5];
+                    if(seResponseLength<0)
+                        seResponseLength+=256;
+                    if(totalLength!=(seResponseLength+2)){
+                        LogUtil.debug(TAG,"receive apdu response failed");
+                        return;
+                    }
+                    System.arraycopy(data,6,seResponseData,0,data.length-6);
+                    seDataLength = data.length-6;
+                }
+                else
+                {
+                    if((totalPackage-1)!=packageNum){
+                        //检查包的顺序是否正确
+                        if((totalPackage!=(data[0]>>4))||((packageNum+1)!=(data[0]&0x0F))){
+                            LogUtil.debug(TAG,"receive APDU response failed");
+                            return;
+                        }
+                    }
+                    packageNum=data[0]&0x0F;
+                    System.arraycopy(data,1,seResponseData,seDataLength,data.length-1);
+                    seDataLength+=(data.length-1);
+                    //当一个APDU指令包接收完毕，发给TSM处理
+//                    if((totalPackage-1)==packageNum){
+//                        //将数据发送给TSM处理
+//                        callbackTSMListener.callbackTSM(seResponseData, seDataLength);
+//                    }
+                }
+                if((totalPackage-1)==packageNum){
+                    //将数据发送给TSM处理
+                    callbackTSMListener.callbackTSM(seResponseData, seDataLength);
+                }
+
+            } else {
+                //使用展讯蓝牙
+                //收到数据，倒计时结束
+                countDowntimer.cancel();
+                final byte[] data = characteristic.getValue();
+                LogUtil.debug(TAG, "receive from ble:" + bytesToHexString(data));
+                //判断是SE返回的数据，还是蓝牙响应数据
             /*收到蓝牙的2字节应答数据*/
-            //当收到BLE的重发数据，在onResponseWrite中通过第一字节进行解析，如果是重发数据，则不用做处理
-            if(data.length==2){
-                if(data[0]==((byte)(~data[1]))) {
-                    //LogUtil.debug(TAG,"BLE response data");
-                    recvTime = -1;
-                    bleCallbackListener.onResponseWrite((int)data[0]);
+                //当收到BLE的重发数据，在onResponseWrite中通过第一字节进行解析，如果是重发数据，则不用做处理
+                if (data.length == 2) {
+                    if (data[0] == ((byte) (~data[1]))) {
+                        //LogUtil.debug(TAG,"BLE response data");
+                        recvTime = -1;
+                        bleCallbackListener.onResponseWrite((int) data[0]);
+                        return;
+                    }
+                }
+            /*收到SE返回数据*/
+                //当收到BLE重发数据，通过第一个字节进行解析，直接发送两字节应答数据
+                if (data[0] == recvTime) {
+                    LogUtil.debug(TAG, "BLE resend");
+                    bleCallbackListener.onResponseRead((int) data[0]);
                     return;
                 }
+                recvTime = data[0];
+                System.arraycopy(data, 1, seResponseData, seDataLength, data.length - 1);
+                seDataLength += (data.length - 1);
+                if (data[0] != 0x0) {
+                    //给蓝牙发送2字节应答数据
+                    bleCallbackListener.onResponseRead((int) data[0]);
+                } else {
+                    //LogUtil.debug(TAG,"callbackTSM:"+bytesToHexString(seResponseData));
+                    //给蓝牙发送2字节应答数据
+                    bleCallbackListener.onResponseRead(0);
+                    //将数据发送给TSM处理
+                    callbackTSMListener.callbackTSM(seResponseData, seDataLength);
+                    //将长度清零
+                    seDataLength = 0;
+                }
             }
-            /*收到SE返回数据*/
-            //当收到BLE重发数据，通过第一个字节进行解析，直接发送两字节应答数据
-            if(data[0]==recvTime) {
-                LogUtil.debug(TAG,"BLE resend");
-                bleCallbackListener.onResponseRead((int)data[0]);
-                return;
-            }
-            recvTime = data[0];
-            System.arraycopy(data,1,seResponseData,seDataLength,data.length-1);
-            seDataLength+=(data.length-1);
-            if(data[0]!=0x0){
-                //给蓝牙发送2字节应答数据
-                bleCallbackListener.onResponseRead((int)data[0]);
-            }
-            else{
-                //LogUtil.debug(TAG,"callbackTSM:"+bytesToHexString(seResponseData));
-                //给蓝牙发送2字节应答数据
-                bleCallbackListener.onResponseRead(0);
-                //将数据发送给TSM处理
-                callbackTSMListener.callbackTSM(seResponseData,seDataLength);
-                //将长度清零
-                seDataLength=0;
-                //将byte数组清零
-                //Arrays.fill(seResponseData,(byte) 0);
-            }
-
-//            if (data != null && data.length > 0) {
-//                final StringBuilder stringBuilder = new StringBuilder(
-//                        data.length);
-//                for (byte byteChar : data)
-//                    stringBuilder.append(String.format("%02X ", byteChar));
-//
-//                //System.out.println("ppp" + new String(data) + "\n" + stringBuilder.toString());
-//                //LogUtil.debug(TAG,new String(data) + "\n" + stringBuilder.toString());
-//                //intent.putExtra(EXTRA_DATA, new String(data) + "\n" + stringBuilder.toString());
-//                //intent.putExtra(EXTRA_DATA,data);
-//
-//                //callbackTSMListener.callbackTSM(data);
-//
-//            }
         }
-        //sendBroadcast(intent);
     }
 
     public void seResponseDataToZero()

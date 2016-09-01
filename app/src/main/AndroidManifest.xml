@@ -28,15 +28,15 @@
 
         </activity>
         <activity android:name=".network.bluetooth.BluetoothTestActivity">
+
+        </activity>
+        <activity android:name=".network.bluetooth.DeviceControlActivity"></activity>
+        <activity android:name=".network.TestNetworkActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity android:name=".network.bluetooth.DeviceControlActivity"></activity>
-        <activity android:name=".network.TestNetworkActivity">
-
         </activity>
 
         <activity android:name=".network.nfc.NFCDemoActivity">

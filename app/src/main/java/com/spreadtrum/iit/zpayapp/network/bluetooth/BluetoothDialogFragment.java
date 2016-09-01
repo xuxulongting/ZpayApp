@@ -76,7 +76,7 @@ public class BluetoothDialogFragment extends DialogFragment {
                 bluetoothStopDiscover();
             }
         });
-        commonAdapter = new CommonAdapter<String>(view.getContext(),R.layout.item_list_btdevices, btDevicesNameList) {
+        commonAdapter = new CommonAdapter<String>(view.getContext(),R.layout.item_list_btdevices, btDeviceAddressList) {
             @Override
             protected void convert(ViewHolder viewHolder, String item, int position) {
                 viewHolder.setText(R.id.id_tv_bt_device_name,item);
