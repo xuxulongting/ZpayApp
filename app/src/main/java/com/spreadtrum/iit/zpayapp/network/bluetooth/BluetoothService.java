@@ -130,7 +130,12 @@ public class BluetoothService extends android.app.Service{
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             //super.onCharacteristicWrite(gatt, characteristic, status);
             LogUtil.info(TAG,"--------write Characteristic success----- status:" + status);
-            bWriteCharacteristic = true;
+            byte[] data = characteristic.getValue();
+            int totalPackages = (data[0]&0xF0)>>4;
+            int packageNum = data[0]&0x0F;
+            if((totalPackages-1)!=packageNum)
+                bleCallbackListener.onResponseWrite(data[0]);//将作为参数
+///            bWriteCharacteristic = true;
         }
 
         @Override

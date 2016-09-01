@@ -33,14 +33,13 @@ public class BluetoothControl {
     private BluetoothGattCharacteristic notifyCharacteristic;
     private BluetoothGattCharacteristic writeCharacteristic;
 
+    //展讯蓝牙
     private int sendTime=0;
     private int sendCount=0;
+    //金电蓝牙手环
+    int apduSentLength = 0;     //已发送的apdu指令长度（蓝牙每次发送20字节）
+    int packages;               //待发送的包数
 
-//    private SEResponseDataAvilableListener listener;
-//
-//    public interface SEResponseDataAvilableListener{
-//        void onSeResponseDataAviable(byte []responseData);
-//    }
     /**
      * 展讯蓝牙相关参数
      */
@@ -251,18 +250,17 @@ public class BluetoothControl {
      * @param byteofdata
      * @param length
      */
-    public void communicateWithJDSe(byte[] byteofdata,int length){
-        int apduLength = length;    //待发送的apdu指令的长度
-        int apduSentLength = 0;     //已发送的apdu指令长度（蓝牙每次发送20字节）
+    public void communicateWithJDSe(final byte[] byteofdata,final int length){
+        //int apduLength = length;    //待发送的apdu指令的长度
+        //int apduSentLength = 0;     //已发送的apdu指令长度（蓝牙每次发送20字节）
+        //int packages;   //待发送的包数
         int packageNum=0;           //包序号
-        int total_package = 0;      //总包数
-        int packages;   //待发送的包数
-        int mod = 0;                //蓝牙最后一包是否为20byte
+        int total_package;      //总包数
         //计算total_package
         if(length<=14)
             total_package = 1;
         else {
-            mod = (length - 14) % 19;
+            int mod = (length - 14) % 19; //蓝牙最后一包是否为20byte
             total_package =(length - 14) / 19;
             if(mod>0){
                 total_package+=2;
@@ -278,6 +276,7 @@ public class BluetoothControl {
         header[3] = (byte)((length+2) & 0xFF);
         header[4] = (byte)(length >> 8);
         header[5] = (byte)(length & 0xFF);
+        //当APDU指令包<14字节，则总包数为1包
         if(length<=14) {
             byte[] data = new byte[6+length];
             System.arraycopy(header,0,data,0,6);
@@ -285,59 +284,115 @@ public class BluetoothControl {
             writeCharacteristic.setValue(data);
             bluetoothService.wirteCharacteristic(writeCharacteristic);
             LogUtil.debug(TAG,"send to BLE:"+ByteUtil.bytesToHexString(data,data.length));
-            apduLength = 0;
-            apduSentLength = length;
+            //apduLength = 0;
+            //apduSentLength = length;
         }
         else{
-            byte[] data = new byte[20];
+            //当APDU指令包>14字节，总包数大于1包
+            final byte[] data = new byte[20];
+            final int mod = (length - 14) % 19; //蓝牙最后一包是否为20byte
             System.arraycopy(header,0,data,0,6);
             System.arraycopy(byteofdata,0,data,6,14);
             writeCharacteristic.setValue(data);
             bluetoothService.wirteCharacteristic(writeCharacteristic);
             bluetoothService.bWriteCharacteristic=false;
             LogUtil.debug(TAG,"send to BLE:"+ByteUtil.bytesToHexString(data,data.length));
-            apduLength -= 14;
-            apduSentLength += 14;
+            //apduLength -= 14;
+            apduSentLength = 14;
             packages-=1;
-            while ((packages>1) || ((packages==1) && (mod==0))){
-                packageNum+=1;
-                data[0]=(byte)(((byte)(total_package << 4)) | ((byte)(packageNum))) ;
-                System.arraycopy(byteofdata,apduSentLength,data,1,19);
-                //确保上次写完成
-                while (!bluetoothService.bWriteCharacteristic) {
+            bluetoothService.setBleCallbackListener(new BluetoothService.BLECallbackListener() {
+                @Override
+                public void onResponseWrite(int para) {
+                    byte firstByte = (byte)para;
+                    int totalPackage = (firstByte & 0xF0)>>4;
+                    int packageNo = (firstByte & 0x0F);
+                    if((packages>1) || ((packages==1) && (mod==0))){
+                        //packageNum+=1;
+                        data[0]=(byte)(((byte)(totalPackage << 4)) | ((byte)(packageNo+1))) ;
+                        System.arraycopy(byteofdata,apduSentLength,data,1,19);
+//                        //确保上次写完成
+//                        while (!bluetoothService.bWriteCharacteristic) {
+//
+//                        }
+                        writeCharacteristic.setValue(data);
+                        bluetoothService.wirteCharacteristic(writeCharacteristic);
+//                        bluetoothService.bWriteCharacteristic=false;
+                        LogUtil.debug(TAG,"send to BLE:"+ByteUtil.bytesToHexString(data,data.length));
+                        //apduLength -= 19;
+                        apduSentLength +=19;
+                        packages-=1;
+                    }
+                    else if((packages==1) && (mod!=0)){
+                        byte[] lastPackage = new byte[mod+1];
+                        //packageNum+=1;
+                        lastPackage[0]=(byte)(((byte)(totalPackage << 4)) | ((byte)(packageNo+1))) ;
+                        System.arraycopy(byteofdata,apduSentLength,lastPackage,1,mod);
+                        //确保上次写完成
+//                        while (!bluetoothService.bWriteCharacteristic) {
+//
+//                        }
+                        writeCharacteristic.setValue(lastPackage);
+                        bluetoothService.wirteCharacteristic(writeCharacteristic);
+//                        bluetoothService.bWriteCharacteristic=false;
+                        LogUtil.debug(TAG,"send to BLE:"+ByteUtil.bytesToHexString(lastPackage,lastPackage.length));
+//                        apduLength-=mod;
+                        apduSentLength+=mod;
+                        packages-=1;
+                        if(apduSentLength==length)
+                        {
+                            //apduSentLength=0;
+                            LogUtil.debug("apdu send success!");
+                        }
+                        else
+                            LogUtil.debug("apdu send failed!");
+                    }
 
                 }
-                writeCharacteristic.setValue(data);
-                bluetoothService.wirteCharacteristic(writeCharacteristic);
-                bluetoothService.bWriteCharacteristic=false;
-                LogUtil.debug(TAG,"send to BLE:"+ByteUtil.bytesToHexString(data,data.length));
-                apduLength -= 19;
-                apduSentLength +=19;
-                packages-=1;
-            }
-            if(mod!=0){
-                byte[] lastPackage = new byte[mod+1];
-                packageNum+=1;
-                lastPackage[0]=(byte)(((byte)(total_package << 4)) | ((byte)(packageNum))) ;
-                System.arraycopy(byteofdata,apduSentLength,lastPackage,1,mod);
-                //确保上次写完成
-                while (!bluetoothService.bWriteCharacteristic) {
+
+                @Override
+                public void onResponseRead(int receiveTime) {
 
                 }
-                writeCharacteristic.setValue(lastPackage);
-                bluetoothService.wirteCharacteristic(writeCharacteristic);
-                bluetoothService.bWriteCharacteristic=false;
-                LogUtil.debug(TAG,"send to BLE:"+ByteUtil.bytesToHexString(lastPackage,lastPackage.length));
-                apduLength-=mod;
-                apduSentLength+=mod;
-                packages-=1;
-            }
-            if(apduLength==0 && apduSentLength==length)
-            {
-                LogUtil.debug(TAG,"apdu send success!");
-            }
-            else
-                LogUtil.debug("apdu send failed!");
+            });
+//            while ((packages>1) || ((packages==1) && (mod==0))){
+//                packageNum+=1;
+//                data[0]=(byte)(((byte)(total_package << 4)) | ((byte)(packageNum))) ;
+//                System.arraycopy(byteofdata,apduSentLength,data,1,19);
+//                //确保上次写完成
+//                while (!bluetoothService.bWriteCharacteristic) {
+//
+//                }
+//                writeCharacteristic.setValue(data);
+//                bluetoothService.wirteCharacteristic(writeCharacteristic);
+//                bluetoothService.bWriteCharacteristic=false;
+//                LogUtil.debug(TAG,"send to BLE:"+ByteUtil.bytesToHexString(data,data.length));
+//                apduLength -= 19;
+//                apduSentLength +=19;
+//                packages-=1;
+//            }
+//            if(mod!=0){
+//                byte[] lastPackage = new byte[mod+1];
+//                packageNum+=1;
+//                lastPackage[0]=(byte)(((byte)(total_package << 4)) | ((byte)(packageNum))) ;
+//                System.arraycopy(byteofdata,apduSentLength,lastPackage,1,mod);
+//                //确保上次写完成
+//                while (!bluetoothService.bWriteCharacteristic) {
+//
+//                }
+//                writeCharacteristic.setValue(lastPackage);
+//                bluetoothService.wirteCharacteristic(writeCharacteristic);
+//                bluetoothService.bWriteCharacteristic=false;
+//                LogUtil.debug(TAG,"send to BLE:"+ByteUtil.bytesToHexString(lastPackage,lastPackage.length));
+//                apduLength-=mod;
+//                apduSentLength+=mod;
+//                packages-=1;
+//            }
+//            if(apduLength==0 && apduSentLength==length)
+//            {
+//                LogUtil.debug(TAG,"apdu send success!");
+//            }
+//            else
+//                LogUtil.debug("apdu send failed!");
 
         }
 
