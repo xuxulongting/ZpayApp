@@ -2,21 +2,23 @@ package com.spreadtrum.iit.zpayapp.display;
 
 import android.widget.ImageView;
 
+import java.io.Serializable;
+
 /**
  * Created by SPREADTRUM\ting.long on 16-7-27.
  */
-public class Card {
+public class Card implements Serializable{
     public Card(String cardType,int cardViewId,String cardName){
-       this.appType = cardType;
+       this.cardType = cardType;
         this.cardViewId = cardViewId;
         this.cardName = cardName;
     }
-    public String getAppType() {
-        return appType;
+    public String getCardType() {
+        return cardType;
     }
 
-    public void setAppType(String cardType) {
-        this.appType = cardType;
+    public void setCardType(String cardType) {
+        this.cardType = cardType;
     }
 
     public int getCardView() {
@@ -35,7 +37,7 @@ public class Card {
         this.cardName = cardName;
     }
 
-    private String appType;
+    private String cardType;
     private int cardViewId;
     private String cardName;
 }

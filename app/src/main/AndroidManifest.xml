@@ -13,11 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".register.LoginActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity android:name=".register.RegisterActivity"></activity>
         <activity android:name=".RegisterActivity_1"></activity>
@@ -28,6 +24,18 @@
         <activity android:name=".login.UserZhiwenLoginActivity"></activity>
         <activity android:name=".display.ApplicationActivity"></activity>
         <activity android:name=".display.SpecialApplicationActivity"></activity>
+
+        <activity android:name=".displaydemo.MainDisplayActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".displaydemo.SpecialAppActivity">
+
+        </activity>
+
         <activity android:name=".network.tcp.SimpleClientActivity">
 
         </activity>

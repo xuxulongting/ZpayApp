@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zhy.autolayout.AutoLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.zhy.autolayout.AutoFrameLayout
+        android:id="@+id/id_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+
+    </com.zhy.autolayout.AutoFrameLayout>
+    <com.zhy.autolayout.AutoLinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        android:background="@color/colorPrimary"
+        >
+        <Button
+            android:id="@+id/id_btn_app_store"
+            android:layout_width="300px"
+            android:layout_height="200px"
+            android:text="应用商店"
+            android:layout_weight="1"
+            android:background="@color/colorPrimary"
+            android:textColor="@color/colorGreen"
+            android:textSize="70px"
+            />
+        <Button
+            android:id="@+id/id_btn_service"
+            android:layout_width="200px"
+            android:layout_height="200px"
+            android:text="服务"
+            android:layout_weight="1"
+            android:background="@color/colorPrimary"
+            android:textColor="@color/colorWhite"
+            android:textSize="70px"/>
+        <Button
+            android:id="@+id/id_btn_local"
+            android:layout_width="200px"
+            android:layout_height="200px"
+            android:text="附近"
+            android:layout_weight="1"
+            android:background="@color/colorPrimary"
+            android:textColor="@color/colorWhite"
+            android:textSize="70px"/>
+        <Button
+            android:id="@+id/id_btn_settings"
+            android:layout_width="200px"
+            android:layout_height="200px"
+            android:text="设置"
+            android:layout_weight="1"
+            android:background="@color/colorPrimary"
+            android:textColor="@color/colorWhite"
+            android:textSize="70px"/>
+    </com.zhy.autolayout.AutoLinearLayout>
+
+
+</com.zhy.autolayout.AutoLinearLayout>
