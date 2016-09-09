@@ -2,26 +2,32 @@
 <com.zhy.autolayout.AutoLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <TextView
-        android:id="@+id/id_tv_appname"
+    <com.zhy.autolayout.AutoLinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="中国工商银行"
-        android:gravity="center"
-        android:textSize="120px"
-
-        android:background="@color/colorPrimary"/>
+        android:background="@color/colorPrimary">
+        <TextView
+            android:id="@+id/id_tv_appname"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="中国工商银行"
+            android:gravity="center"
+            android:textSize="120px"
+            android:layout_marginTop="40px"
+            android:layout_marginBottom="40px"
+            />
+    </com.zhy.autolayout.AutoLinearLayout>
     <ImageView
         android:id="@+id/id_iv_icon_large"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="900px"
         android:layout_marginTop="40px"
-        android:src="@drawable/icbc_bank"/>
+        android:src="@drawable/bjgj"/>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="40px"
-        android:text="绑卡说明："
+        android:text="简介："
         android:textSize="80px"/>
     <TextView
         android:id="@+id/id_tv_detailapp"
@@ -39,7 +45,8 @@
             android:id="@+id/id_btn_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="40px"
+            android:layout_marginRight="70px"
+            android:background="@drawable/button_style"
             android:text="绑卡"/>
 
     </com.zhy.autolayout.AutoLinearLayout>

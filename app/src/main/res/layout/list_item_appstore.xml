@@ -1,54 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.zhy.autolayout.AutoLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="400px"
+    android:layout_height="wrap_content"
     android:descendantFocusability="blocksDescendants">
     <com.zhy.autolayout.AutoLinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1">
-        <ImageView
-            android:id="@+id/id_iv_icon"
-            android:layout_width="400px"
-            android:layout_height="400px"
-            android:layout_gravity="center"
-            android:layout_marginLeft="40px"
-            android:src="@drawable/bus"/>
-    </com.zhy.autolayout.AutoLinearLayout>
-    <com.zhy.autolayout.AutoLinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:orientation="vertical"
-        android:layout_weight="1"
+
         >
-    <TextView
-        android:id="@+id/id_tv_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="北京公交一卡通"
-        android:textSize="60px"/>
-    <TextView
-        android:id="@+id/id_tv_type"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="40px"
-        android:text="旅行交通"/>
-    </com.zhy.autolayout.AutoLinearLayout>
-    <com.zhy.autolayout.AutoLinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="400px"
-        android:layout_weight="1"
-        android:gravity="right|bottom"
-        android:layout_marginRight="40px"
-        >
-        <Button
-            android:id="@+id/id_btn_opra"
-            android:layout_width="wrap_content"
+        <com.zhy.autolayout.AutoLinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="绑卡"
-            android:textSize="50px"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/id_tv_appname"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="中国工商银行"
+                android:textSize="80px"
+                android:textStyle="bold"
+                android:textColor="@color/colorPrimary"/>
+            <com.zhy.autolayout.AutoFrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:layout_marginRight="40px"
+                android:layout_marginTop="40px"
+                android:layout_marginBottom="40px">
+                <ProgressBar
+                    android:id="@+id/id_pb_appProgressBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:visibility="invisible"
+                    />
+                <Button
+                    android:layout_gravity="right"
+                    android:id="@+id/id_btn_appopra"
+                    android:layout_width="300px"
+                    android:layout_height="180px"
+                    android:text="绑卡"
+                    android:textSize="70px"
+                    android:textColor="@color/colorPrimary"
+                    android:background="@drawable/button_style"
+                    />
+                    <!--android:background="@drawable/button_background"-->
+
+            </com.zhy.autolayout.AutoFrameLayout>
+
+        </com.zhy.autolayout.AutoLinearLayout>
+        <ImageView
+            android:id="@+id/id_iv_appicon"
+            android:layout_width="match_parent"
+            android:layout_height="900px"
+            android:layout_gravity="center"
+            android:layout_marginLeft="20px"
+            android:layout_marginRight="20px"
+            android:src="@drawable/bjgj"
             />
     </com.zhy.autolayout.AutoLinearLayout>
+    <!--<com.zhy.autolayout.AutoLinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_gravity="center"-->
+        <!--android:orientation="vertical"-->
+        <!--android:layout_weight="1"-->
+        <!--&gt;-->
+    <!--<TextView-->
+        <!--android:id="@+id/id_tv_name"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="北京公交一卡通"-->
+        <!--android:textSize="60px"/>-->
+    <!--<TextView-->
+        <!--android:id="@+id/id_tv_type"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginTop="40px"-->
+        <!--android:text="旅行交通"/>-->
+    <!--</com.zhy.autolayout.AutoLinearLayout>-->
+    <!--<com.zhy.autolayout.AutoLinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="400px"-->
+        <!--android:layout_weight="5"-->
+        <!--android:gravity="right|bottom"-->
+        <!--android:layout_marginRight="40px"-->
+        <!--&gt;-->
+        <!--<Button-->
+            <!--android:id="@+id/id_btn_opra"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="绑卡"-->
+            <!--android:textSize="50px"-->
+            <!--/>-->
+    <!--</com.zhy.autolayout.AutoLinearLayout>-->
 </com.zhy.autolayout.AutoLinearLayout>

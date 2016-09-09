@@ -37,7 +37,38 @@ public class Card implements Serializable{
         this.cardName = cardName;
     }
 
-    private String cardType;
-    private int cardViewId;
-    private String cardName;
+
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(String capacity) {
+        this.capacity = capacity;
+    }
+
+    public String getIntroction() {
+        return introction;
+    }
+
+    public void setIntroction(String introction) {
+        this.introction = introction;
+    }
+
+    private String cardType;//所属行业
+    private int cardViewId;//icon
+    private String cardName;//卡名称或者应用名称
+    private String status;//绑卡 or 已绑定
+    private String capacity;//applet大小
+    private String introction;//简介说明
+
+
 }

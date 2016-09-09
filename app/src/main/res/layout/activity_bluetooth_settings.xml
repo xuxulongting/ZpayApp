@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zhy.autolayout.AutoLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <com.zhy.autolayout.AutoLinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        >
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="40px"
+            android:layout_marginTop="40px"
+            android:text="蓝牙"
+            android:gravity="center"
+            android:textSize="150px"/>
+    </com.zhy.autolayout.AutoLinearLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40px"
+        android:layout_marginBottom="40px"
+        android:text="请选择蓝牙设备:"
+        android:textSize="80px"
+        android:textColor="@color/colorPrimary"/>
+    <ListView
+        android:id="@+id/id_lv_bluetooth"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </ListView>
+
+</com.zhy.autolayout.AutoLinearLayout>

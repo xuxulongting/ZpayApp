@@ -32,7 +32,8 @@ public class BluetoothControl {
     private BluetoothGattService seCommService;
     private BluetoothGattCharacteristic notifyCharacteristic;
     private BluetoothGattCharacteristic writeCharacteristic;
-
+    private static BluetoothControl bluetoothControl=null;
+    private BLEPreparedCallbackListener blePreparedCallbackListener;
     //展讯蓝牙
     private int sendTime=0;
     private int sendCount=0;
@@ -96,6 +97,10 @@ public class BluetoothControl {
         }
     }
 
+    public void setBlePreparedCallbackListener(BLEPreparedCallbackListener listener){
+        this.blePreparedCallbackListener = listener;
+    }
+
     private BroadcastReceiver gattUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -124,6 +129,17 @@ public class BluetoothControl {
                         //打开SE通道
                         byte[] openSeAccess = {PARAMCODE_OPENSE};
                         setBLEParameter(openSeAccess,openSeAccess.length);
+                        bluetoothService.setOpenSECallbackListener(new OpenSECallbackListener() {
+                            @Override
+                            public void onSEOpenedSuccess() {
+                                blePreparedCallbackListener.onBLEPrepared();
+                            }
+
+                            @Override
+                            public void onSEOpenedFailed() {
+
+                            }
+                        });
                         //查看电量
 //                        byte[] checkPower = {0x01};
 //                        checkBLEParameter(checkPower,checkPower.length);
@@ -147,11 +163,11 @@ public class BluetoothControl {
     };
 
     /**
-     * 构造函数
+     * private构造函数
      * @param context
      * @param selBleDevAddr
      */
-    public BluetoothControl(Context context,String selBleDevAddr){
+    private BluetoothControl(Context context,String selBleDevAddr){
         this.mContext = context;
         this.selBluetoothDevAddr = selBleDevAddr;
         Intent intent = new Intent(context,BluetoothService.class);
@@ -159,6 +175,19 @@ public class BluetoothControl {
         if(bBind==false){
             Toast.makeText(context,"bind service failed",Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /**
+     * 单例模式，获取静态实例
+     * @param context
+     * @param selBleDevAddr
+     * @return
+     */
+    public static BluetoothControl getInstance(Context context,String selBleDevAddr){
+        if(bluetoothControl==null){
+            bluetoothControl = new BluetoothControl(context,selBleDevAddr);
+        }
+        return bluetoothControl;
     }
 
     public void bluetoothUnregisterReceiver(){

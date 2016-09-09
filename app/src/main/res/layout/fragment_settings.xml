@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zhy.autolayout.AutoLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <com.zhy.autolayout.AutoLinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="设置"
+        android:gravity="center"
+        android:textSize="100px"
+        android:layout_marginTop="20px"
+        android:layout_marginBottom="20px"
+        />
+    </com.zhy.autolayout.AutoLinearLayout>
+    <com.zhy.autolayout.AutoFrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:layout_width="100px"
+            android:layout_height="180px"
+            android:layout_gravity="right"
+            android:src="@drawable/arrow"/>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="  帐号与安全"
+            android:gravity="start|center"
+            android:textSize="80px"
+            android:background="#00000000" />
+    </com.zhy.autolayout.AutoFrameLayout>
+    <com.zhy.autolayout.AutoFrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:layout_width="100px"
+            android:layout_height="180px"
+            android:layout_gravity="right"
+            android:src="@drawable/arrow"/>
+        <Button
+            android:id="@+id/id_btn_ble_settings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="  蓝牙设置"
+            android:gravity="start|center"
+            android:textSize="80px"
+            android:background="#00000000" />
+    </com.zhy.autolayout.AutoFrameLayout>
+    <com.zhy.autolayout.AutoFrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:layout_width="100px"
+            android:layout_height="180px"
+            android:layout_gravity="right"
+            android:src="@drawable/arrow"/>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="  关于我们"
+            android:gravity="start|center"
+            android:textSize="80px"
+            android:background="#00000000" />
+    </com.zhy.autolayout.AutoFrameLayout>
+    <Button
+        android:id="@+id/id_btn_quit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="  退出登录"
+        android:gravity="center"
+        android:textSize="80px"
+        android:background="@color/colorGray" />
+
+</com.zhy.autolayout.AutoLinearLayout>

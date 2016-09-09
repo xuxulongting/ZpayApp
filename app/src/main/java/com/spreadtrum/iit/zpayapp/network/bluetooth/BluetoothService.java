@@ -54,8 +54,8 @@ public class BluetoothService extends android.app.Service{
     private BluetoothManager bluetoothManager;
 
     private SECallbackTSMListener callbackTSMListener;
-
     private BLECallbackListener bleCallbackListener;
+    private OpenSECallbackListener openSECallbackListener;
     //Se返回数据缓冲区，已接收长度，及第一字节代表的次数
     private byte[] seResponseData = new byte[256];
     private int seDataLength=0;
@@ -81,6 +81,10 @@ public class BluetoothService extends android.app.Service{
 
     public void setSeCallbackTSMListener(SECallbackTSMListener listener){
         this.callbackTSMListener = listener;
+    }
+
+    public void setOpenSECallbackListener(OpenSECallbackListener listener){
+        this.openSECallbackListener = listener;
     }
 
     private final BluetoothGattCallback bluetoothGattCallback = new BluetoothGattCallback() {
@@ -261,12 +265,15 @@ public class BluetoothService extends android.app.Service{
                     //设置蓝牙参数返回数据
                     if((data[4]+256)==0x90 && data[5]==0x00){
                         LogUtil.debug(TAG,"open se success.");
+                        openSECallbackListener.onSEOpenedSuccess();
                     }
-                    else
-                        LogUtil.debug(TAG,"open se failed.");
+                    else {
+                        LogUtil.debug(TAG, "open se failed.");
+                        openSECallbackListener.onSEOpenedFailed();
+                    }
                 }
                 else if(data[1]==BluetoothControl.APDU_RECV){
-                    totalPackage=data[0]>>4;
+                    totalPackage=(data[0]&0xF0)>>4;
                     packageNum=data[0]&0x0F;
                     int totalLength = data[3];//(data[2]<<8) + //由于APDU指令长度最大为256,则data[2]应该一直是0x00
                     if(totalLength<0)
@@ -285,7 +292,7 @@ public class BluetoothService extends android.app.Service{
                 {
                     if((totalPackage-1)!=packageNum){
                         //检查包的顺序是否正确
-                        if((totalPackage!=(data[0]>>4))||((packageNum+1)!=(data[0]&0x0F))){
+                        if((totalPackage!=((data[0]&0xF0)>>4))||((packageNum+1)!=(data[0]&0x0F))){
                             LogUtil.debug(TAG,"receive APDU response failed");
                             return;
                         }
@@ -301,6 +308,7 @@ public class BluetoothService extends android.app.Service{
                 }
                 if((totalPackage-1)==packageNum){
                     //将数据发送给TSM处理
+                    LogUtil.debug("callbackTSMListener");
                     callbackTSMListener.callbackTSM(seResponseData, seDataLength);
                 }
 

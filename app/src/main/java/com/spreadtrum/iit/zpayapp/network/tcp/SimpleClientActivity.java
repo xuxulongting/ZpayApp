@@ -58,14 +58,6 @@ public class SimpleClientActivity extends AppCompatActivity {
                                 LogUtil.debug("TEST",input[i]+"");
                             LogUtil.debug("TEST",bytesToHexString(input));
                             LogUtil.debug("TEST","------------------");
-//                            byte[] output = tcpSocket.tcpSocketRead();
-//                            for(int i=0;i<output.length;i++)
-//                                LogUtil.debug("TEST",output[i]+"");
-//                            LogUtil.debug("TEST",bytesToHexString(output));
-//                            Message msg = new Message();
-//                            msg.what = 0;
-//                            msg.obj = output;
-//                            handler.sendMessage(msg);
 
                             byte []buf=new byte[100];
                             int readCount = tcpSocket.tcpSocketReadByte(buf);

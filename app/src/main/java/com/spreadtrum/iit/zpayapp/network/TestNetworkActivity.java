@@ -259,7 +259,10 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
     public void onBluetoothDeviceSelected(String devAddr) {
         LogUtil.debug(TAG, devAddr);
         LogUtil.debug(TAG, "onBluetoothDeviceSelected: " + devAddr);
-        bluetoothControl = new BluetoothControl(this, devAddr);
+        //通过构造函数创建实例
+        //bluetoothControl = new BluetoothControl(this, devAddr);
+        //使用单例模式创建实例
+        bluetoothControl = BluetoothControl.getInstance(this,devAddr);
         dialogFragment.dismiss();
     }
 
