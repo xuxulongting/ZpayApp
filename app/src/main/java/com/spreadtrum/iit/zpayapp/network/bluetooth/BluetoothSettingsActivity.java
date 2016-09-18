@@ -56,8 +56,6 @@ public class BluetoothSettingsActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Toast.makeText(BluetoothSettingsActivity.this,btDeviceAddressList.get(i),Toast.LENGTH_LONG).show();
-                //listener = (SelectBluetoothDeviceListener)BluetoothSettingsActivity.this;
-                //listener.onBluetoothDeviceSelected(btDeviceAddressList.get(i));
                 Intent intent = new Intent();
                 intent.putExtra("BLE_ADDR",btDeviceAddressList.get(i));
                 setResult(SettingsFragment.RESULT_BLUETOOTH_DEVICE,intent);

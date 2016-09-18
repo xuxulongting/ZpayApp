@@ -17,6 +17,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    useLibrary 'org.apache.http.legacy'
 }
 
 dependencies {
@@ -27,4 +28,6 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:24.1.0'
     compile project(':base-adapter-library')
     compile project(':baseadapter-recyclerview')
+    compile 'com.squareup.okhttp:okhttp:2.4.0'
+    compile 'com.zhy:okhttputils:2.6.2'
 }

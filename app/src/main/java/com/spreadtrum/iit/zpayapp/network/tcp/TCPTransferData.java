@@ -40,6 +40,8 @@ public class TCPTransferData {
                         mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
                     } catch (IOException e) {
                         e.printStackTrace();
+                        tsmTaskCompleteListener.onTaskExecutedFailed();
+                        return;
                     }
                 }
                 appRequest(mTcpSocket,input);

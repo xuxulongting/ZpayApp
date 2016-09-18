@@ -109,8 +109,6 @@ public class TCPSocket implements Runnable{
             try {
                 InputStream inputStream = socket.getInputStream();
                 count = inputStream.read(readBuf);
-//                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-//                count = bufferedReader.read(readBuf);
             } catch (IOException e) {
                 e.printStackTrace();
                 LogUtil.error("BLE",e.getMessage());

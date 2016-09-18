@@ -3,6 +3,8 @@ package com.spreadtrum.iit.zpayapp.common;
 import android.app.Application;
 import android.content.Context;
 
+import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
+
 /**
  * Created by SPREADTRUM\ting.long on 16-9-6.
  */
@@ -23,4 +25,5 @@ public class MyApplication extends Application {
     public String getBluetoothDevAddr(){
         return bluetoothDevAddr;
     }
+//    public static BluetoothControl bluetoothControl=null;
 }

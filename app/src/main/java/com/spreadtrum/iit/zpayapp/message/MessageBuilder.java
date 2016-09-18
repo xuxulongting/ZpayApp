@@ -178,17 +178,17 @@ public class MessageBuilder {
 		return xml;
 	}
 
-	/**
-	 * 应用报文APDU处理
-	 * 
-	 * @param businessType
-	 *            交易类型
-	 * @param appAID
-	 *            待申请应用AID
-	 * @param apdu
-	 *            应用下载指令集
-	 * @return
-	 */
+//	/**
+//	 * 应用报文APDU处理
+//	 *
+//	 * @param businessType
+//	 *            交易类型
+//	 * @param appAID
+//	 *            待申请应用AID
+//	 * @param apdu
+//	 *            应用下载指令集
+//	 * @return
+//	 */
 //	public static String do_Bussiness_Progress(String businessType, String appAID, CAPDUInformation apdu) {
 //		serializer = Xml.newSerializer();
 //		writer = new StringWriter();
@@ -230,7 +230,7 @@ public class MessageBuilder {
 						entity.setReqtype(parser.nextText());
 					} else if ("result".equals(nodeName)) {
 						entity.setResult(parser.nextText());
-					} else if ("appinformation".equals(nodeName)) {
+					} else if ("appinfomation".equals(nodeName)) {
 						appInformation = new AppInformation();
 					} else if ("index".equals(nodeName)) {
 						appInformation.setIndex(parser.nextText());
@@ -248,11 +248,17 @@ public class MessageBuilder {
 						appInformation.setAppdesc(parser.nextText());
 					} else if("appinstalled".equals(nodeName)){
 						appInformation.setAppinstalled(parser.nextText());
+					} else if ("appid".equals(nodeName)) {
+						appInformation.setAppid(parser.nextText());
 					} else if("taskid".equals(nodeName)){
 						entity.setTaskId(parser.nextText());
 					}
 					break;
 				case XmlPullParser.END_TAG:
+					if("appinfomation".equals(nodeName)){
+						entity.getAppInformationList().add(appInformation);
+						//将appInformation存入数据库
+					}
 					break;
 				default:
 					break;

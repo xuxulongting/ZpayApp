@@ -17,6 +17,7 @@
             android:layout_marginBottom="40px"
             />
     </com.zhy.autolayout.AutoLinearLayout>
+
     <ImageView
         android:id="@+id/id_iv_icon_large"
         android:layout_width="match_parent"
@@ -24,31 +25,56 @@
         android:layout_marginTop="40px"
         android:src="@drawable/bjgj"/>
     <TextView
+        android:id="@+id/id_tv_apptype"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="40px"
-        android:text="简介："
-        android:textSize="80px"/>
+        android:textSize="70px"
+        android:text="类型：旅行交通"/>
     <TextView
-        android:id="@+id/id_tv_detailapp"
+        android:id="@+id/id_tv_spname"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="60px"
-        android:text="    绑定信用卡只作为您使用服务的信用担保，可以更方便快捷的地使用停车的服务。为了检验信用卡是否有效，我们会先从您卡中扣除元，检验通过后72小时内返还至您绑定的信用卡中，具体到账时间请参考，各银行的标准。
+        android:textSize="70px"
+        android:text="提供商：北京公交一卡通公司"/>
+    <TextView
+        android:id="@+id/id_tv_appsize"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="70px"
+        android:text="大小：12k"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="简介："
+        android:textSize="70px"/>
+    <TextView
+        android:id="@+id/id_tv_appdesc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="      绑定信用卡只作为您使用服务的信用担保，可以更方便快捷的地使用停车的服务。为了检验信用卡是否有效，我们会先从您卡中扣除元，检验通过后72小时内返还至您绑定的信用卡中，具体到账时间请参考，各银行的标准。
 "/>
-    <com.zhy.autolayout.AutoLinearLayout
+
+    <com.zhy.autolayout.AutoFrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="right">
-
+        <ProgressBar
+            android:id="@+id/id_pb_appProgressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:visibility="invisible"
+            />
         <Button
             android:id="@+id/id_btn_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="right"
             android:layout_marginRight="70px"
             android:background="@drawable/button_style"
             android:text="绑卡"/>
 
-    </com.zhy.autolayout.AutoLinearLayout>
+    </com.zhy.autolayout.AutoFrameLayout>
 
 </com.zhy.autolayout.AutoLinearLayout>

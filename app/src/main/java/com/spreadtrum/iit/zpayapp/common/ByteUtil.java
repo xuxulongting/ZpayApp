@@ -70,6 +70,11 @@ public final class ByteUtil {
 		return sb.toString().toUpperCase(Locale.CHINA);
 	}
 
+	/**
+	 * 将16进制String转换成byte[]数组，例如：String appid="1542" --> byte[] bAppid={21,66};
+	 * @param data
+	 * @return
+	 */
 	public static byte[] hexStringToByteArray(String data) {
 		if (data == null || data.length() == 0 || (data.length() % 2) != 0) {
 			return null;
@@ -81,6 +86,30 @@ public final class ByteUtil {
 			tmp = data.substring(i * 2, (i + 1) * 2);
 			try {
 				result[i] = (byte) Integer.parseInt(tmp, 16);
+			} catch (Exception e) {
+
+				result[i] = 0x00;
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * 将String转换成byte[]数组，例如：String appid="1542" --> byte[] bAppid={15,42};
+	 * @param data
+	 * @return
+     */
+	public static byte[] StringToByteArray(String data) {
+		if (data == null || data.length() == 0 || (data.length() % 2) != 0) {
+			return null;
+		}
+		int len = data.length() / 2;
+		byte[] result = new byte[len];
+		String tmp;
+		for (int i = 0; i < len; i++) {
+			tmp = data.substring(i * 2, (i + 1) * 2);
+			try {
+				result[i] = (byte) Integer.parseInt(tmp, 10);
 			} catch (Exception e) {
 
 				result[i] = 0x00;
@@ -122,6 +151,7 @@ public final class ByteUtil {
 		}
 		return b;
 	}
+
 	
 	public	static	void	intToBytes(int value, byte[] b, int off, int len)
 	throws	Exception {
@@ -326,10 +356,34 @@ public final class ByteUtil {
 //        return stringBuilder.toString();
 //    }
 
+	/**
+	 * 将byte[]数组转换成16进制的string，例如byte[] data={00,15,42} --> String data="000F2A";
+	 * @param bytes
+	 * @param byteOfLength
+     * @return
+     */
 	public static String bytesToHexString(byte[] bytes,int byteOfLength) {
 		String result = "";
 		for (int i = 0; i < byteOfLength; i++) {
 			String hexString = Integer.toHexString(bytes[i] & 0xFF);
+			if (hexString.length() == 1) {
+				hexString = '0' + hexString;
+			}
+			result += hexString.toUpperCase();
+		}
+		return result;
+	}
+
+	/**
+	 * 将byte[]数组转换成string，例如byte[] data={00,15,42} --> String data="001542";
+	 * @param bytes
+	 * @param byteOfLength
+     * @return
+     */
+	public static String bytesToString(byte[] bytes,int byteOfLength) {
+		String result = "";
+		for (int i = 0; i < byteOfLength; i++) {
+			String hexString = Integer.toString(bytes[i] & 0xFF);
 			if (hexString.length() == 1) {
 				hexString = '0' + hexString;
 			}
