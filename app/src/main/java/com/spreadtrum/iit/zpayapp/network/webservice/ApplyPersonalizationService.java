@@ -5,6 +5,8 @@ import android.util.Xml;
 
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
+import com.spreadtrum.iit.zpayapp.message.MessageBuilder;
+import com.spreadtrum.iit.zpayapp.message.RequestTaskidEntity;
 
 import org.w3c.dom.ProcessingInstruction;
 import org.xmlpull.v1.XmlPullParser;
@@ -197,6 +199,24 @@ public class ApplyPersonalizationService {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static void getAppinfoFromWebservice(String seId,String requestType,String requestData,TSMAppInformationCallback callback){
+        //创建请求xml
+        String requestXml = MessageBuilder.doBussinessRequest(seId,requestType,requestData);
+        //base64加密
+        String requestXmlBase64 = Base64.encodeToString(requestXml.getBytes(),Base64.DEFAULT);
+        //发送soap请求，并获取xml结果
+        ApplyPersonalizationService.getTSMAppInformation(requestXmlBase64,callback);
+    }
+
+    public static void getTSMTaskid(String seId, String requestType, RequestTaskidEntity entity, TSMAppInformationCallback callback){
+        //创建请求xml
+        String requestXml = MessageBuilder.doBussinessRequest(seId,requestType,entity);
+        //base64加密
+        String requestXmlBase64 = Base64.encodeToString(requestXml.getBytes(),Base64.DEFAULT);
+        //发送soap请求，并获取xml结果
+        ApplyPersonalizationService.getTSMAppInformation(requestXmlBase64,callback);
     }
 }
 

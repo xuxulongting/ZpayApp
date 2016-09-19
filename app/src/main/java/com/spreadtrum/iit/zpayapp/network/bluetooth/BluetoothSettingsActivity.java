@@ -55,7 +55,7 @@ public class BluetoothSettingsActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Toast.makeText(BluetoothSettingsActivity.this,btDeviceAddressList.get(i),Toast.LENGTH_LONG).show();
+                //Toast.makeText(BluetoothSettingsActivity.this,btDeviceAddressList.get(i),Toast.LENGTH_LONG).show();
                 Intent intent = new Intent();
                 intent.putExtra("BLE_ADDR",btDeviceAddressList.get(i));
                 setResult(SettingsFragment.RESULT_BLUETOOTH_DEVICE,intent);
@@ -66,11 +66,12 @@ public class BluetoothSettingsActivity extends AppCompatActivity {
             }
         });
 
-        commonAdapter = new CommonAdapter<String>(this,R.layout.item_list_btdevices,btDeviceAddressList) {
+        commonAdapter = new CommonAdapter<String>(this,R.layout.item_list_btdevices,btDevicesNameList) {
 
             @Override
             protected void convert(ViewHolder viewHolder, String item, int position) {
                 viewHolder.setText(R.id.id_tv_bt_device_name,item);
+                viewHolder.setText(R.id.id_tv_bt_device_addr,btDeviceAddressList.get(position));
             }
         };
         listView.setAdapter(commonAdapter);

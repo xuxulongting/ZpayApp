@@ -48,6 +48,7 @@ public class TCPSocket implements Runnable{
             try {
                 socket.close();
                 socket=null;
+                tcpSocket = null;
             } catch (IOException e) {
                 e.printStackTrace();
             }

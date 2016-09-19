@@ -30,13 +30,33 @@
                 android:layout_marginRight="40px"
                 android:layout_marginTop="40px"
                 android:layout_marginBottom="40px">
-                <ProgressBar
-                    android:id="@+id/id_pb_appProgressBar"
+                <!--<ProgressBar-->
+                    <!--android:id="@+id/id_pb_appProgressBar"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_gravity="right"-->
+                    <!--android:visibility="invisible"-->
+                    <!--/>-->
+                <com.zhy.autolayout.AutoLinearLayout
+                    android:layout_gravity="right"
+                    android:id="@+id/id_ll_downloading"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="right"
+                    android:orientation="vertical"
                     android:visibility="invisible"
-                    />
+                    >
+
+                    <ProgressBar
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:gravity="center"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="正在处理..."
+                        android:textSize="60px" />
+                </com.zhy.autolayout.AutoLinearLayout>
                 <Button
                     android:layout_gravity="right"
                     android:id="@+id/id_btn_appopra"

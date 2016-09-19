@@ -115,4 +115,26 @@ public class MainDisplayActivity extends AppCompatActivity implements View.OnCli
         MyApplication app= (MyApplication) getApplication();
         app.setBluetoothDevAddr(devAddr);
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        LogUtil.debug("MainDisplayActivity onPause");
+        //将appLst存入数据库
+
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        LogUtil.debug("MainDisplayActivity onStop");
+
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        LogUtil.debug("MainDisplayActivity onDestroy");
+
+    }
 }

@@ -161,6 +161,11 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
                                     System.arraycopy(responseData, 0, response, 17, responseLen);
                                     handleTSMData(mTcpSocket,response);
                                 }
+
+                                @Override
+                                public void errorCallback() {
+
+                                }
                             });
                         }
                     }
@@ -187,6 +192,11 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
                     response[16] = (byte) (responseLen);
                     System.arraycopy(responseData, 0, response, 17, responseLen);
                     handleTSMData(mTcpSocket,response);
+                }
+
+                @Override
+                public void errorCallback() {
+
                 }
             });
         }

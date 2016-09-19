@@ -56,6 +56,7 @@ public class TCPTransferData {
             LogUtil.debug("bluetoothControl is null");
             return;
         }
+
         this.bluetoothControl=bluetoothControl;
 //        this.tsmTaskCompleteCallback = callback;
         new Thread(new Runnable() {
@@ -68,12 +69,19 @@ public class TCPTransferData {
                 byte[] input = genAppRequestByte(randomNum,bSeNO,taskId);
                 if (mTcpSocket == null) {
                     try {
+//                        if(true){
+//                            throw new IOException();
+//                        }
                         mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
+                        appRequest(mTcpSocket,input);
                     } catch (IOException e) {
-                        e.printStackTrace();
+//                        e.printStackTrace();
+                        if(tsmTaskCompleteListener!=null){
+                            tsmTaskCompleteListener.onTaskExecutedFailed();
+                        }
                     }
                 }
-                appRequest(mTcpSocket,input);
+
             }
         }).start();
     }
@@ -94,7 +102,10 @@ public class TCPTransferData {
                     try {
                         mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress,NetParameter.Port);
                     } catch (IOException e) {
-                        e.printStackTrace();
+//                        e.printStackTrace();
+                        if(tsmTaskCompleteListener!=null){
+                            tsmTaskCompleteListener.onTaskExecutedFailed();
+                        }
                     }
                     appRequest(mTcpSocket,input);
                 }
@@ -112,6 +123,18 @@ public class TCPTransferData {
         TCPByteRequest request = new TCPByteRequest(tcpSocket, input, new TCPResponse.Listener<byte[]>() {
             @Override
             public void onResponse(byte[] response, int responseLen) {
+                ///////////////////TEST/////////////
+                if(false) {
+                    LogUtil.debug("TEST onResponse");
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    tsmTaskCompleteListener.onTaskExecutedSuccess();
+                    return;
+                }
+                ///////////////////////////////
                 int cmdParaLen = 0;
                 cmdParaLen = (response[15] << 8) + response[16];
                 //byte类型是有符号数据，范围-128~127，当大于127时，需要取补
@@ -141,10 +164,6 @@ public class TCPTransferData {
                     if(cmdParaLen==1 && (response[17]==0x00)){
                         LogUtil.warn("success");
                         tsmTaskCompleteListener.onTaskExecutedSuccess();
-//                        if(tsmTaskCompleteCallback!=null) {
-//                            tsmTaskCompleteCallback.onSuccess();
-//                            tsmTaskCompleteCallback=null;
-//                        }
                     }
                     else {
                         tcpSocket.closeSocket();
@@ -152,10 +171,6 @@ public class TCPTransferData {
                         LogUtil.warn( ByteUtil.bytesToHexString(response,responseLen));
                         LogUtil.warn( "failed");
                         tsmTaskCompleteListener.onTaskExecutedFailed();
-//                        if(tsmTaskCompleteCallback!=null) {
-//                            tsmTaskCompleteCallback.onFailed();
-//                            tsmTaskCompleteCallback = null;
-//                        }
                     }
                     return;
 
@@ -199,6 +214,11 @@ public class TCPTransferData {
                     response[16] = (byte) (responseLen);
                     System.arraycopy(responseData, 0, response, 17, responseLen);
                     handleTSMData(mTcpSocket,response);
+                }
+
+                @Override
+                public void errorCallback() {
+                    tsmTaskCompleteListener.onTaskExecutedFailed();
                 }
             });
         }

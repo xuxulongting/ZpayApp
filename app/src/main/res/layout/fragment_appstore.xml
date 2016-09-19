@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.zhy.autolayout.AutoLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
     <com.zhy.autolayout.AutoLinearLayout
         android:layout_width="match_parent"
@@ -16,10 +17,35 @@
         android:layout_marginBottom="20px"
         />
     </com.zhy.autolayout.AutoLinearLayout>
+
+    <com.zhy.autolayout.AutoFrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="100" >
+
+        <com.zhy.autolayout.AutoLinearLayout
+            android:layout_gravity="center"
+            android:id="@+id/id_ll_loading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="invisible" >
+
+            <ProgressBar
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="数据加载中,请稍后..."
+                android:textSize="80px" />
+        </com.zhy.autolayout.AutoLinearLayout>
+    </com.zhy.autolayout.AutoFrameLayout>
     <ListView
         android:id="@+id/id_listview_bus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
     </ListView>
 </com.zhy.autolayout.AutoLinearLayout>

@@ -108,6 +108,9 @@ public class BluetoothService extends android.app.Service{
                 intentAction = ACTION_GATT_DISCONNECTED;
                 connectionState = STATE_DISCONNECTED;
                 LogUtil.info(TAG, "Disconnected from GATT server.");
+                if(callbackTSMListener!=null){
+                    callbackTSMListener.errorCallback();
+                }
                 broadcastUpdate(intentAction);
             }
         }

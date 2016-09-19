@@ -5,4 +5,5 @@ package com.spreadtrum.iit.zpayapp.network.bluetooth;
  */
 public interface SECallbackTSMListener{
     void callbackTSM(byte[] responseData,int responseLen);
+    void errorCallback();
 }
