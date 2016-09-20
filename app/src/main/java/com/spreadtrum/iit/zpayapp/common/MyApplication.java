@@ -32,7 +32,6 @@ public class MyApplication extends Application {
     public String getBluetoothDevAddr(){
         return bluetoothDevAddr;
     }
-    public static BluetoothControl bluetoothControl=null;
     public static Handler handler = new Handler(){
         public void handleMessage(Message msg){
            switch (msg.what){
