@@ -8,6 +8,7 @@ import android.os.Message;
 import android.widget.Toast;
 
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
+import com.spreadtrum.iit.zpayapp.database.AppDisplayDatabaseHelper;
 import com.spreadtrum.iit.zpayapp.message.AppInformation;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
 import com.spreadtrum.iit.zpayapp.network.tcp.TCPTransferData;
@@ -19,26 +20,7 @@ import com.spreadtrum.iit.zpayapp.network.tcp.TsmTaskCompleteListener;
 public class BussinessTransaction{
     public static final String ACTION_BUSSINESS_EXECUTED_SUCCESS="com.spreadtrum.iit.zpayapp.displaydemo.BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS";
     public static final String ACTION_BUSSINESS_EXECUTED_FAILED="com.spreadtrum.iit.zpayapp.displaydemo.BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED";
-
-//    private Handler handler = new Handler(){
-//        public void handleMessage(Message msg){
-//           switch (msg.what){
-//               case DOWNLOAD_SUCCESS:
-//                   Toast.makeText(MyApplication.getContextObject(),"绑卡成功",Toast.LENGTH_LONG).show();
-//                   break;
-//               case DOWNLOAD_FAILED:
-//                   Toast.makeText(MyApplication.getContextObject(),"绑卡失败",Toast.LENGTH_LONG).show();
-//                   break;
-//               case DELETE_SUCCESS:
-//                   Toast.makeText(MyApplication.getContextObject(),"取消绑卡成功",Toast.LENGTH_LONG).show();
-//                   break;
-//               case DELETE_FAILED:
-//                   Toast.makeText(MyApplication.getContextObject(),"取消绑卡失败",Toast.LENGTH_LONG).show();
-//                   break;
-//           }
-//        }
-//    };
-
+    private AppDisplayDatabaseHelper dbHelper=null;
     public void DownloadApplet(BluetoothControl bluetoothControl, byte[] taskId,
                                       final AppInformation appInformation){
         //BLE准备好，开始发送数据
@@ -85,7 +67,7 @@ public class BussinessTransaction{
         });
     }
 
-    private static void broadcastUpdate(String action, AppInformation appInformation,String bussiness){
+    private void broadcastUpdate(String action, AppInformation appInformation,String bussiness){
         Intent intent = new Intent();
         intent.setAction(action);
         Bundle bundle = new Bundle();
@@ -96,6 +78,7 @@ public class BussinessTransaction{
         //修改全局变量appInstalling
         MyApplication.appInstalling.put(appInformation.getIndex(),false);
         //更新数据库
+//        dbHelper.getWritableDatabase();
 //                SQLiteDatabase dbWrite = dbHelper.getWritableDatabase();
 //                ContentValues contentValues = new ContentValues();
 //                contentValues.put("appinstalled", "yes");

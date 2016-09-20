@@ -111,6 +111,13 @@ public class AppInformation implements Serializable{
     public Uri getImageUri() {
         return imageUri;
     }
+    public String getLocalpicpath() {
+        return localpicpath;
+    }
+
+    public void setLocalpicpath(String localpicpath) {
+        this.localpicpath = localpicpath;
+    }
 
     public void setImageUri(Uri imageUri) {
         this.imageUri = imageUri;
@@ -129,4 +136,5 @@ public class AppInformation implements Serializable{
     private Uri imageUri = null;//本地缓存的图片资源
     private boolean appinstalling=false;//应用是否正在安装 true/false
     private int indexForlistview;   //在listview中的位置，与TSM数据库无关
+    private String localpicpath;
 }

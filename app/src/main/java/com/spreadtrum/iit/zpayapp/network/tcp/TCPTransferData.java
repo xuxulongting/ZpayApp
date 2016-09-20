@@ -163,6 +163,8 @@ public class TCPTransferData {
                     LogUtil.debug("CMD_SERVER_END");
                     if(cmdParaLen==1 && (response[17]==0x00)){
                         LogUtil.warn("success");
+                        tcpSocket.closeSocket();
+                        mTcpSocket = null;
                         tsmTaskCompleteListener.onTaskExecutedSuccess();
                     }
                     else {

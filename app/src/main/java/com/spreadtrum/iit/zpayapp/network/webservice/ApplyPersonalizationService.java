@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
  * Created by SPREADTRUM\ting.long on 16-9-7.
  */
 public class ApplyPersonalizationService {
-    //public static final String WEBSERVICE_PATH = "http://10.0.64.120:6893/SPRDTSMDbService.asmx";
+//    public static final String WEBSERVICE_PATH = "http://10.0.64.120:6893/SPRDTSMDbService.asmx";
     public static final String WEBSERVICE_PATH = "http://192.168.1.150:6893/SPRDTSMDbService.asmx";
     /**
      * 查询应用

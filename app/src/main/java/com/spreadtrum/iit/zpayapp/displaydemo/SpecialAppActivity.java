@@ -49,79 +49,7 @@ public class SpecialAppActivity extends AppCompatActivity {
     private Button btnOpera;
 //    private ProgressBar progressBar;
     private LinearLayout linearLayoutBar;
-//    private BluetoothControl bluetoothControl=null;
     private AppInformation appInformation;
-//    private Handler handler = new Handler(){
-//        public void handleMessage(Message msg){
-//            switch (msg.what){
-//                case AppStoreFragment.TSM_COMPLETE_SUCCESS:
-////                    new AlertDialog.Builder(getApplicationContext())//(SpecialAppActivity.this)
-////                            .setTitle("提示")
-////                            .setMessage("绑卡成功")
-////                            .setPositiveButton("确定",null).show();
-//                    Toast.makeText(getApplicationContext(),"绑卡成功",Toast.LENGTH_LONG).show();
-////                    progressBar.setVisibility(View.INVISIBLE);
-//                    linearLayoutBar.setVisibility(View.INVISIBLE);
-//                    btnOpera.setText("取消绑卡");
-//                    btnOpera.setVisibility(View.VISIBLE);
-//                    //修改installing状态值
-//                    appInformation.setAppinstalling(false);
-//                    //修改全局变量map中的值
-//                    MyApplication.appInstalling.put(appInformation.getIndex(),appInformation.isAppinstalling());
-//                    break;
-//                case AppStoreFragment.TSM_COMPLETE_FAILED:
-////                    new AlertDialog.Builder(getBaseContext())
-////                            .setTitle("错误")
-////                            .setMessage("绑卡失败")
-////                            .setPositiveButton("确定",null).show();
-//                    Toast.makeText(getApplicationContext(),"绑卡失败",Toast.LENGTH_LONG).show();
-////                    progressBar.setVisibility(View.INVISIBLE);
-//                    linearLayoutBar.setVisibility(View.INVISIBLE);
-//                    btnOpera.setVisibility(View.VISIBLE);
-//                    //修改installing状态值
-//                    appInformation.setAppinstalling(false);
-//                    //修改全局变量map中的值
-//                    MyApplication.appInstalling.put(appInformation.getIndex(),appInformation.isAppinstalling());
-//                    break;
-//            }
-//        }
-//    };
-
-//    private Handler deleteHandler = new Handler(){
-//        @Override
-//        public void handleMessage(Message msg) {
-//            switch (msg.what){
-//                case AppStoreFragment.TSM_COMPLETE_SUCCESS:
-////                    new AlertDialog.Builder(SpecialAppActivity.this).setTitle("提示")
-////                            .setMessage("取消绑卡成功")
-////                            .setPositiveButton("确定",null).show();
-//                    Toast.makeText(getApplicationContext(),"取消绑卡成功",Toast.LENGTH_LONG).show();
-////                    progressBar.setVisibility(View.INVISIBLE);
-//                    linearLayoutBar.setVisibility(View.INVISIBLE);
-//                    btnOpera.setText("绑卡");
-//                    btnOpera.setVisibility(View.VISIBLE);
-//                    //修改installing状态值
-//                    appInformation.setAppinstalling(false);
-//                    //修改全局变量map中的值
-//                    MyApplication.appInstalling.put(appInformation.getIndex(),appInformation.isAppinstalling());
-//                    break;
-//                case AppStoreFragment.TSM_COMPLETE_FAILED:
-////                    new AlertDialog.Builder(SpecialAppActivity.this)
-////                            .setTitle("错误")
-////                            .setMessage("取消绑卡失败")
-////                            .setPositiveButton("确定",null).show();
-//                    Toast.makeText(getApplicationContext(),"取消绑卡失败",Toast.LENGTH_LONG).show();
-////                    progressBar.setVisibility(View.INVISIBLE);
-//                    linearLayoutBar.setVisibility(View.INVISIBLE);
-//                    btnOpera.setVisibility(View.VISIBLE);
-//                    //修改installing状态值
-//                    appInformation.setAppinstalling(false);
-//                    //修改全局变量map中的值
-//                    MyApplication.appInstalling.put(appInformation.getIndex(),appInformation.isAppinstalling());
-//                    break;
-//            }
-//        }
-//    };
 private BroadcastReceiver bussinessUpdateReceiver = new BroadcastReceiver() {
     @Override
     public void onReceive(Context context, Intent intent) {

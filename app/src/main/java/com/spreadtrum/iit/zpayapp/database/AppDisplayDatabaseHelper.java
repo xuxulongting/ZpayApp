@@ -3,6 +3,7 @@ package com.spreadtrum.iit.zpayapp.database;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.widget.Toast;
 
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 
@@ -25,7 +26,7 @@ public class AppDisplayDatabaseHelper extends SQLiteOpenHelper {
             + "appdesc text,"
             + "appinstalled text not null,"
             + "appid text not null, "
-            + "imageuri text)";
+            + "localpicpath text)";
     public AppDisplayDatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
         mContext = context;
@@ -34,7 +35,8 @@ public class AppDisplayDatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL(CREATE_TABLE_APPINFO);
-        LogUtil.debug("create table appinfo");
+        //Toast.makeText(mContext,"create table",Toast.LENGTH_LONG).show();
+        //LogUtil.debug("create table appinfo");
     }
 
     @Override
