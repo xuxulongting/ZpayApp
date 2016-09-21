@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -19,11 +20,13 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
@@ -167,7 +170,7 @@ public class AppStoreFragment extends Fragment {
     }
 
     private File saveImage(String url,Bitmap bmp) {
-        File appDir = new File(getActivity().getExternalCacheDir(), "image");
+        File appDir = new File(MyApplication.getContextObject().getExternalCacheDir(), "image");
         if (!appDir.exists()) {
             appDir.mkdir();
         }
@@ -180,7 +183,7 @@ public class AppStoreFragment extends Fragment {
         }else{
             format = Bitmap.CompressFormat.JPEG;
         }
-        LogUtil.debug(fileName);
+//        LogUtil.debug(fileName);
         File file = new File(appDir, fileName);
         try {
             FileOutputStream fos = new FileOutputStream(file);
@@ -205,7 +208,10 @@ public class AppStoreFragment extends Fragment {
         }
     }
 
-    private void DownloadImage(final String url, final ViewHolder viewHolder, final AppInformation item){
+    private void DownloadImage(final String url, final ImageView imageView, final AppInformation item, final ListView listView){
+        if(item.isPicdownloading())
+            return;
+        LogUtil.debug(url);
         OkHttpUtils
                 .get()//
                 .url(url)//
@@ -220,8 +226,20 @@ public class AppStoreFragment extends Fragment {
 
                     @Override
                     public void onResponse(Bitmap response, int id) {
-                        viewHolder.setImageBitmap(R.id.id_iv_appicon,response);
+//                        viewHolder.setImageBitmap(R.id.id_iv_appicon,response);
+//                        imageView.setImageBitmap(response);
+                        ImageView imageViewByTag = (ImageView) listView.findViewWithTag(url);
+                        if(imageViewByTag!=null){
+                            imageViewByTag.setImageBitmap(response);
+                        }
                         File file = saveImage(url,response);
+                        //发送消息，更新appList
+                        item.setPicdownloading(false);
+                        item.setLocalpicpath(file.getAbsolutePath());
+                        Message msg = new Message();
+                        msg.obj = item;
+                        msg.what=0;
+                        updatePicHandler.sendMessage(msg);
                         //更新数据库
                         SQLiteDatabase dbwrite = dbHelper.getWritableDatabase();
                         ContentValues contentValues = new ContentValues();
@@ -230,6 +248,20 @@ public class AppStoreFragment extends Fragment {
                     }
                 });
     }
+
+    //更新appList
+    private Handler updatePicHandler = new Handler(){
+        public void handleMessage(Message msg){
+            if(msg.what==0){
+                AppInformation appInfo = (AppInformation) msg.obj;
+                for(int i=0;i<appList.size();i++){
+                    if (appList.get(i).getIndex().equals(appInfo.getIndex())){
+                        appList.set(i,appInfo);
+                    }
+                }
+            }
+        }
+    };
 
     @Nullable
     @Override
@@ -262,25 +294,30 @@ public class AppStoreFragment extends Fragment {
                             //显示应用名称
                             viewHolder.setText(R.id.id_tv_appname,item.getAppname());
                             //显示图片
-                            viewHolder.setImageResource(R.id.id_iv_appicon,R.drawable.bjgj);//item.getIconviewid());
-//                            if(item.getLocalpicpath().isEmpty()){
-//                                //网络下载图片保存并显示
-//            //                    String url = "http://www.tjykt.com/templets/default/images/hl_z.png";
-//                                String url = item.getPicurl();
-//                                DownloadImage(url,viewHolder,item);
-//
-//                            }
-//                            else{
-//                                //查找本地图片
-//                                Bitmap bitmap = getLoacalBitmap(item.getLocalpicpath());
-//                                if(bitmap==null){
+                            ImageView imageView = viewHolder.getView(R.id.id_iv_appicon);
+                            String url = item.getPicurl();
+                            imageView.setTag(url);
+//                            viewHolder.setImageResource(R.id.id_iv_appicon,R.drawable.bjgj);//item.getIconviewid());
+
+                            if(item.getLocalpicpath()==null){
+                                if(item.isPicdownloading()==false) {
+                                    //网络下载图片保存并显示
+
+                                    DownloadImage(url, imageView, item, listViewAppStore);
+                                    item.setPicdownloading(true);
+                                }
+
+                            }
+                            else{
+                                //查找本地图片
+                                Bitmap bitmap = getLoacalBitmap(item.getLocalpicpath());
+                                if(bitmap==null){
                                     //本地图片缓存被清空
-//                                    String url = item.getPicurl();
-//                                    DownloadImage(url,viewHolder,item);
-//                                }
-//                                else
-//                                    viewHolder.setImageBitmap(R.id.id_iv_appicon,bitmap);
-//                            }
+                                    DownloadImage(url,imageView,item,listViewAppStore);
+                                }
+                                else
+                                    viewHolder.setImageBitmap(R.id.id_iv_appicon,bitmap);
+                            }
 
                             btnOperaCard = viewHolder.getView(R.id.id_btn_appopra);
 //                            progressBar = viewHolder.getView(R.id.id_pb_appProgressBar);
@@ -381,39 +418,100 @@ public class AppStoreFragment extends Fragment {
                 }
             }
         };
-        //从网络获取数据
+        //获取AppInformation List
         if(appList!=null){
             handler.sendEmptyMessage(0);
         }
         else {
-            String requestType = "dbquery";
-            String requestData = "applistquery";
-            ApplyPersonalizationService.getAppinfoFromWebservice(seId, requestType, requestData, new TSMAppInformationCallback() {
-                @Override
-                public void getAppInfo(String xml) {
-                    //解析xml
-                    TSMResponseEntity entity = MessageBuilder.parseDownLoadXml(xml);
-                    //获取List<AppInformation>
-                    LogUtil.debug("get applist");
-                    appList = entity.getAppInformationList();
-                    //appInfoPrepared=true;
-                    //获取全局变量map中的值给appList
-                    for(Map.Entry<String,Boolean> entry:MyApplication.appInstalling.entrySet()){
-                        String index = entry.getKey();
-                        Boolean installing = entry.getValue();
-                        for(int i=0;i<appList.size();i++){
-                            AppInformation appInfo = appList.get(i);
-                            if(appInfo.getIndex().equals(index)){
-                                appInfo.setAppinstalling(installing);
-                            }
+            //从数据库获取appInformation
+            // 查询Book表中所有的数据
+            if (MyApplication.dataFromNet) {
+                appList = new ArrayList<AppInformation>();
+                SQLiteDatabase dbRead = dbHelper.getReadableDatabase();
+                Cursor cursor = dbRead.query("appinfo", null, null, null, null, null, null);
+                if (cursor.moveToFirst()) {
+                    do {
+                        String appindex = cursor.getString(cursor.
+                                getColumnIndex("appindex"));
+                        String picurl = cursor.getString(cursor.
+                                getColumnIndex("picurl"));
+                        String appname = cursor.getString(cursor.
+                                getColumnIndex("appname"));
+                        String appsize = cursor.getString(cursor.
+                                getColumnIndex("appsize"));
+                        String apptype = cursor.getString(cursor.
+                                getColumnIndex("apptype"));
+                        String spname = cursor.getString(cursor.
+                                getColumnIndex("spname"));
+                        String appdesc = cursor.getString(cursor.
+                                getColumnIndex("appdesc"));
+                        String appinstalled = cursor.getString(cursor.
+                                getColumnIndex("appinstalled"));
+                        String appid = cursor.getString(cursor.
+                                getColumnIndex("appid"));
+                        String localpicpath = cursor.getString(cursor.
+                                getColumnIndex("localpicpath"));
+                        AppInformation appInformation = new AppInformation(appindex,picurl,appname,appsize,apptype,
+                                spname,appdesc,appinstalled,appid,false,-1,localpicpath);
+//                        appInformation.setIndex(appindex);
+//                        appInformation.setAppname(appname);
+//                        appInformation.setPicurl(picurl);
+//                        appInformation.setAppsize(appsize);
+//                        appInformation.setApptype(apptype);
+//                        appInformation.setSpname(spname);
+//                        appInformation.setAppdesc(appdesc);
+//                        appInformation.setAppinstalled(appinstalled);
+//                        appInformation.setAppid(appid);
+//                        appInformation.setLocalpicpath(localpicpath);
+                        appList.add(appInformation);
+                    } while (cursor.moveToNext());
+                }
+                cursor.close();
+                //获取全局变量map中的值给appList
+                for (Map.Entry<String, Boolean> entry : MyApplication.appInstalling.entrySet()) {
+                    String index = entry.getKey();
+                    Boolean installing = entry.getValue();
+                    for (int i = 0; i < appList.size(); i++) {
+                        AppInformation appInfo = appList.get(i);
+                        if (appInfo.getIndex().equals(index)) {
+                            appInfo.setAppinstalling(installing);
                         }
                     }
-                    handler.sendEmptyMessage(0);
-                    //将数据写入数据库
-                    SQLiteDatabase dbWrite = dbHelper.getWritableDatabase();
-                    insertDB(dbWrite, appList);
                 }
-            });
+                handler.sendEmptyMessage(0);
+            }
+            else {
+                //从网络获取appInformation
+                String requestType = "dbquery";
+                String requestData = "applistquery";
+                ApplyPersonalizationService.getAppinfoFromWebservice(seId, requestType, requestData, new TSMAppInformationCallback() {
+                    @Override
+                    public void getAppInfo(String xml) {
+                        //解析xml
+                        TSMResponseEntity entity = MessageBuilder.parseDownLoadXml(xml);
+                        //获取List<AppInformation>
+                        LogUtil.debug("get applist");
+                        appList = entity.getAppInformationList();
+                        //appInfoPrepared=true;
+                        //获取全局变量map中的值给appList
+                        for (Map.Entry<String, Boolean> entry : MyApplication.appInstalling.entrySet()) {
+                            String index = entry.getKey();
+                            Boolean installing = entry.getValue();
+                            for (int i = 0; i < appList.size(); i++) {
+                                AppInformation appInfo = appList.get(i);
+                                if (appInfo.getIndex().equals(index)) {
+                                    appInfo.setAppinstalling(installing);
+                                }
+                            }
+                        }
+                        handler.sendEmptyMessage(0);
+                        //将数据写入数据库
+                        SQLiteDatabase dbWrite = dbHelper.getWritableDatabase();
+                        insertDB(dbWrite, appList);
+                        MyApplication.dataFromNet = true;
+                    }
+                });
+            }
         }
         return view;
     }
@@ -435,52 +533,52 @@ public class AppStoreFragment extends Fragment {
             busAdapter.notifyDataSetChanged();
         }
     }
-    public void getAppListData(){
-        AppInformation app1 = new AppInformation();
-        AppInformation app2 = new AppInformation();
-        AppInformation app3 = new AppInformation();
-        AppInformation app4 = new AppInformation();
-        AppInformation app5 = new AppInformation();
-        AppInformation app6 = new AppInformation();
-        AppInformation app7 = new AppInformation();
-
-        app1.setAppname("北京公交一卡通");
-        app1.setIconviewid(R.drawable.bjgj);
-        app1.setAppinstalling(false);
-        appInformationList.add(app1);
-
-        app2.setAppname("上海公交一卡通");
-        app2.setIconviewid(R.drawable.shgj);
-        app2.setAppinstalling(false);
-        appInformationList.add(app2);
-
-        app3.setAppname("天津公交一卡通");
-        app3.setIconviewid(R.drawable.tjgj);
-        app3.setAppinstalling(false);
-        appInformationList.add(app3);
-
-        app4.setAppname("中国银行");
-        app4.setIconviewid(R.drawable.china_bank);
-        app4.setAppinstalling(false);
-        appInformationList.add(app4);
-
-        app5.setAppname("中国农业银行");
-        app5.setIconviewid(R.drawable.abc_bank);;
-        app5.setAppinstalling(false);
-        appInformationList.add(app5);
-
-        app6.setAppname("中国建设银行");
-        app6.setIconviewid(R.drawable.ccb_bank);
-        app6.setAppinstalling(false);
-        appInformationList.add(app6);
-
-        app7.setAppname("中国工商银行");
-        app7.setIconviewid(R.drawable.icbc_bank);
-        app7.setAppinstalling(false);
-        appInformationList.add(app7);
-
-
-    }
+//    public void getAppListData(){
+//        AppInformation app1 = new AppInformation();
+//        AppInformation app2 = new AppInformation();
+//        AppInformation app3 = new AppInformation();
+//        AppInformation app4 = new AppInformation();
+//        AppInformation app5 = new AppInformation();
+//        AppInformation app6 = new AppInformation();
+//        AppInformation app7 = new AppInformation();
+//
+//        app1.setAppname("北京公交一卡通");
+//        app1.setIconviewid(R.drawable.bjgj);
+//        app1.setAppinstalling(false);
+//        appInformationList.add(app1);
+//
+//        app2.setAppname("上海公交一卡通");
+//        app2.setIconviewid(R.drawable.shgj);
+//        app2.setAppinstalling(false);
+//        appInformationList.add(app2);
+//
+//        app3.setAppname("天津公交一卡通");
+//        app3.setIconviewid(R.drawable.tjgj);
+//        app3.setAppinstalling(false);
+//        appInformationList.add(app3);
+//
+//        app4.setAppname("中国银行");
+//        app4.setIconviewid(R.drawable.china_bank);
+//        app4.setAppinstalling(false);
+//        appInformationList.add(app4);
+//
+//        app5.setAppname("中国农业银行");
+//        app5.setIconviewid(R.drawable.abc_bank);;
+//        app5.setAppinstalling(false);
+//        appInformationList.add(app5);
+//
+//        app6.setAppname("中国建设银行");
+//        app6.setIconviewid(R.drawable.ccb_bank);
+//        app6.setAppinstalling(false);
+//        appInformationList.add(app6);
+//
+//        app7.setAppname("中国工商银行");
+//        app7.setIconviewid(R.drawable.icbc_bank);
+//        app7.setAppinstalling(false);
+//        appInformationList.add(app7);
+//
+//
+//    }
 
     @Override
     public void onPause() {

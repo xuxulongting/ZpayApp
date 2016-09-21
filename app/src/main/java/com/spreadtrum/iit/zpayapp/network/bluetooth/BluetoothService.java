@@ -264,7 +264,7 @@ public class BluetoothService extends android.app.Service{
             if (ConditionCompile.JDBLE) {
                 final byte[] data = characteristic.getValue();
                 LogUtil.debug(TAG, "receive from ble:" + bytesToHexString(data));
-                if(data[1]==BluetoothControl.SETPARA_RECV){
+                if((data[1]==BluetoothControl.SETPARA_RECV) && (data[0]==0x10)){
                     //设置蓝牙参数返回数据
                     if((data[4]+256)==0x90 && data[5]==0x00){
                         LogUtil.debug(TAG,"open se success.");

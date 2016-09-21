@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -91,8 +92,11 @@ private BroadcastReceiver bussinessUpdateReceiver = new BroadcastReceiver() {
         String appType = appInformation.getApptype();
         String spName = appInformation.getSpname();
         String appDesc = appInformation.getAppdesc();
+//        Bitmap bitmap = appInformation.getBitmap();
+        String localPicpath = appInformation.getLocalpicpath();
         final String appInstalled = appInformation.getAppinstalled();
-        int resourceIdIcon = appInformation.getIconviewid();
+//        int resourceIdIcon = appInformation.getIconviewid();
+
         boolean isInstalling = appInformation.isAppinstalling();
 
         textViewAppName = (TextView) findViewById(R.id.id_tv_appname);
@@ -110,7 +114,10 @@ private BroadcastReceiver bussinessUpdateReceiver = new BroadcastReceiver() {
         textViewAppSize.setText(appSize);
         textViewSpName.setText(spName);
         textViewAppDesc.setText("\t\t"+appDesc);
-        imageViewIcon.setImageResource(resourceIdIcon);
+//        imageViewIcon.setImageResource(resourceIdIcon);
+        Bitmap bitmap = AppStoreFragment.getLoacalBitmap(localPicpath);
+//        imageViewIcon.setImageBitmap(bitmap);
+        imageViewIcon.setImageBitmap(bitmap);
         if(isInstalling){
             btnOpera.setVisibility(View.INVISIBLE);
 //            progressBar.setVisibility(View.VISIBLE);

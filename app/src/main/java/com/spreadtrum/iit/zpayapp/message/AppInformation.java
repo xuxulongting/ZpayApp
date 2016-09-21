@@ -79,13 +79,13 @@ public class AppInformation implements Serializable{
     public void setAppid(String appid) {
         this.appid = appid;
     }
-    public int getIconviewid() {
-        return iconviewid;
-    }
+//    public int getIconviewid() {
+//        return iconviewid;
+//    }
 
-    public void setIconviewid(int iconViewId) {
-        this.iconviewid = iconViewId;
-    }
+//    public void setIconviewid(int iconViewId) {
+//        this.iconviewid = iconViewId;
+//    }
 
     public boolean isAppinstalling() {
         return appinstalling;
@@ -101,16 +101,16 @@ public class AppInformation implements Serializable{
     public void setIndexForlistview(int indexForlistview) {
         this.indexForlistview = indexForlistview;
     }
-    public Bitmap getBitmap() {
-        return bitmap;
-    }
-
-    public void setBitmap(Bitmap bitmap) {
-        this.bitmap = bitmap;
-    }
-    public Uri getImageUri() {
-        return imageUri;
-    }
+//    public Bitmap getBitmap() {
+//        return bitmap;
+//    }
+//
+//    public void setBitmap(Bitmap bitmap) {
+//        this.bitmap = bitmap;
+//    }
+//    public Uri getImageUri() {
+//        return imageUri;
+//    }
     public String getLocalpicpath() {
         return localpicpath;
     }
@@ -119,9 +119,29 @@ public class AppInformation implements Serializable{
         this.localpicpath = localpicpath;
     }
 
-    public void setImageUri(Uri imageUri) {
-        this.imageUri = imageUri;
+    public AppInformation(){
+
     }
+    public AppInformation(String index, String picurl, String appname, String appsize,
+                          String apptype, String spname, String appdesc, String appinstalled,
+                          String appid, boolean appinstalling, int indexForlistview, String localpicpath) {
+        this.index = index;
+        this.picurl = picurl;
+        this.appname = appname;
+        this.appsize = appsize;
+        this.apptype = apptype;
+        this.spname = spname;
+        this.appdesc = appdesc;
+        this.appinstalled = appinstalled;
+        this.appid = appid;
+        this.appinstalling = appinstalling;
+        this.indexForlistview = indexForlistview;
+        this.localpicpath = localpicpath;
+    }
+
+    //    public void setImageUri(Uri imageUri) {
+//        this.imageUri = imageUri;
+//    }
     private String index;//索引
     private String picurl;//图片下载url
     private String appname;//应用名称
@@ -131,10 +151,20 @@ public class AppInformation implements Serializable{
     private String appdesc;//应用简介
     private String appinstalled="not";//应用是否已安装 yes/not
     private String appid;//应用标识
-    private int iconviewid;//本地图片资源id
-    private Bitmap bitmap=null;//下载的图片资源
-    private Uri imageUri = null;//本地缓存的图片资源
+//    private int iconviewid;//本地图片资源id
+//    private Bitmap bitmap=null;//下载的图片资源
+//    private Uri imageUri = null;//本地缓存的图片资源
     private boolean appinstalling=false;//应用是否正在安装 true/false
     private int indexForlistview;   //在listview中的位置，与TSM数据库无关
     private String localpicpath;
+
+    public boolean isPicdownloading() {
+        return picdownloading;
+    }
+
+    public void setPicdownloading(boolean picdownloading) {
+        this.picdownloading = picdownloading;
+    }
+
+    private boolean picdownloading=false;
 }

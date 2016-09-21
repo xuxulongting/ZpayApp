@@ -1,7 +1,9 @@
 package com.spreadtrum.iit.zpayapp.displaydemo;
 
 import android.app.Service;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -32,7 +34,7 @@ public class BussinessTransaction{
             @Override
             public void onTaskExecutedSuccess() {
                 broadcastUpdate(ACTION_BUSSINESS_EXECUTED_SUCCESS,appInformation,"download");
-                //handler.sendEmptyMessage(DOWNLOAD_SUCCESS);
+                MyApplication.handler.sendEmptyMessage(MyApplication.DOWNLOAD_SUCCESS);
             }
 
             @Override
@@ -54,14 +56,14 @@ public class BussinessTransaction{
             @Override
             public void onTaskExecutedSuccess() {
                 broadcastUpdate(ACTION_BUSSINESS_EXECUTED_SUCCESS,appInformation,"delete");
-                //handler.sendEmptyMessage(DELETE_SUCCESS);
+                MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_SUCCESS);
 
             }
 
             @Override
             public void onTaskExecutedFailed(){
                 broadcastUpdate(ACTION_BUSSINESS_EXECUTED_FAILED,appInformation,"delete");
-                //handler.sendEmptyMessage(DELETE_FAILED);
+                MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_FAILED);
 
             }
         });
@@ -78,6 +80,17 @@ public class BussinessTransaction{
         //修改全局变量appInstalling
         MyApplication.appInstalling.put(appInformation.getIndex(),false);
         //更新数据库
+        dbHelper = new AppDisplayDatabaseHelper(MyApplication.getContextObject(),"info.db",null,1);
+        if(action.equals(ACTION_BUSSINESS_EXECUTED_SUCCESS)){
+            ContentValues contentValues = new ContentValues();
+            if(bussiness.equals("download")){
+                contentValues.put("appinstalled", "yes");
+            }
+            else
+                contentValues.put("appinstalled","no");
+            SQLiteDatabase dbWrite = dbHelper.getWritableDatabase();
+            dbWrite.update(AppDisplayDatabaseHelper.TABLE_APPINFO,contentValues,"appname=?",new String[]{appInformation.getAppname()});
+        }
 //        dbHelper.getWritableDatabase();
 //                SQLiteDatabase dbWrite = dbHelper.getWritableDatabase();
 //                ContentValues contentValues = new ContentValues();

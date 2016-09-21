@@ -50,6 +50,7 @@ public class MyApplication extends Application {
            }
         }
     };
+    public static boolean dataFromNet = false;
     public static final int DOWNLOAD_SUCCESS=0;
     public static final int DOWNLOAD_FAILED=1;
     public static final int DELETE_SUCCESS=2;

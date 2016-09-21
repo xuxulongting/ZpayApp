@@ -37,7 +37,7 @@ public class ApplyPersonalizationService {
     public static String getTSMAppInformation(String xml, final TSMAppInformationCallback callback){
         String soap = readSoap("soap11.xml");
         soap = soap.replace("123",xml);
-        LogUtil.debug("soap:"+soap);
+//        LogUtil.debug("soap:"+soap);
         byte[] entity = soap.getBytes();
         final String[] tsmXmlArrays = new String[1];
         HttpUtils.sendHttpRequestforWebservice(WEBSERVICE_PATH, entity, new HttpCallbackListener() {

@@ -7,13 +7,13 @@
     <com.zhy.autolayout.AutoFrameLayout
         android:id="@+id/id_main"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_weight="1">
 
     </com.zhy.autolayout.AutoFrameLayout>
     <com.zhy.autolayout.AutoLinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="200px"
         android:orientation="horizontal"
         android:layout_alignParentBottom="true"
         android:background="@color/colorPrimary"

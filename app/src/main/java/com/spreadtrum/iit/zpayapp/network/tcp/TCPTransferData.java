@@ -101,13 +101,14 @@ public class TCPTransferData {
                 if(mTcpSocket==null){
                     try {
                         mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress,NetParameter.Port);
+                        appRequest(mTcpSocket,input);
                     } catch (IOException e) {
 //                        e.printStackTrace();
                         if(tsmTaskCompleteListener!=null){
                             tsmTaskCompleteListener.onTaskExecutedFailed();
                         }
                     }
-                    appRequest(mTcpSocket,input);
+
                 }
             }
         }).start();
@@ -131,6 +132,9 @@ public class TCPTransferData {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                    LogUtil.debug("success");
+                    tcpSocket.closeSocket();
+                    mTcpSocket = null;
                     tsmTaskCompleteListener.onTaskExecutedSuccess();
                     return;
                 }
@@ -162,7 +166,7 @@ public class TCPTransferData {
                 }else if(response[14]==CMD_SERVER_END){
                     LogUtil.debug("CMD_SERVER_END");
                     if(cmdParaLen==1 && (response[17]==0x00)){
-                        LogUtil.warn("success");
+                        LogUtil.debug("success");
                         tcpSocket.closeSocket();
                         mTcpSocket = null;
                         tsmTaskCompleteListener.onTaskExecutedSuccess();
@@ -170,8 +174,8 @@ public class TCPTransferData {
                     else {
                         tcpSocket.closeSocket();
                         mTcpSocket = null;
-                        LogUtil.warn( ByteUtil.bytesToHexString(response,responseLen));
-                        LogUtil.warn( "failed");
+                        LogUtil.debug( ByteUtil.bytesToHexString(response,responseLen));
+                        LogUtil.debug( "failed");
                         tsmTaskCompleteListener.onTaskExecutedFailed();
                     }
                     return;

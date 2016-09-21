@@ -31,6 +31,7 @@ public class TCPSocket implements Runnable{
 
     public static TCPSocket getInstance(String netAddr,int netPort) throws IOException {
         if(tcpSocket==null){
+            LogUtil.debug("create socket");
             tcpSocket = new TCPSocket(netAddr,netPort);
         }
         return tcpSocket;
@@ -44,8 +45,10 @@ public class TCPSocket implements Runnable{
     }
 
     public void closeSocket(){
+        LogUtil.debug("close socket before");
         if(socket!=null){
             try {
+                LogUtil.debug("close socket");
                 socket.close();
                 socket=null;
                 tcpSocket = null;

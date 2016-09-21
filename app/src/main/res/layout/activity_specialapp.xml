@@ -22,8 +22,8 @@
         android:id="@+id/id_iv_icon_large"
         android:layout_width="match_parent"
         android:layout_height="900px"
-        android:layout_marginTop="40px"
-        android:src="@drawable/bjgj"/>
+        android:layout_marginTop="40px"/>
+        <!--android:src="@drawable/bjgj"/>-->
     <com.zhy.autolayout.AutoLinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
