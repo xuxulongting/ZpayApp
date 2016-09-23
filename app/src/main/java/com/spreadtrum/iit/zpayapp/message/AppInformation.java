@@ -91,7 +91,7 @@ public class AppInformation implements Serializable{
 //    }
 
     public boolean isAppinstalling(String appindex) {
-//       //获取全局变量map中的值给appList
+       //获取全局变量map中的值给appList
         for (Map.Entry<String, Boolean> entry : MyApplication.appInstalling.entrySet()) {
             String index = entry.getKey();
             Boolean installing = entry.getValue();
@@ -100,6 +100,7 @@ public class AppInformation implements Serializable{
             }
         }
         return false;
+//        return appinstalling;
     }
 
     public void setAppinstalling(boolean appinstalling) {

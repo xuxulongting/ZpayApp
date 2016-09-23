@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -84,9 +85,9 @@ public class ImageLoaderUtil {
 
     public void DownloadImage(final String url, final ImageView imageView, final AppInformation item,
                               final View view){
-        if(item.isPicdownloading())
-            return;
-        LogUtil.debug(url);
+//        if(item.isPicdownloading())
+//            return;
+
         OkHttpUtils
                 .get()//
                 .url(url)//
@@ -102,10 +103,17 @@ public class ImageLoaderUtil {
                     @Override
                     public void onResponse(Bitmap response, int id) {
 //                        imageView.setImageBitmap(response);
-                        ImageView imageViewByTag = (ImageView) view.findViewWithTag(url);
-                        if(imageViewByTag!=null){
-                            imageViewByTag.setImageBitmap(response);
+//                        LogUtil.debug("findViewWithTag:"+view.toString());
+//                        ImageView imageViewByTag = (ImageView) view.findViewWithTag(url);
+//                        if(imageViewByTag!=null){
+//                            imageViewByTag.setImageBitmap(response);
+//                        }
+                        LogUtil.debug("imageview :"+imageView.toString()+";"+url);
+                        if(imageView.getTag()!=null && imageView.getTag().equals(url)){
+                            imageView.setImageBitmap(response);
                         }
+                        else
+                            LogUtil.debug("test+"+(String) imageView.getTag());
                         String fileName = url.substring(url.lastIndexOf("/")+1);
                         saveImage(ImageFileCache.getAppDir(),fileName,response);
                         File file = new File(ImageFileCache.getAppDir(),fileName);

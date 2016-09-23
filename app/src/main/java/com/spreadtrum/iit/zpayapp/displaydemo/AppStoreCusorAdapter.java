@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
@@ -37,6 +38,9 @@ import java.util.List;
  */
 public class AppStoreCusorAdapter extends CursorAdapter{
     private List<AppInformation> appList= new ArrayList<>();
+    private Context mContext;
+    private ListView mListView=null;
+
     //更新appList
     private Handler updatePicHandler = new Handler(){
         public void handleMessage(Message msg){
@@ -55,12 +59,18 @@ public class AppStoreCusorAdapter extends CursorAdapter{
     }
     public AppStoreCusorAdapter(Context context, Cursor c, boolean autoRequery) {
         super(context, c, autoRequery);
+        mContext = context;
     }
+
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
-        View itemView = LayoutInflater.from(context).inflate(R.layout.list_item_appstore, viewGroup,
-                false);
+//        View itemView = LayoutInflater.from(context).inflate(R.layout.list_item_appstore, viewGroup,
+//                false);
+        if(mListView==null)
+            mListView = (ListView) viewGroup;
+        LayoutInflater inflater=(LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE );
+        View itemView=inflater.inflate(R.layout.list_item_appstore ,viewGroup,false);
         ViewHolder viewHolder = new ViewHolder();
         viewHolder.btnOperaCard = (Button) itemView.findViewById(R.id.id_btn_appopra);
         viewHolder.linearLayoutBar = (LinearLayout) itemView.findViewById(R.id.id_ll_downloading);
@@ -68,20 +78,17 @@ public class AppStoreCusorAdapter extends CursorAdapter{
         viewHolder.imageViewAppicon = (ImageView) itemView.findViewById(R.id.id_iv_appicon);
         itemView.setTag(viewHolder);
 //        LogUtil.debug("setTag ViewHolder");
+        LogUtil.debug("itemview:"+itemView.toString());
         return itemView;
     }
 
     @Override
     public void bindView(View view, final Context context, final Cursor cursor) {
+        ViewHolder viewHolder = (ViewHolder) view.getTag();
         AppInformation appInformation = null;
         final String appindex = cursor.getString(cursor.
                 getColumnIndex("appindex"));
-        String appname = cursor.getString(cursor.
-                getColumnIndex("appname"));
-        String picurl = cursor.getString(cursor.
-                getColumnIndex("picurl"));
-        String localpicpath = cursor.getString(cursor.
-                getColumnIndex("localpicpath"));
+
         int i=0;
         for(i=0;i<appList.size();i++){
             if(appList.get(i).getIndex().equals(appindex)){
@@ -89,7 +96,14 @@ public class AppStoreCusorAdapter extends CursorAdapter{
                 break;
             }
         }
+
         if(i==appList.size()) {
+            String appname = cursor.getString(cursor.
+                    getColumnIndex("appname"));
+            String picurl = cursor.getString(cursor.
+                    getColumnIndex("picurl"));
+            String localpicpath = cursor.getString(cursor.
+                    getColumnIndex("localpicpath"));
             String appsize = cursor.getString(cursor.
                     getColumnIndex("appsize"));
             String apptype = cursor.getString(cursor.
@@ -108,23 +122,21 @@ public class AppStoreCusorAdapter extends CursorAdapter{
         }
         LogUtil.debug("bindView");
 
-        ViewHolder viewHolder = (ViewHolder) view.getTag();
-        //显示应用名称
-        viewHolder.textViewAppname.setText(appname);
 
-//        TextView textViewAppname = (TextView) view.findViewById(R.id.id_tv_appname);
-//        textViewAppname.setText(appname);
+        //显示应用名称
+        viewHolder.textViewAppname.setText(appInformation.getAppname());
         //显示图片
         ImageView imageView = viewHolder.imageViewAppicon;
-        imageView.setTag(picurl);
-        LogUtil.debug("setTag"+picurl);
+//        ImageView imageView = (ImageView) view.findViewById(R.id.id_iv_appicon);
+        //imageView.setTag(picurl);
+        viewHolder.imageViewAppicon.setTag(appInformation.getPicurl());
+//        LogUtil.debug("setTag:"+appInformation.getPicurl()+"; "+ imageView.toString());
         ImageLoaderUtil imageLoader = new ImageLoaderUtil(updatePicHandler);
-        if(localpicpath==null){
+        if(appInformation.getLocalpicpath()==null){
             if(appInformation.isPicdownloading()==false) {
                 //网络下载图片保存并显示
-
-                imageLoader.DownloadImage(picurl, imageView, appInformation, view);
-                appInformation.setPicdownloading(true);
+                imageLoader.DownloadImage(appInformation.getPicurl(), imageView, appInformation, mListView);
+                //appInformation.setPicdownloading(true);
 
             }
 
@@ -134,12 +146,21 @@ public class AppStoreCusorAdapter extends CursorAdapter{
             Bitmap bitmap = imageLoader.getLoacalBitmap(appInformation.getLocalpicpath());
             if(bitmap==null){
                 //本地图片缓存被清空
-                imageLoader.DownloadImage(picurl,imageView,appInformation,view);
+                imageLoader.DownloadImage(appInformation.getPicurl(),imageView,appInformation, mListView);
             }
-            else
+            else {
+                LogUtil.debug("get local bitmap");
                 imageView.setImageBitmap(bitmap);
+            }
         }
-        appList.add(appInformation);
+        if(i==appList.size()){
+            appList.add(appInformation);
+        }
+        else
+        {
+            appList.set(i,appInformation);
+        }
+
 
         Button btnOperaCard = viewHolder.btnOperaCard;
         LinearLayout linearLayoutBar = viewHolder.linearLayoutBar;
@@ -167,8 +188,9 @@ public class AppStoreCusorAdapter extends CursorAdapter{
             @Override
             public void onClick(View view) {
                 //连接BLE
-                MyApplication app =MyApplication.getInstance();
+//                MyApplication app =MyApplication.getInstance();
                 //(MyApplication) getActivity().getApplication();
+                MyApplication app = (MyApplication) mContext.getApplicationContext();
                 final String bluetoothDevAddr = app.getBluetoothDevAddr();
                 if(bluetoothDevAddr.isEmpty()){
                     new AlertDialog.Builder(context)
@@ -231,6 +253,11 @@ public class AppStoreCusorAdapter extends CursorAdapter{
                 //}
             }
         });
+    }
+
+    @Override
+    public void changeCursor(Cursor cursor) {
+        super.changeCursor(cursor);
     }
 
     private class ViewHolder{

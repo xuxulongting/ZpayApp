@@ -125,7 +125,7 @@ public class TestFragment extends Fragment {
             public void handleMessage(Message msg){
                 if(msg.what==0) {
                     Cursor cursor = dbWrite.query(AppDisplayDatabaseHelper.TABLE_APPINFO, null, null, null, null, null, null);
-                    cursorAdapter = new AppStoreCusorAdapter(getActivity(), cursor, true);
+                    cursorAdapter = new AppStoreCusorAdapter(getActivity(), cursor, false);
                     listView.setAdapter(cursorAdapter);
                     loading.setVisibility(View.INVISIBLE);
                 }
@@ -172,6 +172,52 @@ public class TestFragment extends Fragment {
                 handler.sendEmptyMessage(0);
             }
         });
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        //注册receiver
+        getActivity().registerReceiver(bussinessUpdateReceiver,makeBussinessUpdateIntentFilter());
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==REQUEST_SPECIAL_APP && resultCode==RESULT_SPECIAL_APP){
+            AppInformation appInformation = (AppInformation) data.getSerializableExtra("APP_INFO");
+//            appInformationList.set(appInformation.getIndexForlistview(),appInformation);
+            appList.set(appInformation.getIndexForlistview(),appInformation);
+            cursorAdapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        LogUtil.debug("AppStoreFragment onPause");
+        if(appList==null)
+            LogUtil.debug("appList is null");
+        //
+
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        LogUtil.debug("AppStoreFragment onStop");
+        if(appList==null)
+            LogUtil.debug("appList is null");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        LogUtil.debug("AppStoreFragment onDestroy");
+        if(appList==null)
+            LogUtil.debug("appList is null");
+        //取消receiver注册
+        getActivity().unregisterReceiver(bussinessUpdateReceiver);
     }
 
     public static final int REQUEST_SPECIAL_APP=2;

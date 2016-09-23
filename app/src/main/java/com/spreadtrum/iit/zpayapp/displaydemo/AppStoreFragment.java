@@ -222,12 +222,15 @@ public class AppStoreFragment extends Fragment {
                     @Override
                     public void onError(Call call, Exception e, int id) {
                         LogUtil.debug(e.getMessage());
+                        ImageView imageViewByTag = (ImageView) listView.findViewWithTag(url);
+                        if(imageViewByTag!=null){
+                            imageViewByTag.setImageResource(R.drawable.refresh);
+                        }
                     }
 
                     @Override
                     public void onResponse(Bitmap response, int id) {
-//                        viewHolder.setImageBitmap(R.id.id_iv_appicon,response);
-//                        imageView.setImageBitmap(response);
+                        //防止图片出现乱序
                         ImageView imageViewByTag = (ImageView) listView.findViewWithTag(url);
                         if(imageViewByTag!=null){
                             imageViewByTag.setImageBitmap(response);
@@ -295,16 +298,16 @@ public class AppStoreFragment extends Fragment {
                             viewHolder.setText(R.id.id_tv_appname,item.getAppname());
                             //显示图片
                             ImageView imageView = viewHolder.getView(R.id.id_iv_appicon);
+                            imageView.setImageResource(R.drawable.refresh);//空白图片记得加上，否则，在图片下载成功之前，会显示重复利用的itemview的图片
                             String url = item.getPicurl();
                             imageView.setTag(url);
-//                            viewHolder.setImageResource(R.id.id_iv_appicon,R.drawable.bjgj);//item.getIconviewid());
-
+//                            LogUtil.debug("setTag:"+url);
                             if(item.getLocalpicpath()==null){
                                 if(item.isPicdownloading()==false) {
                                     //网络下载图片保存并显示
 
                                     DownloadImage(url, imageView, item, listViewAppStore);
-                                    item.setPicdownloading(true);
+                                    item.setPicdownloading(true);//主要是为了防止图片重复下载，另外，增加这个约束以后，图片也不会出现乱序的问题了（现在还不知道原因）
                                 }
 
                             }
@@ -364,7 +367,7 @@ public class AppStoreFragment extends Fragment {
                                     //修改listview中button视图，修改item的值，就相当于修改了appList变量
                                     item.setAppinstalling(true);
                                     //修改全局变量map中的值
-                                    MyApplication.appInstalling.put(item.getIndex(),item.isAppinstalling(item.getIndex()));
+                                    MyApplication.appInstalling.put(item.getIndex(),true);
                                     //刷新Listview
                                     notifyDataSetChanged();
                                     //获取蓝牙读写句柄
@@ -453,16 +456,6 @@ public class AppStoreFragment extends Fragment {
                                 getColumnIndex("localpicpath"));
                         AppInformation appInformation = new AppInformation(appindex,picurl,appname,appsize,apptype,
                                 spname,appdesc,appinstalled,appid,false,-1,localpicpath);
-//                        appInformation.setIndex(appindex);
-//                        appInformation.setAppname(appname);
-//                        appInformation.setPicurl(picurl);
-//                        appInformation.setAppsize(appsize);
-//                        appInformation.setApptype(apptype);
-//                        appInformation.setSpname(spname);
-//                        appInformation.setAppdesc(appdesc);
-//                        appInformation.setAppinstalled(appinstalled);
-//                        appInformation.setAppid(appid);
-//                        appInformation.setLocalpicpath(localpicpath);
                         appList.add(appInformation);
                     } while (cursor.moveToNext());
                 }
