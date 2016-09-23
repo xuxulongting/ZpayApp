@@ -3,7 +3,10 @@ package com.spreadtrum.iit.zpayapp.message;
 import android.graphics.Bitmap;
 import android.net.Uri;
 
+import com.spreadtrum.iit.zpayapp.common.MyApplication;
+
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-9-6.
@@ -87,8 +90,16 @@ public class AppInformation implements Serializable{
 //        this.iconviewid = iconViewId;
 //    }
 
-    public boolean isAppinstalling() {
-        return appinstalling;
+    public boolean isAppinstalling(String appindex) {
+//       //获取全局变量map中的值给appList
+        for (Map.Entry<String, Boolean> entry : MyApplication.appInstalling.entrySet()) {
+            String index = entry.getKey();
+            Boolean installing = entry.getValue();
+            if (appindex.equals(index)) {
+               return installing;
+            }
+        }
+        return false;
     }
 
     public void setAppinstalling(boolean appinstalling) {

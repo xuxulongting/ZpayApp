@@ -68,14 +68,14 @@ public class AppStoreFragment extends Fragment {
     private GridLayoutManager gridLayoutManagerBus;
     private GridLayoutManager gridLayoutManagerBank;
     private CommonAdapter busAdapter= null;
-   // private CommonAdapter bankAdapter;
+    // private CommonAdapter bankAdapter;
     private List<Card> listCardParameter = new ArrayList<Card>();
     private List<AppInformation> appInformationList = new ArrayList<AppInformation>();
     List<AppInformation> appList=null;
     private Button btnOperaCard;
-//    private ProgressBar progressBar;
+    //    private ProgressBar progressBar;
     private LinearLayout linearLayoutBar;
-//    private File cache;
+    //    private File cache;
     private AppDisplayDatabaseHelper dbHelper;
     public static final int REQUEST_SPECIAL_APP=2;
     public static final int RESULT_SPECIAL_APP=3;
@@ -323,7 +323,7 @@ public class AppStoreFragment extends Fragment {
 //                            progressBar = viewHolder.getView(R.id.id_pb_appProgressBar);
                             linearLayoutBar  =viewHolder.getView(R.id.id_ll_downloading);
                             //LogUtil.debug("isAppinstalling is:"+item.isAppinstalling());
-                            if(item.isAppinstalling()==true){
+                            if(item.isAppinstalling(item.getIndex())==true){
                                 btnOperaCard.setVisibility(View.INVISIBLE);
 //                                progressBar.setVisibility(View.VISIBLE);
                                 linearLayoutBar.setVisibility(View.VISIBLE);
@@ -364,7 +364,7 @@ public class AppStoreFragment extends Fragment {
                                     //修改listview中button视图，修改item的值，就相当于修改了appList变量
                                     item.setAppinstalling(true);
                                     //修改全局变量map中的值
-                                    MyApplication.appInstalling.put(item.getIndex(),item.isAppinstalling());
+                                    MyApplication.appInstalling.put(item.getIndex(),item.isAppinstalling(item.getIndex()));
                                     //刷新Listview
                                     notifyDataSetChanged();
                                     //获取蓝牙读写句柄

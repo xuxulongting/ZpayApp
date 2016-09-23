@@ -16,7 +16,7 @@ public class AppDisplayDatabaseHelper extends SQLiteOpenHelper {
     private Context mContext;
     public static final String TABLE_APPINFO = "appinfo";
     public static final String CREATE_TABLE_APPINFO = "create table "+TABLE_APPINFO+" ("
-            + "id integer primary key autoincrement, "
+            + "_id integer primary key autoincrement, "
             + "appindex text not null, "
             + "picurl text not null,"
             + "appname text not null,"

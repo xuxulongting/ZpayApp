@@ -40,7 +40,9 @@ public class MainDisplayActivity extends AppCompatActivity implements View.OnCli
         btnAppSettings.setOnClickListener(this);
         AppStoreFragment appStoreFragment = new AppStoreFragment();
         FragmentManager fm = getFragmentManager();
-        fm.beginTransaction().replace(R.id.id_main,appStoreFragment,"AppStoreFragment").commit();
+//        fm.beginTransaction().replace(R.id.id_main,appStoreFragment,"AppStoreFragment").commit();
+        TestFragment testFragment = new TestFragment();
+        fm.beginTransaction().replace(R.id.id_main,testFragment,"TestFragment").commit();
         setButtonColor(Color.GREEN);
 
 
@@ -85,8 +87,9 @@ public class MainDisplayActivity extends AppCompatActivity implements View.OnCli
         FragmentManager fm = getFragmentManager();
         switch(para){
             case FRAGMENT_APP_STORE:
-                AppStoreFragment appStoreFragment = new AppStoreFragment();
-                fm.beginTransaction().replace(R.id.id_main,appStoreFragment,"AppStoreFragment").commit();
+//                AppStoreFragment appStoreFragment = new AppStoreFragment();
+                TestFragment testFragment = new TestFragment();
+                fm.beginTransaction().replace(R.id.id_main,testFragment,"AppStoreFragment").commit();
                 break;
             case FRAGMENT_APP_SERVICE:
                 break;

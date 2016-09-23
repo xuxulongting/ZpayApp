@@ -40,6 +40,8 @@ import com.spreadtrum.iit.zpayapp.network.tcp.TsmTaskCompleteListener;
 import com.spreadtrum.iit.zpayapp.network.webservice.ApplyPersonalizationService;
 import com.spreadtrum.iit.zpayapp.network.webservice.TSMAppInformationCallback;
 
+import java.io.File;
+
 /**
  * Created by SPREADTRUM\ting.long on 16-9-2.
  */
@@ -87,17 +89,19 @@ private BroadcastReceiver bussinessUpdateReceiver = new BroadcastReceiver() {
         setContentView(R.layout.activity_specialapp);
         Intent intent = getIntent();
         appInformation = (AppInformation) intent.getSerializableExtra("APP_PARAMETER");
+        String appIndex = appInformation.getIndex();
         String appName = appInformation.getAppname();
         String appSize = appInformation.getAppsize();
         String appType = appInformation.getApptype();
         String spName = appInformation.getSpname();
         String appDesc = appInformation.getAppdesc();
 //        Bitmap bitmap = appInformation.getBitmap();
+        String picUrl = appInformation.getPicurl();
         String localPicpath = appInformation.getLocalpicpath();
         final String appInstalled = appInformation.getAppinstalled();
 //        int resourceIdIcon = appInformation.getIconviewid();
 
-        boolean isInstalling = appInformation.isAppinstalling();
+        boolean isInstalling = appInformation.isAppinstalling(appIndex);
 
         textViewAppName = (TextView) findViewById(R.id.id_tv_appname);
         imageViewIcon = (ImageView) findViewById(R.id.id_iv_icon_large);
@@ -115,7 +119,11 @@ private BroadcastReceiver bussinessUpdateReceiver = new BroadcastReceiver() {
         textViewSpName.setText(spName);
         textViewAppDesc.setText("\t\t"+appDesc);
 //        imageViewIcon.setImageResource(resourceIdIcon);
-        Bitmap bitmap = AppStoreFragment.getLoacalBitmap(localPicpath);
+        if(localPicpath==null){
+            File file = new File(ImageFileCache.getAppDir(),picUrl.substring(picUrl.lastIndexOf("/")+1));
+            localPicpath = file.getAbsolutePath();
+        }
+        Bitmap bitmap = ImageLoaderUtil.getLoacalBitmap(localPicpath);
 //        imageViewIcon.setImageBitmap(bitmap);
         imageViewIcon.setImageBitmap(bitmap);
         if(isInstalling){
@@ -158,7 +166,7 @@ private BroadcastReceiver bussinessUpdateReceiver = new BroadcastReceiver() {
                     //修改button
                     appInformation.setAppinstalling(true);  //为了与AppStoreFragment的button同步
                     //修改全局变量map中的值
-                    MyApplication.appInstalling.put(appInformation.getIndex(),appInformation.isAppinstalling());
+                    MyApplication.appInstalling.put(appInformation.getIndex(),true);
                     btnOpera.setVisibility(View.INVISIBLE);
 //                    progressBar.setVisibility(View.VISIBLE);
                     linearLayoutBar.setVisibility(View.VISIBLE);
@@ -223,7 +231,8 @@ private BroadcastReceiver bussinessUpdateReceiver = new BroadcastReceiver() {
                                     //修改button
                                     appInformation.setAppinstalling(true);
                                     //修改全局变量map中的值
-                                    MyApplication.appInstalling.put(appInformation.getIndex(),appInformation.isAppinstalling());
+//                                    MyApplication.appInstalling.put(appInformation.getIndex(),appInformation.isAppinstalling());
+                                    MyApplication.appInstalling.put(appInformation.getIndex(),true);
                                     btnOpera.setVisibility(View.INVISIBLE);
 //                                    progressBar.setVisibility(View.VISIBLE);
                                     linearLayoutBar.setVisibility(View.VISIBLE);
