@@ -209,6 +209,7 @@ public class AppStoreFragment extends Fragment {
     }
 
     private void DownloadImage(final String url, final ImageView imageView, final AppInformation item, final ListView listView){
+        //避免重复的url请求
         if(item.isPicdownloading())
             return;
         LogUtil.debug(url);

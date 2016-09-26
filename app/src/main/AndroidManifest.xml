@@ -26,12 +26,15 @@
         <activity android:name=".display.ApplicationActivity"></activity>
         <activity android:name=".display.SpecialApplicationActivity"></activity>
 
-        <activity android:name=".displaydemo.MainDisplayActivity">
+        <activity android:name=".displaydemo.GuideActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity android:name=".displaydemo.MainDisplayActivity">
+
         </activity>
         <activity android:name=".network.bluetooth.BluetoothSettingsActivity"></activity>
         <activity android:name=".network.webservice.WebserviceActivity">
