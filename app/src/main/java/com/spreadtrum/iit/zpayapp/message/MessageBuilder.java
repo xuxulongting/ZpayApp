@@ -12,11 +12,25 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.util.Xml;
 
+import com.spreadtrum.iit.zpayapp.common.ByteUtil;
+
 public class MessageBuilder {
 
 	private static XmlSerializer serializer = null;
 	private static StringWriter writer = null;
 	private static int taskIndex = 1;
+
+	public static RequestTaskidEntity getRequestTaskidEntity(AppInformation appInformation,String taskType){
+		RequestTaskidEntity entity=new RequestTaskidEntity();
+		String appid = appInformation.getAppid();
+		byte[] bAppid = new byte[5];
+		byte[] data = ByteUtil.StringToByteArray(appid);
+		System.arraycopy(data,0,bAppid,5-data.length,data.length);
+		entity.setTasktype(taskType);
+		String strCmd = taskType+"05"+ByteUtil.bytesToString(bAppid,5);
+		entity.setTaskcommand(strCmd);
+		return entity;
+	}
 
 	/**
 	 * 拼接报文头

@@ -50,10 +50,12 @@ public class SpecialAppActivity extends AppCompatActivity {
     private TextView textViewAppName,textViewAppType,textViewSpName,textViewAppSize,textViewAppDesc;
     private ImageView imageViewIcon;
     private Button btnOpera;
-//    private ProgressBar progressBar;
     private LinearLayout linearLayoutBar;
     private AppInformation appInformation;
-private BroadcastReceiver bussinessUpdateReceiver = new BroadcastReceiver() {
+    /**
+     * 接收来自应用下载或者删除完成的广播消息，主要是为了更新变量appinstalling，appinstalled状态
+     */
+    private BroadcastReceiver bussinessUpdateReceiver = new BroadcastReceiver() {
     @Override
     public void onReceive(Context context, Intent intent) {
         AppInformation appInfo = (AppInformation) intent.getSerializableExtra("BUSSINESS_UPDATE");
@@ -177,16 +179,16 @@ private BroadcastReceiver bussinessUpdateReceiver = new BroadcastReceiver() {
                             @Override
                             public void onBLEPrepared() {
                                 //获取taskid
-                                RequestTaskidEntity entity=new RequestTaskidEntity();
-                                String appid = appInformation.getAppid();
-                                byte[] bAppid = new byte[5];
-                                byte[] data = ByteUtil.StringToByteArray(appid);
-                                System.arraycopy(data,0,bAppid,5-data.length,data.length);
-                                //下载应用
-                                entity.setTasktype(AppStoreFragment.TASK_TYPE_DOWNLOAD);
-                                String strCmd = AppStoreFragment.TASK_TYPE_DOWNLOAD+"05"+ByteUtil.bytesToString(bAppid,5);
-                                entity.setTaskcommand(strCmd);
-                                ApplyPersonalizationService.getTSMTaskid(AppStoreFragment.seId, "dbinsert", entity, new TSMAppInformationCallback() {
+//                                RequestTaskidEntity entity=new RequestTaskidEntity();
+//                                String appid = appInformation.getAppid();
+//                                byte[] bAppid = new byte[5];
+//                                byte[] data = ByteUtil.StringToByteArray(appid);
+//                                System.arraycopy(data,0,bAppid,5-data.length,data.length);
+//                                entity.setTasktype(AppStoreFragment.TASK_TYPE_DOWNLOAD);
+//                                String strCmd = AppStoreFragment.TASK_TYPE_DOWNLOAD+"05"+ByteUtil.bytesToString(bAppid,5);
+//                                entity.setTaskcommand(strCmd);
+                                RequestTaskidEntity entity=MessageBuilder.getRequestTaskidEntity(appInformation,BussinessTransaction.TASK_TYPE_DOWNLOAD);
+                                ApplyPersonalizationService.getTSMTaskid(MyApplication.seId, "dbinsert", entity, new TSMAppInformationCallback() {
                                     @Override
                                     public void getAppInfo(String xml) {
                                         //解析xml
@@ -196,7 +198,7 @@ private BroadcastReceiver bussinessUpdateReceiver = new BroadcastReceiver() {
                                         byte[] data = ByteUtil.int2Bytes(dectask);
                                         byte[] bTaskId = new byte[20];
                                         System.arraycopy(data,0,bTaskId,20-data.length,data.length);
-                                        //DownloadApplet(bTaskId);
+                                        //下载应用
                                         new BussinessTransaction().DownloadApplet(bluetoothControl,bTaskId,appInformation);;
                                     }
                                 });
@@ -242,16 +244,17 @@ private BroadcastReceiver bussinessUpdateReceiver = new BroadcastReceiver() {
                                         bluetoothControl.setBlePreparedCallbackListener(new BLEPreparedCallbackListener() {
                                             @Override
                                             public void onBLEPrepared() {
-                                                //删除应用
-                                                String appid = appInformation.getAppid();
-                                                byte[] bAppid = new byte[5];
-                                                byte[] data = ByteUtil.StringToByteArray(appid);
-                                                System.arraycopy(data,0,bAppid,5-data.length,data.length);
-                                                RequestTaskidEntity entity = new RequestTaskidEntity();
-                                                entity.setTasktype(AppStoreFragment.TASK_TYPE_DELETE);
-                                                String strCmd = AppStoreFragment.TASK_TYPE_DELETE+"05"+ ByteUtil.bytesToString(bAppid,5);
-                                                entity.setTaskcommand(strCmd);
-                                                ApplyPersonalizationService.getTSMTaskid(AppStoreFragment.seId, "dbinsert", entity, new TSMAppInformationCallback() {
+                                                //获取task id
+//                                                String appid = appInformation.getAppid();
+//                                                byte[] bAppid = new byte[5];
+//                                                byte[] data = ByteUtil.StringToByteArray(appid);
+//                                                System.arraycopy(data,0,bAppid,5-data.length,data.length);
+//                                                RequestTaskidEntity entity = new RequestTaskidEntity();
+//                                                entity.setTasktype(AppStoreFragment.TASK_TYPE_DELETE);
+//                                                String strCmd = AppStoreFragment.TASK_TYPE_DELETE+"05"+ ByteUtil.bytesToString(bAppid,5);
+//                                                entity.setTaskcommand(strCmd);
+                                                RequestTaskidEntity entity = MessageBuilder.getRequestTaskidEntity(appInformation,BussinessTransaction.TASK_TYPE_DELETE);
+                                                ApplyPersonalizationService.getTSMTaskid(MyApplication.seId, "dbinsert", entity, new TSMAppInformationCallback() {
                                                     @Override
                                                     public void getAppInfo(String xml) {
                                                         //解析xml
@@ -261,7 +264,7 @@ private BroadcastReceiver bussinessUpdateReceiver = new BroadcastReceiver() {
                                                         byte[] data = ByteUtil.int2Bytes(dectask);
                                                         byte[] bTaskId = new byte[20];
                                                         System.arraycopy(data,0,bTaskId,20-data.length,data.length);
-                                                        //DeleteApplet(bTaskId);
+                                                        //删除应用
                                                         new BussinessTransaction().DeleteApplet(bluetoothControl,bTaskId,appInformation);
                                                     }
                                                 });
@@ -279,58 +282,7 @@ private BroadcastReceiver bussinessUpdateReceiver = new BroadcastReceiver() {
         });
     }
 
-//    private void DownloadApplet(byte[] taskId){
-//        //BLE准备好，开始发送数据
-//        TCPTransferData tcpTransferData = new TCPTransferData();
-//        //tcpTransferData.SyncApplet(bluetoothControl);
-//        tcpTransferData.DownloadApplet(bluetoothControl,taskId);
-//        //android 视图控件只能在主线程中去访问，用消息的方式
-//        tcpTransferData.setTsmTaskCompleteListener(new TsmTaskCompleteListener() {
-//            @Override
-//            public void onTaskExecutedSuccess() {
-//                appInformation.setAppinstalling(false);
-//                appInformation.setAppinstalled("yes");
-//                bluetoothControl=null;
-//                handler.sendEmptyMessage(AppStoreFragment.TSM_COMPLETE_SUCCESS);
-//
-//            }
-//
-//            @Override
-//            public void onTaskExecutedFailed(){
-//                appInformation.setAppinstalling(false);
-//                appInformation.setAppinstalled("no");
-//                bluetoothControl=null;
-//                handler.sendEmptyMessage(AppStoreFragment.TSM_COMPLETE_FAILED);
-//
-//            }
-//        });
-//    }
-//
-//    private void DeleteApplet(byte []taskId){
-//        //BLE准备好，开始发送数据
-//        TCPTransferData tcpTransferData = new TCPTransferData();
-//        //tcpTransferData.SyncApplet(bluetoothControl, taskId);
-//        tcpTransferData.DeleteApplet(bluetoothControl,taskId);
-//        //android 视图控件只能在主线程中去访问，用消息的方式
-//        tcpTransferData.setTsmTaskCompleteListener(new TsmTaskCompleteListener() {
-//            @Override
-//            public void onTaskExecutedSuccess() {
-//
-//                appInformation.setAppinstalling(false);
-//                appInformation.setAppinstalled("no");
-//                bluetoothControl=null;
-//                deleteHandler.sendEmptyMessage(AppStoreFragment.TSM_COMPLETE_SUCCESS);
-//            }
-//
-//            @Override
-//            public void onTaskExecutedFailed(){
-//                appInformation.setAppinstalling(false);
-//                appInformation.setAppinstalled("yes");
-//                bluetoothControl=null;
-//                deleteHandler.sendEmptyMessage(AppStoreFragment.TSM_COMPLETE_FAILED);
-//            }
-//        });
-//    }
+
 
     @Override
     public void onBackPressed() {

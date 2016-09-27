@@ -23,6 +23,13 @@ public class BussinessTransaction{
     public static final String ACTION_BUSSINESS_EXECUTED_SUCCESS="com.spreadtrum.iit.zpayapp.displaydemo.BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS";
     public static final String ACTION_BUSSINESS_EXECUTED_FAILED="com.spreadtrum.iit.zpayapp.displaydemo.BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED";
     private AppDisplayDatabaseHelper dbHelper=null;
+
+    /**
+     *应用下载
+     * @param bluetoothControl  与蓝牙通信实例
+     * @param taskId    任务id
+     * @param appInformation    应用信息
+     */
     public void DownloadApplet(BluetoothControl bluetoothControl, byte[] taskId,
                                       final AppInformation appInformation){
         //BLE准备好，开始发送数据
@@ -45,6 +52,12 @@ public class BussinessTransaction{
         });
     }
 
+    /**
+     * 应用删除
+     * @param bluetoothControl  与蓝牙通信实例
+     * @param taskId    任务id
+     * @param appInformation    应用信息
+     */
     public void DeleteApplet(BluetoothControl bluetoothControl, byte []taskId,
                                     final AppInformation appInformation){
         //BLE准备好，开始发送数据
@@ -69,6 +82,12 @@ public class BussinessTransaction{
         });
     }
 
+    /**
+     * 应用下载/删除完成后，发送广播
+     * @param action
+     * @param appInformation
+     * @param bussiness "download” or "delete"
+     */
     private void broadcastUpdate(String action, AppInformation appInformation,String bussiness){
         Intent intent = new Intent();
         intent.setAction(action);
@@ -98,8 +117,8 @@ public class BussinessTransaction{
 //                dbWrite.update(AppDisplayDatabaseHelper.TABLE_APPINFO, contentValues, "appname=?", new String[]{appInformation.getAppname()});
     }
 
-    public static final int TSM_COMPLETE_SUCCESS=0;
-    public static final int TSM_COMPLETE_FAILED=1;
-
+    public static final String TASK_TYPE_DOWNLOAD="D1";
+    public static final String TASK_TYPE_DELETE="D2";
+    public static final String TASK_TYPE_SYNC="DA";
 
 }

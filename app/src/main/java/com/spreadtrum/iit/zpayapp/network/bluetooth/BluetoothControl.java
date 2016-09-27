@@ -97,6 +97,10 @@ public class BluetoothControl {
         }
     }
 
+    /**
+     * 设置回调实例
+     * @param listener
+     */
     public void setBlePreparedCallbackListener(BLEPreparedCallbackListener listener){
         this.blePreparedCallbackListener = listener;
     }
@@ -182,15 +186,16 @@ public class BluetoothControl {
     }
 
     /**
-     * 单例模式，获取静态实例
+     * 单例模式，获取蓝牙通信静态实例
      * @param context
-     * @param selBleDevAddr
+     * @param selBleDevAddr 蓝牙设备地址
      * @return
      */
     public static BluetoothControl getInstance(Context context,String selBleDevAddr){
         if(bluetoothControl==null){
             bluetoothControl = new BluetoothControl(context,selBleDevAddr);
         }else{
+            //如果BluetoothControl实例已经创建，则延时，先返回bluetoothControl对象，再回调onBLEPrepared()
             DelayThread();
         }
         return bluetoothControl;

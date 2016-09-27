@@ -16,7 +16,7 @@ public class StreamTool {
         int len = 0;
         try {
             while ((len=inStream.read(buf))!=-1){
-                LogUtil.debug("InputStream read len is:"+len);
+//                LogUtil.debug("InputStream read len is:"+len);
                 outStream.write(buf,0,len);
             }
             inStream.close();

@@ -51,6 +51,12 @@ public class SettingsFragment extends Fragment {
         return view;
     }
 
+    /**
+     * 关闭BluetoothSettingsActivity后的回调
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

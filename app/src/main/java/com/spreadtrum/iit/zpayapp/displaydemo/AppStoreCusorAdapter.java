@@ -135,7 +135,7 @@ public class AppStoreCusorAdapter extends CursorAdapter{
         if(appInformation.getLocalpicpath()==null){
             if(appInformation.isPicdownloading()==false) {
                 //网络下载图片保存并显示
-                imageLoader.DownloadImage(appInformation.getPicurl(), imageView, appInformation, mListView);
+                imageLoader.DownloadImage(appInformation.getPicurl(), appInformation, mListView);
                 //appInformation.setPicdownloading(true);
 
             }
@@ -146,7 +146,7 @@ public class AppStoreCusorAdapter extends CursorAdapter{
             Bitmap bitmap = imageLoader.getLoacalBitmap(appInformation.getLocalpicpath());
             if(bitmap==null){
                 //本地图片缓存被清空
-                imageLoader.DownloadImage(appInformation.getPicurl(),imageView,appInformation, mListView);
+                imageLoader.DownloadImage(appInformation.getPicurl(),appInformation, mListView);
             }
             else {
                 LogUtil.debug("get local bitmap");

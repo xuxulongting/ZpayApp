@@ -38,16 +38,19 @@ public class MainDisplayActivity extends AppCompatActivity implements View.OnCli
         btnAppService.setOnClickListener(this);
         btnAppLocal.setOnClickListener(this);
         btnAppSettings.setOnClickListener(this);
-        AppStoreFragment appStoreFragment = new AppStoreFragment();
-        FragmentManager fm = getFragmentManager();
-        fm.beginTransaction().replace(R.id.id_main,appStoreFragment,"AppStoreFragment").commit();
-//        TestFragment testFragment = new TestFragment();
-//        fm.beginTransaction().replace(R.id.id_main,testFragment,"TestFragment").commit();
+//        AppStoreFragment appStoreFragment = new AppStoreFragment();
+//        FragmentManager fm = getFragmentManager();
+//        fm.beginTransaction().replace(R.id.id_main,appStoreFragment,"AppStoreFragment").commit();
+        getFragment(FRAGMENT_APP_STORE);
         setButtonColor(Color.GREEN);
 
 
     }
 
+    /**
+     * Fragment下方按钮的响应函数
+     * @param view
+     */
     @Override
     public void onClick(View view) {
         switch (view.getId()){
@@ -66,6 +69,10 @@ public class MainDisplayActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
+    /**
+     * 显示Fragment对应的按钮的颜色
+     * @param btnPara   代表特定Fragment的参数
+     */
     public void setButtonColor(int btnPara){
         switch (btnPara){
             case FRAGMENT_APP_STORE:
@@ -83,12 +90,16 @@ public class MainDisplayActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
+    /**
+     * 显示Fragment
+     * @param para  代表特定Fragment的参数
+     */
     public void getFragment(int para){
         FragmentManager fm = getFragmentManager();
         switch(para){
             case FRAGMENT_APP_STORE:
                 AppStoreFragment appStoreFragment = new AppStoreFragment();
-                TestFragment testFragment = new TestFragment();
+//                TestFragment testFragment = new TestFragment();
                 fm.beginTransaction().replace(R.id.id_main,appStoreFragment,"AppStoreFragment").commit();
                 break;
             case FRAGMENT_APP_SERVICE:
@@ -102,15 +113,10 @@ public class MainDisplayActivity extends AppCompatActivity implements View.OnCli
         }
 
     }
-
-
-
-    public static final int FRAGMENT_APP_STORE=0;
-    public static final int FRAGMENT_APP_SERVICE=1;
-    public static final int FRAGMENT_APP_LOCAL=2;
-    public static final int FRAGMENT_APP_SETTINGS=3;
-
-
+    /**
+     * 设置蓝牙后的回调，将蓝牙设备地址写入全局变量
+     * @param devAddr   蓝牙设备的地址
+     */
     @Override
     public void onBluetoothDeviceSelected(String devAddr) {
         LogUtil.debug("bluetooth address:"+devAddr);
@@ -122,7 +128,7 @@ public class MainDisplayActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onPause() {
         super.onPause();
-        LogUtil.debug("MainDisplayActivity onPause");
+//        LogUtil.debug("MainDisplayActivity onPause");
         //将appLst存入数据库
 
     }
@@ -130,14 +136,18 @@ public class MainDisplayActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onStop() {
         super.onStop();
-        LogUtil.debug("MainDisplayActivity onStop");
+//        LogUtil.debug("MainDisplayActivity onStop");
 
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        LogUtil.debug("MainDisplayActivity onDestroy");
+//        LogUtil.debug("MainDisplayActivity onDestroy");
 
     }
+    public static final int FRAGMENT_APP_STORE=0;
+    public static final int FRAGMENT_APP_SERVICE=1;
+    public static final int FRAGMENT_APP_LOCAL=2;
+    public static final int FRAGMENT_APP_SETTINGS=3;
 }

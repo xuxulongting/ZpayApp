@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
+import com.spreadtrum.iit.zpayapp.R;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.database.AppDisplayDatabaseHelper;
 import com.spreadtrum.iit.zpayapp.message.AppInformation;
@@ -30,16 +31,19 @@ import okhttp3.Call;
  * Created by SPREADTRUM\ting.long on 16-9-22.
  */
 public class ImageLoaderUtil {
-    private Handler updatePicHandler=null;
+    private Handler updatePicHandler = null;
 
+    public ImageLoaderUtil() {
 
-    public ImageLoaderUtil(Handler handler){
+    }
+
+    public ImageLoaderUtil(Handler handler) {
         this.updatePicHandler = handler;
 
     }
 
 
-    private boolean saveImage(File appDir,String fileName,Bitmap bmp){
+    private boolean saveImage(File appDir, String fileName, Bitmap bmp) {
 //    private File saveImage(String url, Bitmap bmp) {
 //        File appDir = new File(MyApplication.getContextObject().getExternalCacheDir(), "image");
 //        if (!appDir.exists()) {
@@ -49,11 +53,11 @@ public class ImageLoaderUtil {
 //        String fileName = url.substring(url.lastIndexOf("/")+1);
 //        String picType = url.substring(url.lastIndexOf(".")+1);
 
-        String picType = fileName.substring(fileName.lastIndexOf(".")+1);
+        String picType = fileName.substring(fileName.lastIndexOf(".") + 1);
         Bitmap.CompressFormat format;
-        if(picType.equals("png")){
+        if (picType.equals("png")) {
             format = Bitmap.CompressFormat.PNG;
-        }else{
+        } else {
             format = Bitmap.CompressFormat.JPEG;
         }
 //        LogUtil.debug(fileName);
@@ -83,53 +87,48 @@ public class ImageLoaderUtil {
         }
     }
 
-    public void DownloadImage(final String url, final ImageView imageView, final AppInformation item,
-                              final View view){
-//        if(item.isPicdownloading())
-//            return;
-
+    public void DownloadImage(final String url, final AppInformation item, View view) {
+        if (item.isPicdownloading())
+            return;
+        final ListView listView = (ListView) view;
         OkHttpUtils
                 .get()//
                 .url(url)//
                 .build()//
-                .execute(new BitmapCallback()
-                {
+                .execute(new BitmapCallback() {
 
                     @Override
                     public void onError(Call call, Exception e, int id) {
                         LogUtil.debug(e.getMessage());
+                        ImageView imageViewByTag = (ImageView) listView.findViewWithTag(url);
+                        if (imageViewByTag != null) {
+                            imageViewByTag.setImageResource(R.drawable.refresh);
+                        }
                     }
 
                     @Override
                     public void onResponse(Bitmap response, int id) {
-//                        imageView.setImageBitmap(response);
-//                        LogUtil.debug("findViewWithTag:"+view.toString());
-//                        ImageView imageViewByTag = (ImageView) view.findViewWithTag(url);
-//                        if(imageViewByTag!=null){
-//                            imageViewByTag.setImageBitmap(response);
-//                        }
-                        LogUtil.debug("imageview :"+imageView.toString()+";"+url);
-                        if(imageView.getTag()!=null && imageView.getTag().equals(url)){
-                            imageView.setImageBitmap(response);
+                        //防止图片出现乱序
+                        ImageView imageViewByTag = (ImageView) listView.findViewWithTag(url);
+                        if (imageViewByTag != null) {
+                            imageViewByTag.setImageBitmap(response);
                         }
-                        else
-                            LogUtil.debug("test+"+(String) imageView.getTag());
-                        String fileName = url.substring(url.lastIndexOf("/")+1);
-                        saveImage(ImageFileCache.getAppDir(),fileName,response);
-                        File file = new File(ImageFileCache.getAppDir(),fileName);
+                        File file = ImageFileCache.getAppDir();
+                        String fileName = url.substring(url.lastIndexOf("/") + 1);
+                        saveImage(file, fileName, response);
                         //发送消息，更新appList
                         item.setPicdownloading(false);
-                        item.setLocalpicpath(file.getAbsolutePath());
+                        item.setLocalpicpath(file.getAbsolutePath()+"/"+fileName);
                         Message msg = new Message();
                         msg.obj = item;
-                        msg.what=0;
+                        msg.what = 0;
                         updatePicHandler.sendMessage(msg);
                         //更新数据库
-                        AppDisplayDatabaseHelper dbHelper = new AppDisplayDatabaseHelper(MyApplication.getContextObject(),"info.db",null,1);
+                        AppDisplayDatabaseHelper dbHelper = new AppDisplayDatabaseHelper(MyApplication.getContextObject(), "info.db", null, 1);
                         SQLiteDatabase dbwrite = dbHelper.getWritableDatabase();
                         ContentValues contentValues = new ContentValues();
-                        contentValues.put("localpicpath",file.getAbsolutePath());
-                        dbwrite.update(AppDisplayDatabaseHelper.TABLE_APPINFO,contentValues,"picurl=?",new String[]{url});
+                        contentValues.put("localpicpath", file.getAbsolutePath()+"/"+fileName);
+                        dbwrite.update(AppDisplayDatabaseHelper.TABLE_APPINFO, contentValues, "picurl=?", new String[]{url});
                     }
                 });
     }

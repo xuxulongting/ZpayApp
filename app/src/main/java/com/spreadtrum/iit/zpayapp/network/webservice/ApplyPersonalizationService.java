@@ -124,34 +124,34 @@ public class ApplyPersonalizationService {
         return null;
     }
 
-    private void test(InputStream inputStream,String keywords){
-        InputStreamReader isr = new InputStreamReader(inputStream);
-        BufferedReader br = new BufferedReader(isr);
-        StringBuilder xmlAsString = new StringBuilder(4098);
-        String line;
-        try {
-            while ((line = br.readLine()) != null) {
-                xmlAsString.append(line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // Look for links using a regex. Assume the first link is "Prev" and the
-        // next link is "Next"
-        Pattern hrefRegex = Pattern.compile("<XMLReturnResult>\"([^\"]*)\">");
-        Matcher m = hrefRegex.matcher(xmlAsString);
-        String linkToPrevPost = null;
-        String linkToNextPost = null;
-        while (m.find()) {
-            String hrefValue = m.group(1);
-            if (linkToPrevPost == null) {
-                linkToPrevPost = hrefValue;
-            } else {
-                linkToNextPost = hrefValue;
-            }
-        }
-    }
+//    private void test(InputStream inputStream,String keywords){
+//        InputStreamReader isr = new InputStreamReader(inputStream);
+//        BufferedReader br = new BufferedReader(isr);
+//        StringBuilder xmlAsString = new StringBuilder(4098);
+//        String line;
+//        try {
+//            while ((line = br.readLine()) != null) {
+//                xmlAsString.append(line);
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        // Look for links using a regex. Assume the first link is "Prev" and the
+//        // next link is "Next"
+//        Pattern hrefRegex = Pattern.compile("<XMLReturnResult>\"([^\"]*)\">");
+//        Matcher m = hrefRegex.matcher(xmlAsString);
+//        String linkToPrevPost = null;
+//        String linkToNextPost = null;
+//        while (m.find()) {
+//            String hrefValue = m.group(1);
+//            if (linkToPrevPost == null) {
+//                linkToPrevPost = hrefValue;
+//            } else {
+//                linkToNextPost = hrefValue;
+//            }
+//        }
+//    }
 
     private static String parseSOAP(InputStream inputStream,String keywords) {
         XmlPullParser xmlPullParser = Xml.newPullParser();
@@ -201,7 +201,15 @@ public class ApplyPersonalizationService {
         return null;
     }
 
-    public static void getAppinfoFromWebservice(String seId,String requestType,String requestData,TSMAppInformationCallback callback){
+    /**
+     * 获取展示的应用信息
+     * @param seId  SE的索引信息
+     * @param requestType 请求的类型（数据查询/数据写入）
+     * @param requestData 请求的数据内容
+     * @param callback     网络请求结果回调
+     */
+    public static void getAppinfoFromWebservice(String seId,String requestType,String requestData,
+                                                TSMAppInformationCallback callback){
         //创建请求xml
         String requestXml = MessageBuilder.doBussinessRequest(seId,requestType,requestData);
         //base64加密
@@ -210,7 +218,15 @@ public class ApplyPersonalizationService {
         ApplyPersonalizationService.getTSMAppInformation(requestXmlBase64,callback);
     }
 
-    public static void getTSMTaskid(String seId, String requestType, RequestTaskidEntity entity, TSMAppInformationCallback callback){
+    /**
+     * 获取业务（下载，删除，同步）的任务id
+     * @param seId  SE的索引信息
+     * @param requestType   请求的类型（数据查询/数据写入）
+     * @param entity    请求的数据内容
+     * @param callback  网络请求结果回调
+     */
+    public static void getTSMTaskid(String seId, String requestType, RequestTaskidEntity entity,
+                                    TSMAppInformationCallback callback){
         //创建请求xml
         String requestXml = MessageBuilder.doBussinessRequest(seId,requestType,entity);
         //base64加密
