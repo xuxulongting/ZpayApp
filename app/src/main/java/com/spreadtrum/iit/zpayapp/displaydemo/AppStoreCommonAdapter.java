@@ -22,6 +22,7 @@ import com.spreadtrum.iit.zpayapp.message.RequestTaskidEntity;
 import com.spreadtrum.iit.zpayapp.message.TSMResponseEntity;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BLEPreparedCallbackListener;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
+import com.spreadtrum.iit.zpayapp.network.tcp.TsmTaskCompleteCallback;
 import com.spreadtrum.iit.zpayapp.network.webservice.ApplyPersonalizationService;
 import com.spreadtrum.iit.zpayapp.network.webservice.TSMAppInformationCallback;
 import com.zhy.adapter.abslistview.CommonAdapter;
@@ -180,7 +181,29 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
                                 System.arraycopy(data,0,bTaskId,20-data.length,data.length);
                                 item.setIndexForlistview(position);//标识在listview中的位置
                                 //下载应用
-                                new BussinessTransaction().DownloadApplet(bluetoothControl,bTaskId,item);
+//                                new BussinessTransaction().DownloadApplet(bluetoothControl,bTaskId,item);
+                                final BussinessTransaction transaction = new BussinessTransaction();
+                                LogUtil.debug("item index:"+item.getIndex());
+                                transaction.DownloadApplet(bluetoothControl, bTaskId, item, new TsmTaskCompleteCallback() {
+//                                    AppInformation appInformation = item;
+                                    @Override
+                                    public void onTaskExecutedSuccess() {
+                                        AppInformation appInformation = item;
+                                        LogUtil.debug("internal item index:"+appInformation.getIndex());
+                                        transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS,
+                                                appInformation,"download");
+
+                                        MyApplication.handler.sendEmptyMessage(MyApplication.DOWNLOAD_SUCCESS);
+                                    }
+
+                                    @Override
+                                    public void onTaskExecutedFailed() {
+                                        AppInformation appInformation = item;
+                                        LogUtil.debug("internal item index:"+appInformation.getIndex());
+                                        transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED,appInformation,"download");
+                                        MyApplication.handler.sendEmptyMessage(MyApplication.DOWNLOAD_FAILED);
+                                    }
+                                });
                                 //DeleteApplet(bTaskId,handler);
                             }
                         });

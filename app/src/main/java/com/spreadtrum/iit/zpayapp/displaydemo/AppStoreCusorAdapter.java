@@ -243,7 +243,7 @@ public class AppStoreCusorAdapter extends CursorAdapter{
                                 byte[] bTaskId = new byte[20];
                                 System.arraycopy(data,0,bTaskId,20-data.length,data.length);
 //                                item.setIndexForlistview(position);//标识在listview中的位置
-                                new BussinessTransaction().DownloadApplet(bluetoothControl,bTaskId, finalAppInformation);
+//                                new BussinessTransaction().DownloadApplet(bluetoothControl,bTaskId, finalAppInformation);
                                 //DeleteApplet(bTaskId,handler);
                             }
                         });

@@ -67,11 +67,7 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
                         System.arraycopy(id,0,taskId,18,2);
                         byte[] input = genAppRequestByte(randomNum,bSeNO,taskId);
                         if (mTcpSocket == null) {
-                            try {
-                                mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+                            mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
                         }
                         appRequest(mTcpSocket,input);
                     }
@@ -92,11 +88,7 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
                         System.arraycopy(id,0,taskId,18,2);
                         byte[] input = genAppRequestByte(randomNum,bSeNO,taskId);
                         if (mTcpSocket == null) {
-                            try {
-                                mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+                            mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
                         }
                         appRequest(mTcpSocket,input);
                     }
@@ -120,12 +112,7 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
                     @Override
                     public void run() {
                         if (mTcpSocket == null) {
-                            try {
-                                mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
-                            } catch (IOException e) {
-                                //e.printStackTrace();
-                                Toast.makeText(TestNetworkActivity.this,e.getMessage(),Toast.LENGTH_LONG).show();
-                            }
+                            mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
                         }
                         //准备发给TSM的数据
                         String strSeId = "451000000000000020160328000000010005";

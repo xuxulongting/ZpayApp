@@ -15,12 +15,12 @@ public class TCPTransferData {
     private BluetoothControl bluetoothControl = null;
     private TCPSocket mTcpSocket = null;
 //    private TSMTaskCompleteCallback tsmTaskCompleteCallback=null;
-    private TsmTaskCompleteListener tsmTaskCompleteListener=null;
-    public void setTsmTaskCompleteListener(TsmTaskCompleteListener listener){
-        tsmTaskCompleteListener = listener;
-    }
+//    private TsmTaskCompleteListener tsmTaskCompleteListener=null;
+//    public void setTsmTaskCompleteListener(TsmTaskCompleteListener listener){
+//        tsmTaskCompleteListener = listener;
+//    }
 
-    public void SyncApplet(BluetoothControl bluetoothControl,final byte[] taskId){//,TCPSocket tcpSocket, byte[] request, int length){
+    public void SyncApplet(BluetoothControl bluetoothControl, final byte[] taskId, final TsmTaskCompleteCallback tsmTaskCompleteCallback){//,TCPSocket tcpSocket, byte[] request, int length){
         if(bluetoothControl==null) {
             //bluetoothControl = new BluetoothControl(context, bluetoothDev);
             LogUtil.debug("bluetoothControl is null");
@@ -37,21 +37,21 @@ public class TCPTransferData {
 //                System.arraycopy(id,0,taskId,18,2);
                 byte[] input = genAppRequestByte(randomNum,bSeNO,taskId);
                 if (mTcpSocket == null) {
-                    try {
-                        mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        tsmTaskCompleteListener.onTaskExecutedFailed();
-                        return;
+                    mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
+                    if(mTcpSocket==null){
+                        if(tsmTaskCompleteCallback!=null)
+                            tsmTaskCompleteCallback.onTaskExecutedFailed();
                     }
+                    else
+                        appRequest(mTcpSocket,input,tsmTaskCompleteCallback);
                 }
-                appRequest(mTcpSocket,input);
+
             }
         }).start();
 
     }
 
-    public void DownloadApplet(BluetoothControl bluetoothControl,final byte[] taskId){//},TCPSocket tcpSocket, byte[] request, int length){
+    public void DownloadApplet(BluetoothControl bluetoothControl, final byte[] taskId, final TsmTaskCompleteCallback callback){//},TCPSocket tcpSocket, byte[] request, int length){
         if(bluetoothControl==null) {
 //            bluetoothControl = new BluetoothControl(context, bluetoothDev);
             LogUtil.debug("bluetoothControl is null");
@@ -69,25 +69,26 @@ public class TCPTransferData {
 //                System.arraycopy(id,0,taskId,18,2);
                 byte[] input = genAppRequestByte(randomNum,bSeNO,taskId);
                 if (mTcpSocket == null) {
-                    try {
-//                        if(true){
+                    //                        if(true){
 //                            throw new IOException();
 //                        }
-                        mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
-                        appRequest(mTcpSocket,input);
-                    } catch (IOException e) {
-//                        e.printStackTrace();
-                        if(tsmTaskCompleteListener!=null){
-                            tsmTaskCompleteListener.onTaskExecutedFailed();
+                    mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
+                    if(mTcpSocket==null){
+//                        if(tsmTaskCompleteListener!=null)
+//                            tsmTaskCompleteListener.onTaskExecutedFailed();
+                        if(callback!=null){
+                            callback.onTaskExecutedFailed();
                         }
                     }
+                    else
+                        appRequest(mTcpSocket,input,callback);
                 }
 
             }
         }).start();
     }
 
-    public void DeleteApplet(BluetoothControl bluetoothControl, final byte[] taskId){
+    public void DeleteApplet(BluetoothControl bluetoothControl, final byte[] taskId, final TsmTaskCompleteCallback tsmTaskCompleteCallback){
         if(bluetoothControl==null){
             LogUtil.debug("bluetoothControl is null");
             return;
@@ -100,15 +101,13 @@ public class TCPTransferData {
                 byte []bSeNO = MyApplication.seId.getBytes();
                 byte[] input = genAppRequestByte(randomNum,bSeNO,taskId);
                 if(mTcpSocket==null){
-                    try {
-                        mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress,NetParameter.Port);
-                        appRequest(mTcpSocket,input);
-                    } catch (IOException e) {
-//                        e.printStackTrace();
-                        if(tsmTaskCompleteListener!=null){
-                            tsmTaskCompleteListener.onTaskExecutedFailed();
-                        }
+                    mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress,NetParameter.Port);
+                    if(mTcpSocket==null){
+                        if(tsmTaskCompleteCallback!=null)
+                            tsmTaskCompleteCallback.onTaskExecutedFailed();
                     }
+                    else
+                        appRequest(mTcpSocket,input,tsmTaskCompleteCallback);
 
                 }
             }
@@ -119,7 +118,7 @@ public class TCPTransferData {
 
     }
 
-    public void handleTSMData(final TCPSocket tcpSocket,byte []input){
+    public void handleTSMData(final TCPSocket tcpSocket, byte []input, final TsmTaskCompleteCallback tsmTaskCompleteCallback){
         //testSeCmdCount++;
         LogUtil.debug("input:"+ByteUtil.bytesToHexString(input,input.length));
         new TCPRequest().TCPByteRequest(tcpSocket, input, new TCPResponse.Listener<byte[]>() {
@@ -136,7 +135,8 @@ public class TCPTransferData {
                     LogUtil.debug("success");
                     tcpSocket.closeSocket();
                     mTcpSocket = null;
-                    tsmTaskCompleteListener.onTaskExecutedSuccess();
+//                    tsmTaskCompleteListener.onTaskExecutedSuccess();
+                    tsmTaskCompleteCallback.onTaskExecutedSuccess();
                     return;
                 }
                 ///////////////////////////////
@@ -150,7 +150,8 @@ public class TCPTransferData {
                     LogUtil.warn( "TCP response correct");
                 else {
                     LogUtil.warn( "TCP response error");
-                    tsmTaskCompleteListener.onTaskExecutedFailed();
+//                    tsmTaskCompleteListener.onTaskExecutedFailed();
+                    tsmTaskCompleteCallback.onTaskExecutedFailed();
                     return;
                 }
                 if(response[14]==CMD_SERVER_APDU){
@@ -170,14 +171,16 @@ public class TCPTransferData {
                         LogUtil.debug("success");
                         tcpSocket.closeSocket();
                         mTcpSocket = null;
-                        tsmTaskCompleteListener.onTaskExecutedSuccess();
+//                        tsmTaskCompleteListener.onTaskExecutedSuccess();
+                        tsmTaskCompleteCallback.onTaskExecutedSuccess();
                     }
                     else {
                         tcpSocket.closeSocket();
                         mTcpSocket = null;
 //                        LogUtil.debug( ByteUtil.bytesToHexString(response,responseLen));
                         LogUtil.debug( "failed");
-                        tsmTaskCompleteListener.onTaskExecutedFailed();
+//                        tsmTaskCompleteListener.onTaskExecutedFailed();
+                        tsmTaskCompleteCallback.onTaskExecutedFailed();
                     }
                     return;
 
@@ -191,7 +194,8 @@ public class TCPTransferData {
                     LogUtil.warn("unknown cmd");
                     tcpSocket.closeSocket();
                     mTcpSocket=null;
-                    tsmTaskCompleteListener.onTaskExecutedFailed();
+//                    tsmTaskCompleteListener.onTaskExecutedFailed();
+                    tsmTaskCompleteCallback.onTaskExecutedFailed();
                 }
                 //LogUtil.debug(TAG,bytesToHexString(response,responseLen));
             }
@@ -199,7 +203,8 @@ public class TCPTransferData {
             @Override
             public void onErrorResponse(Object response) {
                 LogUtil.debug((String)response);
-                tsmTaskCompleteListener.onTaskExecutedFailed();
+//                tsmTaskCompleteListener.onTaskExecutedFailed();
+                tsmTaskCompleteCallback.onTaskExecutedFailed();
             }
         });
 
@@ -218,8 +223,8 @@ public class TCPTransferData {
 //        request.start();
     }
 
-    public void appRequest(TCPSocket tcpSocket,byte[] input){
-        handleTSMData(tcpSocket,input);
+    public void appRequest(TCPSocket tcpSocket, byte[] input, final TsmTaskCompleteCallback tsmTaskCompleteCallback){
+        handleTSMData(tcpSocket,input,tsmTaskCompleteCallback);
         if(bluetoothControl!=null){
             bluetoothControl.setSeCallbackTSMListener(new SECallbackTSMListener() {
                 @Override
@@ -233,12 +238,13 @@ public class TCPTransferData {
                     response[15] = (byte) (responseLen >> 8);
                     response[16] = (byte) (responseLen);
                     System.arraycopy(responseData, 0, response, 17, responseLen);
-                    handleTSMData(mTcpSocket,response);
+                    handleTSMData(mTcpSocket,response,tsmTaskCompleteCallback);
                 }
 
                 @Override
                 public void errorCallback() {
-                    tsmTaskCompleteListener.onTaskExecutedFailed();
+//                    tsmTaskCompleteListener.onTaskExecutedFailed();
+                    tsmTaskCompleteCallback.onTaskExecutedFailed();
                 }
             });
         }

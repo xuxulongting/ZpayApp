@@ -36,6 +36,7 @@ import com.spreadtrum.iit.zpayapp.message.TSMResponseEntity;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BLEPreparedCallbackListener;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
 import com.spreadtrum.iit.zpayapp.network.tcp.TCPTransferData;
+import com.spreadtrum.iit.zpayapp.network.tcp.TsmTaskCompleteCallback;
 import com.spreadtrum.iit.zpayapp.network.tcp.TsmTaskCompleteListener;
 import com.spreadtrum.iit.zpayapp.network.webservice.ApplyPersonalizationService;
 import com.spreadtrum.iit.zpayapp.network.webservice.TSMAppInformationCallback;
@@ -199,7 +200,21 @@ public class SpecialAppActivity extends AppCompatActivity {
                                         byte[] bTaskId = new byte[20];
                                         System.arraycopy(data,0,bTaskId,20-data.length,data.length);
                                         //下载应用
-                                        new BussinessTransaction().DownloadApplet(bluetoothControl,bTaskId,appInformation);;
+//                                        new BussinessTransaction().DownloadApplet(bluetoothControl,bTaskId,appInformation);;
+                                        final BussinessTransaction transaction = new BussinessTransaction();
+                                        transaction.DownloadApplet(bluetoothControl, bTaskId, appInformation, new TsmTaskCompleteCallback() {
+                                            @Override
+                                            public void onTaskExecutedSuccess() {
+                                                transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS,appInformation,"delete");
+                                                MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_SUCCESS);
+                                            }
+
+                                            @Override
+                                            public void onTaskExecutedFailed() {
+                                                transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED,appInformation,"delete");
+                                                MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_FAILED);
+                                            }
+                                        });
                                     }
                                 });
                             }
@@ -265,7 +280,21 @@ public class SpecialAppActivity extends AppCompatActivity {
                                                         byte[] bTaskId = new byte[20];
                                                         System.arraycopy(data,0,bTaskId,20-data.length,data.length);
                                                         //删除应用
-                                                        new BussinessTransaction().DeleteApplet(bluetoothControl,bTaskId,appInformation);
+//                                                        new BussinessTransaction().DeleteApplet(bluetoothControl,bTaskId,appInformation);
+                                                        final BussinessTransaction transaction = new BussinessTransaction();
+                                                        transaction.DeleteApplet(bluetoothControl, bTaskId, appInformation, new TsmTaskCompleteCallback() {
+                                                            @Override
+                                                            public void onTaskExecutedSuccess() {
+                                                                transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS,appInformation,"delete");
+                                                                MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_SUCCESS);
+                                                            }
+
+                                                            @Override
+                                                            public void onTaskExecutedFailed() {
+                                                                transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED,appInformation,"delete");
+                                                                MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_FAILED);
+                                                            }
+                                                        });
                                                     }
                                                 });
 

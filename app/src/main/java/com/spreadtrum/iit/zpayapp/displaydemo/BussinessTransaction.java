@@ -14,6 +14,7 @@ import com.spreadtrum.iit.zpayapp.database.AppDisplayDatabaseHelper;
 import com.spreadtrum.iit.zpayapp.message.AppInformation;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
 import com.spreadtrum.iit.zpayapp.network.tcp.TCPTransferData;
+import com.spreadtrum.iit.zpayapp.network.tcp.TsmTaskCompleteCallback;
 import com.spreadtrum.iit.zpayapp.network.tcp.TsmTaskCompleteListener;
 
 /**
@@ -25,61 +26,78 @@ public class BussinessTransaction{
     private AppDisplayDatabaseHelper dbHelper=null;
 
     /**
-     *应用下载
+     *
      * @param bluetoothControl  与蓝牙通信实例
      * @param taskId    任务id
      * @param appInformation    应用信息
+     * @param completeCallback  响应结果回调
      */
-    public void DownloadApplet(BluetoothControl bluetoothControl, byte[] taskId,
-                                      final AppInformation appInformation){
+    public void SyncApplet(BluetoothControl bluetoothControl,byte[] taskId,
+                            AppInformation appInformation,TsmTaskCompleteCallback completeCallback){
         //BLE准备好，开始发送数据
         TCPTransferData tcpTransferData = new TCPTransferData();
 //        tcpTransferData.SyncApplet(bluetoothControl, taskId);
-        tcpTransferData.DownloadApplet(bluetoothControl,taskId);
-        //android 视图控件只能在主线程中去访问，用消息的方式
-        tcpTransferData.setTsmTaskCompleteListener(new TsmTaskCompleteListener() {
-            @Override
-            public void onTaskExecutedSuccess() {
-                broadcastUpdate(ACTION_BUSSINESS_EXECUTED_SUCCESS,appInformation,"download");
-                MyApplication.handler.sendEmptyMessage(MyApplication.DOWNLOAD_SUCCESS);
-            }
-
-            @Override
-            public void onTaskExecutedFailed(){
-                broadcastUpdate(ACTION_BUSSINESS_EXECUTED_FAILED,appInformation,"download");
-                MyApplication.handler.sendEmptyMessage(MyApplication.DOWNLOAD_FAILED);
-            }
-        });
+        tcpTransferData.SyncApplet(bluetoothControl,taskId,completeCallback);
     }
 
     /**
-     * 应用删除
+     *
      * @param bluetoothControl  与蓝牙通信实例
      * @param taskId    任务id
      * @param appInformation    应用信息
+     * @param completeCallback  响应结果回调
+     */
+    public void DownloadApplet(BluetoothControl bluetoothControl, byte[] taskId,
+                               final AppInformation appInformation, TsmTaskCompleteCallback completeCallback){
+        //BLE准备好，开始发送数据
+        TCPTransferData tcpTransferData = new TCPTransferData();
+//        tcpTransferData.SyncApplet(bluetoothControl, taskId);
+        tcpTransferData.DownloadApplet(bluetoothControl,taskId,completeCallback);
+        //android 视图控件只能在主线程中去访问，用消息的方式
+//        tcpTransferData.setTsmTaskCompleteListener(new TsmTaskCompleteListener() {
+//            @Override
+//            public void onTaskExecutedSuccess() {
+//                broadcastUpdate(ACTION_BUSSINESS_EXECUTED_SUCCESS,appInformation,"download");
+//                MyApplication.handler.sendEmptyMessage(MyApplication.DOWNLOAD_SUCCESS);
+//            }
+//
+//            @Override
+//            public void onTaskExecutedFailed(){
+//                broadcastUpdate(ACTION_BUSSINESS_EXECUTED_FAILED,appInformation,"download");
+//                MyApplication.handler.sendEmptyMessage(MyApplication.DOWNLOAD_FAILED);
+//            }
+//        });
+    }
+
+    /**
+     *
+     * @param bluetoothControl  与蓝牙通信实例
+     * @param taskId    任务id
+     * @param appInformation    应用信息
+     * @param completeCallback  响应结果回调
      */
     public void DeleteApplet(BluetoothControl bluetoothControl, byte []taskId,
-                                    final AppInformation appInformation){
+                                    final AppInformation appInformation,TsmTaskCompleteCallback completeCallback){
         //BLE准备好，开始发送数据
         TCPTransferData tcpTransferData = new TCPTransferData();
         //tcpTransferData.SyncApplet(bluetoothControl, taskId);
-        tcpTransferData.DeleteApplet(bluetoothControl,taskId);
+        tcpTransferData.DeleteApplet(bluetoothControl,taskId,completeCallback);
         //android 视图控件只能在主线程中去访问，用消息的方式
-        tcpTransferData.setTsmTaskCompleteListener(new TsmTaskCompleteListener() {
-            @Override
-            public void onTaskExecutedSuccess() {
-                broadcastUpdate(ACTION_BUSSINESS_EXECUTED_SUCCESS,appInformation,"delete");
-                MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_SUCCESS);
-
-            }
-
-            @Override
-            public void onTaskExecutedFailed(){
-                broadcastUpdate(ACTION_BUSSINESS_EXECUTED_FAILED,appInformation,"delete");
-                MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_FAILED);
-
-            }
-        });
+//        tcpTransferData.setTsmTaskCompleteListener(new TsmTaskCompleteListener() {
+//            @Override
+//            public void onTaskExecutedSuccess() {
+//                broadcastUpdate(ACTION_BUSSINESS_EXECUTED_SUCCESS,appInformation,"delete");
+//                MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_SUCCESS);
+//
+//            }
+//
+//            @Override
+//            public void onTaskExecutedFailed(){
+//                broadcastUpdate(ACTION_BUSSINESS_EXECUTED_FAILED,appInformation,"delete");
+//                MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_FAILED);
+//
+//            }
+//        });
     }
 
     /**
@@ -88,7 +106,7 @@ public class BussinessTransaction{
      * @param appInformation
      * @param bussiness "download” or "delete"
      */
-    private void broadcastUpdate(String action, AppInformation appInformation,String bussiness){
+    public void broadcastUpdate(String action, AppInformation appInformation,String bussiness){
         Intent intent = new Intent();
         intent.setAction(action);
         Bundle bundle = new Bundle();

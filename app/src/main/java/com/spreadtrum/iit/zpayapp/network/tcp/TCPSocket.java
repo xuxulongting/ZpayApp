@@ -29,10 +29,22 @@ public class TCPSocket{
         }
     }
 
-    public static TCPSocket getInstance(String netAddr,int netPort) throws IOException {
+    /**
+     * 获取TCPsocket实例
+     * @param netAddr   IP地址
+     * @param netPort   端口号
+     * @return
+     * @throws IOException
+     */
+    public static TCPSocket getInstance(String netAddr,int netPort){
         if(tcpSocket==null){
             LogUtil.debug("create socket");
-            tcpSocket = new TCPSocket(netAddr,netPort);
+            try {
+                tcpSocket = new TCPSocket(netAddr,netPort);
+            } catch (IOException e) {
+//                e.printStackTrace();
+                return null;
+            }
         }
         return tcpSocket;
     }
