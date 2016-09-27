@@ -2,6 +2,7 @@ package com.spreadtrum.iit.zpayapp.network.tcp;
 
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.common.ByteUtil;
+import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.SECallbackTSMListener;
 
@@ -13,7 +14,7 @@ import java.io.IOException;
 public class TCPTransferData {
     private BluetoothControl bluetoothControl = null;
     private TCPSocket mTcpSocket = null;
-    private TSMTaskCompleteCallback tsmTaskCompleteCallback=null;
+//    private TSMTaskCompleteCallback tsmTaskCompleteCallback=null;
     private TsmTaskCompleteListener tsmTaskCompleteListener=null;
     public void setTsmTaskCompleteListener(TsmTaskCompleteListener listener){
         tsmTaskCompleteListener = listener;
@@ -30,7 +31,7 @@ public class TCPTransferData {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                byte []bSeNO = strSeId.getBytes();
+                byte []bSeNO = MyApplication.seId.getBytes();
 //                byte[] id = {0x2E, 0x6E};
 //                byte[] taskId = new byte[20];
 //                System.arraycopy(id,0,taskId,18,2);
@@ -62,7 +63,7 @@ public class TCPTransferData {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                byte []bSeNO = strSeId.getBytes();
+                byte []bSeNO = MyApplication.seId.getBytes();
 //                byte[] id = {0x2F, 0x7A};
 //                byte[] taskId = new byte[20];
 //                System.arraycopy(id,0,taskId,18,2);
@@ -96,7 +97,7 @@ public class TCPTransferData {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                byte []bSeNO = strSeId.getBytes();
+                byte []bSeNO = MyApplication.seId.getBytes();
                 byte[] input = genAppRequestByte(randomNum,bSeNO,taskId);
                 if(mTcpSocket==null){
                     try {
@@ -121,7 +122,7 @@ public class TCPTransferData {
     public void handleTSMData(final TCPSocket tcpSocket,byte []input){
         //testSeCmdCount++;
         LogUtil.debug("input:"+ByteUtil.bytesToHexString(input,input.length));
-        TCPByteRequest request = new TCPByteRequest(tcpSocket, input, new TCPResponse.Listener<byte[]>() {
+        new TCPRequest().TCPByteRequest(tcpSocket, input, new TCPResponse.Listener<byte[]>() {
             @Override
             public void onResponse(byte[] response, int responseLen) {
                 ///////////////////TEST/////////////
@@ -174,7 +175,7 @@ public class TCPTransferData {
                     else {
                         tcpSocket.closeSocket();
                         mTcpSocket = null;
-                        LogUtil.debug( ByteUtil.bytesToHexString(response,responseLen));
+//                        LogUtil.debug( ByteUtil.bytesToHexString(response,responseLen));
                         LogUtil.debug( "failed");
                         tsmTaskCompleteListener.onTaskExecutedFailed();
                     }
@@ -201,7 +202,20 @@ public class TCPTransferData {
                 tsmTaskCompleteListener.onTaskExecutedFailed();
             }
         });
-        request.start();
+
+
+//        TCPByteRequest request = new TCPByteRequest(tcpSocket, input, new TCPResponse.Listener<byte[]>() {
+//            @Override
+//            public void onResponse(byte[] response, int responseLen) {
+//
+//            }
+//        }, new TCPResponse.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(Object response) {
+//
+//            }
+//        });
+//        request.start();
     }
 
     public void appRequest(TCPSocket tcpSocket,byte[] input){
@@ -233,7 +247,7 @@ public class TCPTransferData {
     public byte[] genAppRequestByte(byte[] random,byte[] bSeId,byte[] taskId){
         byte[] input = new byte[38+bSeId.length];
         byte[] cmd = {0x01, 0x00, 0x39, 0x24};
-        byte[] bSeNO = strSeId.getBytes();
+        byte[] bSeNO = MyApplication.seId.getBytes();
         int paraLength = 1+bSeId.length+20;
         System.arraycopy(maskId, 0, input, 0, maskId.length);
         System.arraycopy(randomNum, 0, input, maskId.length, randomNum.length);
@@ -253,7 +267,7 @@ public class TCPTransferData {
     public static byte CMD_SERVER_END = 0x04;
     public static byte CMD_SERVER_RESET = 0x05;
     public byte[] randomNum = {0x01, 0x02, 0x03, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0xb, 0xc};
-    String strSeId = "451000000000000020160328000000010005";
+//    String strSeId = "451000000000000020160328000000010005";
     byte[] maskId = {0x12, (byte) 0xab};
     private void generateRandomData() {
         randomNum = new byte[12];

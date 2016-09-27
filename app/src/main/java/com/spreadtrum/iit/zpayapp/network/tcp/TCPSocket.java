@@ -12,7 +12,7 @@ import java.net.Socket;
 /**
  * Created by SPREADTRUM\ting.long on 16-8-8.
  */
-public class TCPSocket implements Runnable{
+public class TCPSocket{
     private Socket socket;
     private static TCPSocket tcpSocket;
 
@@ -120,22 +120,4 @@ public class TCPSocket implements Runnable{
         }
         return count;
     }
-
-    @Override
-    public void run() {
-        int count = 0;
-        byte[] readBuf = new byte[100];
-        if (socket != null) {
-
-            try {
-                InputStream inputStream = socket.getInputStream();
-                count = inputStream.read(readBuf);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                LogUtil.error("BLE",e.getMessage());
-            }
-        }
-    }
-    public static String TAG = "BLE";
 }

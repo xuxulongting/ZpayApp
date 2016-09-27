@@ -126,7 +126,7 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
             @Override
             public void onClick(View view) {
                 //连接BLE
-                MyApplication app = (MyApplication) mContext;//(MyApplication) getActivity().getApplication();
+                MyApplication app = (MyApplication) mContext.getApplicationContext();//(MyApplication) getActivity().getApplication();
                 final String bluetoothDevAddr = app.getBluetoothDevAddr();
                 if(bluetoothDevAddr.isEmpty()){
                     new AlertDialog.Builder(mContext)

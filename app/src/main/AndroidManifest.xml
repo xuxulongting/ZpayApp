@@ -44,9 +44,6 @@
 
         </activity>
 
-        <activity android:name=".network.tcp.SimpleClientActivity">
-
-        </activity>
         <activity android:name=".network.bluetooth.BluetoothTestActivity">
 
         </activity>

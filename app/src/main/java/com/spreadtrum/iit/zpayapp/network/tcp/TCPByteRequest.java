@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Created by SPREADTRUM\ting.long on 16-8-11.
+ * Created by SPREADTRUM\ting.long on 16-8-11. 目前没有用到，用TCPRequest代替了
  */
 public class TCPByteRequest extends Thread{
     private final TCPResponse.Listener<byte[]> mListener;
