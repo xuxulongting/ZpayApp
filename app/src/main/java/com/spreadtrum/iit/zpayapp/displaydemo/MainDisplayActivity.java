@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Switch;
@@ -128,7 +129,7 @@ public class MainDisplayActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onPause() {
         super.onPause();
-//        LogUtil.debug("MainDisplayActivity onPause");
+        LogUtil.debug("MainDisplayActivity onPause");
         //将appLst存入数据库
 
     }
@@ -136,14 +137,14 @@ public class MainDisplayActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onStop() {
         super.onStop();
-//        LogUtil.debug("MainDisplayActivity onStop");
+        LogUtil.debug("MainDisplayActivity onStop");
 
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-//        LogUtil.debug("MainDisplayActivity onDestroy");
+        LogUtil.debug("MainDisplayActivity onDestroy");
 
     }
     public static final int FRAGMENT_APP_STORE=0;

@@ -39,21 +39,22 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
     private Button btnOperaCard;
     private LinearLayout linearLayoutBar;
     private ListView listViewAppStore;
-    /**
-     * 当图片下载完成后，更新变量appList,主要是更新localpicpath
-     */
-    private Handler updatePicHandler = new Handler(){
-        public void handleMessage(Message msg){
-            if(msg.what==0){
-                AppInformation appInfo = (AppInformation) msg.obj;
-                for(int i=0;i<appList.size();i++){
-                    if (appList.get(i).getIndex().equals(appInfo.getIndex())){
-                        appList.set(i,appInfo);
-                    }
-                }
-            }
-        }
-    };
+    private Handler updatePicHandler=null;
+//    /**
+//     * 当图片下载完成后，更新变量appList,主要是更新localpicpath
+//     */
+//    private Handler updatePicHandler = new Handler(){
+//        public void handleMessage(Message msg){
+//            if(msg.what==0){
+//                AppInformation appInfo = (AppInformation) msg.obj;
+//                for(int i=0;i<appList.size();i++){
+//                    if (appList.get(i).getIndex().equals(appInfo.getIndex())){
+//                        appList.set(i,appInfo);
+//                    }
+//                }
+//            }
+//        }
+//    };
 
 //    public AppStoreCommonAdapter(Context context, int layoutId, List datas) {
 //        super(context, layoutId, datas);
@@ -61,11 +62,20 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
 //        mContext = context;
 //    }
 
-    public AppStoreCommonAdapter(Context context,int layoutId,List datas,View parent){
+    /**
+     * AppStoreFragment的Adapter构造函数
+     * @param context   上下文
+     * @param layoutId  item view的资源Id
+     * @param datas item view要绑定的数据
+     * @param parent    这里指ListView
+     * @param updateHandler 下载图片后，以消息的方式更新appList的Handler，这样，就不必从数据库读取
+     */
+    public AppStoreCommonAdapter(Context context,int layoutId,List datas,View parent,Handler updateHandler){
         super(context, layoutId, datas);
         appList = datas;
         mContext = context;
         listViewAppStore = (ListView) parent;
+        this.updatePicHandler = updateHandler;
     }
 
     @Override

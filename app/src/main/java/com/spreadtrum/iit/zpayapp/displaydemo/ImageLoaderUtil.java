@@ -108,11 +108,12 @@ public class ImageLoaderUtil {
 
                     @Override
                     public void onResponse(Bitmap response, int id) {
-                        //防止图片出现乱序
-                        ImageView imageViewByTag = (ImageView) listView.findViewWithTag(url);
+                        //更新item view，设置图片
+                        ImageView imageViewByTag = (ImageView) listView.findViewWithTag(url);//防止图片出现乱序
                         if (imageViewByTag != null) {
                             imageViewByTag.setImageBitmap(response);
                         }
+                        //将图片写入SD卡
                         File file = ImageFileCache.getAppDir();
                         String fileName = url.substring(url.lastIndexOf("/") + 1);
                         saveImage(file, fileName, response);

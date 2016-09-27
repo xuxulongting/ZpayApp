@@ -42,7 +42,7 @@ public class AppStoreFragment extends Fragment {
     private CommonAdapter busAdapter= null;
 //    private List<Card> listCardParameter = new ArrayList<Card>();
 //    private List<AppInformation> appInformationList = new ArrayList<AppInformation>();
-    List<AppInformation> appList=null;
+    private static List<AppInformation> appList=null;
     private Button btnOperaCard;
     private LinearLayout linearLayoutBar;
     private AppDisplayDatabaseHelper dbHelper;
@@ -94,12 +94,25 @@ public class AppStoreFragment extends Fragment {
         return bussinessUpdateIntentFilter;
     }
 
+    /**
+     * 当图片下载完成后，更新变量appList,主要是更新localpicpath
+     */
+    public Handler updatePicHandler = new Handler(){
+        public void handleMessage(Message msg){
+            if(msg.what==0){
+                AppInformation appInfo = (AppInformation) msg.obj;
+                for(int i=0;i<appList.size();i++){
+                    if (appList.get(i).getIndex().equals(appInfo.getIndex())){
+                        appList.set(i,appInfo);
+                    }
+                }
+            }
+        }
+    };
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //准备数据
-        //getCardListData();
-        //getAppListData();
         //创建数据库
         dbHelper = new AppDisplayDatabaseHelper(MyApplication.getContextObject(),"info.db",null,1);
 //
@@ -131,7 +144,7 @@ public class AppStoreFragment extends Fragment {
             public void handleMessage(Message msg) {
                 if (msg.what == 0) {
                     //创建adapter，绑定listview的itemview的内容
-                    busAdapter = new AppStoreCommonAdapter(view.getContext(), R.layout.list_item_appstore, appList,listViewAppStore);
+                    busAdapter = new AppStoreCommonAdapter(view.getContext(), R.layout.list_item_appstore, appList,listViewAppStore,updatePicHandler);
                 }
                 listViewAppStore.setAdapter(busAdapter);
                 loading.setVisibility(View.INVISIBLE);
@@ -139,11 +152,14 @@ public class AppStoreFragment extends Fragment {
         };
         //获取AppInformation List
         if(appList!=null){
-            handler.sendEmptyMessage(0);
+//            handler.sendEmptyMessage(0);
+            /////////同一个线程内，尽量不要用消息的方式，效率低////////////////
+            busAdapter = new AppStoreCommonAdapter(view.getContext(), R.layout.list_item_appstore, appList,listViewAppStore,updatePicHandler);
         }
         else {
+            LogUtil.debug("appList is not null");
+            //appList标识为静态变量static以后，切换Fragment，Fragment执行OnDestroy，appList不释放，不需要从数据库获取
             //从数据库获取appInformation
-            // 查询Book表中所有的数据
             if (MyApplication.dataFromNet) {
                 appList = new ArrayList<AppInformation>();
                 SQLiteDatabase dbRead = dbHelper.getReadableDatabase();
@@ -187,7 +203,9 @@ public class AppStoreFragment extends Fragment {
                         }
                     }
                 }
-                handler.sendEmptyMessage(0);
+//                handler.sendEmptyMessage(0);
+                busAdapter = new AppStoreCommonAdapter(view.getContext(), R.layout.list_item_appstore,
+                        appList,listViewAppStore,updatePicHandler);
             }
             else {
                 //从网络获取appInformation
@@ -213,7 +231,9 @@ public class AppStoreFragment extends Fragment {
                                 }
                             }
                         }
+                        //从网络获取数据，必须使用消息的方式，因为网络获取数据是异步的
                         handler.sendEmptyMessage(0);
+//                        busAdapter = new AppStoreCommonAdapter(view.getContext(), R.layout.list_item_appstore, appList,listViewAppStore,updatePicHandler);
                         //将数据写入数据库
                         SQLiteDatabase dbWrite = dbHelper.getWritableDatabase();
                         new DatabaseHandler().insertDB(dbWrite, appList);
@@ -222,6 +242,8 @@ public class AppStoreFragment extends Fragment {
                 });
             }
         }
+        listViewAppStore.setAdapter(busAdapter);
+        loading.setVisibility(View.INVISIBLE);
         return view;
     }
 
