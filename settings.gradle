@@ -1,2 +1,2 @@
 include ':app', ':base-adapter-library', ':baseadapter-recyclerview', ':volley'
-project(':volley').projectDir = new File('volley-library')
+project(':volley').projectDir = new File('volley')

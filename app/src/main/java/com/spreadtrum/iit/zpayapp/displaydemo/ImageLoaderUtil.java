@@ -69,9 +69,9 @@ public class ImageLoaderUtil {
             fos.close();
             return true;
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
 //        return file;
         return false;
@@ -82,7 +82,7 @@ public class ImageLoaderUtil {
             FileInputStream fis = new FileInputStream(path);
             return BitmapFactory.decodeStream(fis);
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             return null;
         }
     }

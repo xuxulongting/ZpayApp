@@ -3,25 +3,24 @@ package com.spreadtrum.iit.zpayapp.network.webservice;
 import android.util.Base64;
 import android.util.Xml;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.message.MessageBuilder;
 import com.spreadtrum.iit.zpayapp.message.RequestTaskidEntity;
+import com.spreadtrum.iit.zpayapp.network.http.HttpCallbackListener;
+import com.spreadtrum.iit.zpayapp.network.http.HttpUtils;
 
-import org.w3c.dom.ProcessingInstruction;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-9-7.
@@ -30,8 +29,8 @@ public class ApplyPersonalizationService {
 //    public static final String WEBSERVICE_PATH = "http://10.0.64.120:6893/SPRDTSMDbService.asmx";
     public static final String WEBSERVICE_PATH = "http://192.168.1.150:6893/SPRDTSMDbService.asmx";
     /**
-     * 查询应用
-     * @param xml 查询应用请求xml
+     * 通过web service接口，获取相关信息
+     * @param xml 请求xml
      * @return
      */
     public static String getTSMAppInformation(String xml, final TSMAppInformationCallback callback){
@@ -57,6 +56,7 @@ public class ApplyPersonalizationService {
             @Override
             public void onError(String errResponse) {
                 tsmXmlArrays[0]="";
+                callback.getAppInfo(tsmXmlArrays[0]);
             }
         });
         return null;
@@ -124,34 +124,22 @@ public class ApplyPersonalizationService {
         return null;
     }
 
-//    private void test(InputStream inputStream,String keywords){
-//        InputStreamReader isr = new InputStreamReader(inputStream);
-//        BufferedReader br = new BufferedReader(isr);
-//        StringBuilder xmlAsString = new StringBuilder(4098);
-//        String line;
-//        try {
-//            while ((line = br.readLine()) != null) {
-//                xmlAsString.append(line);
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        // Look for links using a regex. Assume the first link is "Prev" and the
-//        // next link is "Next"
-//        Pattern hrefRegex = Pattern.compile("<XMLReturnResult>\"([^\"]*)\">");
-//        Matcher m = hrefRegex.matcher(xmlAsString);
-//        String linkToPrevPost = null;
-//        String linkToNextPost = null;
-//        while (m.find()) {
-//            String hrefValue = m.group(1);
-//            if (linkToPrevPost == null) {
-//                linkToPrevPost = hrefValue;
-//            } else {
-//                linkToNextPost = hrefValue;
-//            }
-//        }
-//    }
+    public static void test(String xml){
+        String soap = readSoap("soap11.xml");
+        soap = soap.replace("123",xml);
+        byte[] entity = soap.getBytes();
+        HttpUtils.sendHttpRequestforWebservice(WEBSERVICE_PATH, entity, new Response.Listener() {
+            @Override
+            public void onResponse(Object response) {
+                LogUtil.debug((String) response);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                LogUtil.warn(error.getMessage());
+            }
+        });
+    }
 
     private static String parseSOAP(InputStream inputStream,String keywords) {
         XmlPullParser xmlPullParser = Xml.newPullParser();

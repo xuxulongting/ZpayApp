@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.zhy.autolayout.AutoLinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
+<com.zhy.autolayout.AutoLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
     <com.zhy.autolayout.AutoRelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -12,7 +10,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="注册"
+            android:text="登录"
             android:gravity="center"
             android:textSize="100px"
             android:layout_marginTop="20px"
@@ -36,17 +34,22 @@
         android:layout_margin="50px"
         >
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="用 户 名："
-            android:textSize="70px"/>
+        <!--<TextView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="用 户 名："-->
+            <!--android:textSize="70px"/>-->
+        <ImageView
+            android:layout_width="130px"
+            android:layout_height="130px"
+            android:src="@drawable/user"
+            />
 
         <EditText
             android:id="@+id/id_et_username"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="帐户名和登录名，最多输入30个字符"
+            android:hint="用户名"
             android:textColorHint="@color/colorHint"
             android:textSize="60px"
             />
@@ -59,54 +62,34 @@
         android:layout_margin="50px"
         >
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="密       码："
-            android:textSize="70px"/>
+        <!--<TextView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="密       码："-->
+            <!--android:textSize="70px"/>-->
+        <ImageView
+            android:layout_width="130px"
+            android:layout_height="130px"
+            android:src="@drawable/password"/>
 
         <EditText
             android:id="@+id/id_et_pwd"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword"
-            android:textSize="50px"
-            android:hint="建议至少使用两种字符组合，最多输入20个字符"
+            android:textSize="60px"
+            android:hint="密码"
             android:textColorHint="@color/colorHint"/>
 
-    </com.zhy.autolayout.AutoLinearLayout>
-    <com.zhy.autolayout.AutoLinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_margin="50px"
-        >
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="重复密码："
-            android:textSize="70px"/>
-
-        <EditText
-            android:id="@+id/id_et_repwd"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPassword"
-            android:textSize="50px"
-            android:hint="请再次输入密码"
-            android:textColorHint="@color/colorHint"/>
 
     </com.zhy.autolayout.AutoLinearLayout>
-
     <Button
-        android:id="@+id/id_btn_register"
+        android:id="@+id/id_btn_login"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="30dp"
         android:background="@color/colorPrimary"
-        android:text="注册"
+        android:text="登录"
         android:textSize="80px"
         android:textColor="@color/colorAccent"/>
-
-</com.zhy.autolayout.AutoLinearLayout>
+    </com.zhy.autolayout.AutoLinearLayout>

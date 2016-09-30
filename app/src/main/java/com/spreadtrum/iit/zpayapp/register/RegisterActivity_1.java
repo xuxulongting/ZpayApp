@@ -17,7 +17,7 @@ import com.spreadtrum.iit.zpayapp.R;
 /**
  * Created by SPREADTRUM\ting.long on 16-7-26.
  */
-public class RegisterActivity extends AppCompatActivity implements RegisterFragment_1.NextStep_1ClickListener,
+public class RegisterActivity_1 extends AppCompatActivity implements RegisterFragment_1.NextStep_1ClickListener,
         RegisterFragment_2.NextStep_2ClickListener,RegisterFragment_3.NextStep_3ClickListener,
         RegisterFragment_4.NextStep_4ClickListener,
         TitleFragment.BackBtnClickListener {
@@ -94,14 +94,14 @@ public class RegisterActivity extends AppCompatActivity implements RegisterFragm
 
     @Override
     public void nextStep_4BtnClick() {
-        Dialog alertDialog = new AlertDialog.Builder(RegisterActivity.this).
+        Dialog alertDialog = new AlertDialog.Builder(RegisterActivity_1.this).
                 setIcon(R.drawable.verify).
                 setTitle("").
                 setMessage("请填写本人真实身份，认证通过后无法修改").
                 setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Intent intent = new Intent(RegisterActivity.this,ApplicationActivity.class);
+                        Intent intent = new Intent(RegisterActivity_1.this,ApplicationActivity.class);
                         startActivity(intent);
                     }
                 }).setNegativeButton("取消", new DialogInterface.OnClickListener() {

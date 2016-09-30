@@ -13,10 +13,20 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme.Base"
         android:name=".common.MyApplication">
-        <activity android:name=".register.LoginActivity">
+        <activity android:name=".register.MainLoginActivity">
 
         </activity>
-        <activity android:name=".register.RegisterActivity"></activity>
+        <activity
+            android:name=".register_login.RegisterActivity"
+            android:windowSoftInputMode="adjustNothing|stateHidden">
+            <span style="white-space:pre"></span>
+        </activity>
+        <activity
+            android:name=".register_login.DigtalpwdLoginActivity">
+            android:windowSoftInputMode="adjustNothing|stateHidden">
+            <span style="white-space:pre"></span>
+        </activity>
+        <activity android:name=".register.RegisterActivity_1"></activity>
         <activity android:name=".RegisterActivity_1"></activity>
         <activity android:name=".RegisterActivity_2"></activity>
         <activity android:name=".RegisterActivity_3"></activity>
@@ -38,6 +48,13 @@
         </activity>
         <activity android:name=".network.bluetooth.BluetoothSettingsActivity"></activity>
         <activity android:name=".network.webservice.WebserviceActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".network.volley_okhttp.VolleyTestDemo">
 
         </activity>
         <activity android:name=".displaydemo.SpecialAppActivity">

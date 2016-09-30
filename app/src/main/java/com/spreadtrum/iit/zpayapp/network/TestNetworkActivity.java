@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.R;
@@ -13,13 +12,10 @@ import com.spreadtrum.iit.zpayapp.common.ByteUtil;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothDialogFragment;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.SECallbackTSMListener;
-import com.spreadtrum.iit.zpayapp.network.bluetooth.SEResponse;
 import com.spreadtrum.iit.zpayapp.network.tcp.NetParameter;
 import com.spreadtrum.iit.zpayapp.network.tcp.TCPByteRequest;
 import com.spreadtrum.iit.zpayapp.network.tcp.TCPResponse;
 import com.spreadtrum.iit.zpayapp.network.tcp.TCPSocket;
-
-import java.io.IOException;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-8-9.
@@ -34,8 +30,6 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
     private BluetoothControl bluetoothControl = null;
     BluetoothDialogFragment dialogFragment;
     private TCPSocket mTcpSocket = null;
-
-    private SEResponse.Listener seListener;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

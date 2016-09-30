@@ -11,7 +11,7 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/base-adapter-library" />
             <option value="$PROJECT_DIR$/baseadapter-recyclerview" />
-            <option value="$PROJECT_DIR$/volley-library" />
+            <option value="$PROJECT_DIR$/volley" />
           </set>
         </option>
         <option name="myModules">
@@ -20,7 +20,7 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/base-adapter-library" />
             <option value="$PROJECT_DIR$/baseadapter-recyclerview" />
-            <option value="$PROJECT_DIR$/volley-library" />
+            <option value="$PROJECT_DIR$/volley" />
           </set>
         </option>
       </GradleProjectSettings>

@@ -15,12 +15,17 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.NetworkImageView;
+import com.android.volley.toolbox.Volley;
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.R;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.database.AppDisplayDatabaseHelper;
 import com.spreadtrum.iit.zpayapp.message.AppInformation;
 import com.spreadtrum.iit.zpayapp.message.MessageBuilder;
+import com.spreadtrum.iit.zpayapp.network.volley_okhttp.BitmapCache;
 import com.zhy.adapter.abslistview.ViewHolder;
 import com.zhy.http.okhttp.OkHttpUtils;
 import com.zhy.http.okhttp.callback.BitmapCallback;
@@ -42,31 +47,46 @@ public class WebserviceActivity extends AppCompatActivity{
     private Button btnTestWebService;
     private ImageView imageView;
     private File cache;
+    private NetworkImageView networkImageView;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         btnTestWebService = (Button) findViewById(R.id.id_test_webservice);
-        imageView = (ImageView) findViewById(R.id.id_iv_test);
+//        imageView = (ImageView) findViewById(R.id.id_iv_test);
+        networkImageView = (NetworkImageView) findViewById(R.id.network_image_view);
         btnTestWebService.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final String url = "http://www.tjykt.com/templets/default/images/hl_z.png";//item.getPicurl();
-                //ViewHolder viewHolder = new ViewHolder();
-               // AppInformation appInformation = new AppInformation();
-                //创建缓存目录，存放图片，添加允许访问存储设备权限 "/storage/emulated/0/cache111"
-                String path = Environment.getExternalStorageDirectory().getAbsolutePath();
-                cache = new File(Environment.getExternalStorageDirectory(), "cache111");
-                if(!cache.exists()){
-                    cache.mkdirs();
-                    LogUtil.debug(cache.getAbsolutePath());
-                }
-//                DownloadImage(url,null,null);
-                String localpath = "/storage/emulated/0/Android/data/com.spreadtrum.iit.zpayapp/cache/aaaaa/hl_z.png";
-                Bitmap bitmap = getLoacalBitmap(localpath);
-                if(bitmap==null)
-                    return;
-                imageView.setImageBitmap(bitmap);
+//                String xml = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZyA9ICJVVEYtOCI/Pgo8dHNtZGJyZXF1ZXN0IHZlcnNpb249IjEuMCI+CiAgICAgICAgIDxTRUluZGV4PjQ1MTAwMDAwMDAwMDAwMDAyMDE2MDMyODAwMDAwMDAxMDAwMzwvU0VJbmRleD4KICAgICAgICAgPHJlcXR5cGU+ZGJpbnNlcnQ8L3JlcXR5cGU+CiAgICAgICAgIDxyZXFkYXRhPgogICAgICAgICAgICAgICAgICAgPHRhc2t0eXBlPkQ1PC90YXNrdHlwZT4KICAgICAgICAgICAgICAgICAgIDx0YXNrY29tbWFuZD5ENTAxMDE8L3Rhc2tjb21tYW5kPgogICAgICAgICA8L3JlcWRhdGE+CjwvdHNtZGJyZXF1ZXN0Pg==";
+//                ApplyPersonalizationService.test(xml);
+                RequestQueue queue = Volley.newRequestQueue(MyApplication.getContextObject());
+                String url = "http://www.tjykt.com/templets/default/images/hl_z.png";
+                networkImageView.setDefaultImageResId(R.drawable.refresh);
+                networkImageView.setErrorImageResId(R.drawable.refresh);
+                networkImageView.setImageUrl(url,new ImageLoader(queue,new BitmapCache()));
+//                ApplyPersonalizationService.getTSMAppInformation(xml, new TSMAppInformationCallback() {
+//                    @Override
+//                    public void getAppInfo(String xml) {
+//                        LogUtil.debug(xml);
+//                    }
+//                });
+//                final String url = "http://www.tjykt.com/templets/default/images/hl_z.png";//item.getPicurl();
+//                //ViewHolder viewHolder = new ViewHolder();
+//               // AppInformation appInformation = new AppInformation();
+//                //创建缓存目录，存放图片，添加允许访问存储设备权限 "/storage/emulated/0/cache111"
+//                String path = Environment.getExternalStorageDirectory().getAbsolutePath();
+//                cache = new File(Environment.getExternalStorageDirectory(), "cache111");
+//                if(!cache.exists()){
+//                    cache.mkdirs();
+//                    LogUtil.debug(cache.getAbsolutePath());
+//                }
+////                DownloadImage(url,null,null);
+//                String localpath = "/storage/emulated/0/Android/data/com.spreadtrum.iit.zpayapp/cache/aaaaa/hl_z.png";
+//                Bitmap bitmap = getLoacalBitmap(localpath);
+//                if(bitmap==null)
+//                    return;
+//                imageView.setImageBitmap(bitmap);
 //                OkHttpUtils
 //                        .get()//
 //                        .url(url)//

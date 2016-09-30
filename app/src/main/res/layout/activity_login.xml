@@ -14,7 +14,8 @@
         android:src="@drawable/yindao"
         android:layout_weight="1"/>
 
-    <com.zhy.autolayout.AutoLinearLayout       android:layout_width="match_parent"
+    <com.zhy.autolayout.AutoLinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <Button

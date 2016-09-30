@@ -94,10 +94,10 @@ public class BluetoothSettingsActivity extends AppCompatActivity {
         if(!btAdapter.enable()){
             Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(turnOn, 0);
-            Toast.makeText(this,"Turned on",Toast.LENGTH_LONG).show();
+//            Toast.makeText(this,"Turned on",Toast.LENGTH_LONG).show();
         }
         else{
-            Toast.makeText(this,"Already Turn on",Toast.LENGTH_LONG).show();
+//            Toast.makeText(this,"Already Turn on",Toast.LENGTH_LONG).show();
         }
     }
 

@@ -19,14 +19,6 @@ public class RegisterActivity_1 extends AppCompatActivity implements TitleFragme
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register_1);
-
-        findViewById(R.id.id_btn_next_step_1).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(RegisterActivity_1.this,RegisterActivity_2.class);
-                startActivity(intent);
-            }
-        });
     }
 
     @Override

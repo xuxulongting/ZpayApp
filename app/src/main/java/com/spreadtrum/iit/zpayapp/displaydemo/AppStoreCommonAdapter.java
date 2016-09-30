@@ -157,7 +157,7 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
                 MyApplication.appInstalling.put(item.getIndex(),true);
                 //刷新Listview
                 notifyDataSetChanged();
-                //获取蓝牙读写句柄
+                //获取蓝牙句柄
                 //if(bluetoothControl==null){
                 final BluetoothControl bluetoothControl = BluetoothControl.getInstance(MyApplication.getContextObject(),bluetoothDevAddr);
                 bluetoothControl.setBlePreparedCallbackListener(new BLEPreparedCallbackListener() {
@@ -175,10 +175,8 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
 //                        entity.setTasktype(AppStoreFragment.TASK_TYPE_DOWNLOAD);
 //                        String strCmd = AppStoreFragment.TASK_TYPE_DOWNLOAD+"05"+ByteUtil.bytesToString(bAppid,5);
 //                        entity.setTaskcommand(strCmd);
+                        //获取task id
                         RequestTaskidEntity entity = MessageBuilder.getRequestTaskidEntity(item,BussinessTransaction.TASK_TYPE_DOWNLOAD);
-                        //同步应用
-//                                    entity.setTasktype(TASK_TYPE_SYNC);
-//                                    entity.setTaskcommand("DA0103");
                         ApplyPersonalizationService.getTSMTaskid(MyApplication.seId, "dbinsert", entity, new TSMAppInformationCallback() {
                             @Override
                             public void getAppInfo(String xml) {
@@ -214,7 +212,6 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
                                         MyApplication.handler.sendEmptyMessage(MyApplication.DOWNLOAD_FAILED);
                                     }
                                 });
-                                //DeleteApplet(bTaskId,handler);
                             }
                         });
 

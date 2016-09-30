@@ -10,8 +10,9 @@ import android.widget.Button;
 
 import com.spreadtrum.iit.zpayapp.R;
 import com.spreadtrum.iit.zpayapp.login.UserZhiwenLoginActivity;
+import com.spreadtrum.iit.zpayapp.register_login.DigtalpwdLoginActivity;
 
-public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainLoginActivity extends AppCompatActivity implements View.OnClickListener {
     private Fragment titleFragment=null;
     private Button btn_register=null;
     private Button btn_login=null;
@@ -34,7 +35,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.id_btn_register:
-                intent = new Intent(LoginActivity.this,RegisterActivity.class);
+                intent = new Intent(MainLoginActivity.this, com.spreadtrum.iit.zpayapp.register_login.RegisterActivity.class);
                 startActivity(intent);
                 break;
             case R.id.id_btn_login:
@@ -60,7 +61,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 //                        })
 //                        .create();
 //                alertDialog.show();
-                intent = new Intent(LoginActivity.this,UserZhiwenLoginActivity.class);
+                intent = new Intent(MainLoginActivity.this,DigtalpwdLoginActivity.class);
                 startActivity(intent);
                 break;
 

@@ -29,6 +29,7 @@ import com.spreadtrum.iit.zpayapp.message.MessageBuilder;
 import com.spreadtrum.iit.zpayapp.message.TSMResponseEntity;
 import com.spreadtrum.iit.zpayapp.network.webservice.ApplyPersonalizationService;
 import com.spreadtrum.iit.zpayapp.network.webservice.TSMAppInformationCallback;
+import com.spreadtrum.iit.zpayapp.register.MainLoginActivity;
 import com.zhy.adapter.abslistview.CommonAdapter;
 
 import java.io.Serializable;
@@ -155,6 +156,8 @@ public class AppStoreFragment extends Fragment {
 //            handler.sendEmptyMessage(0);
             /////////同一个线程内，尽量不要用消息的方式，效率低////////////////
             busAdapter = new AppStoreCommonAdapter(view.getContext(), R.layout.list_item_appstore, appList,listViewAppStore,updatePicHandler);
+            listViewAppStore.setAdapter(busAdapter);
+            loading.setVisibility(View.INVISIBLE);
         }
         else {
             LogUtil.debug("appList is not null");
@@ -206,6 +209,8 @@ public class AppStoreFragment extends Fragment {
 //                handler.sendEmptyMessage(0);
                 busAdapter = new AppStoreCommonAdapter(view.getContext(), R.layout.list_item_appstore,
                         appList,listViewAppStore,updatePicHandler);
+                listViewAppStore.setAdapter(busAdapter);
+                loading.setVisibility(View.INVISIBLE);
             }
             else {
                 //从网络获取appInformation
@@ -214,6 +219,17 @@ public class AppStoreFragment extends Fragment {
                 ApplyPersonalizationService.getAppinfoFromWebservice(MyApplication.seId, requestType, requestData, new TSMAppInformationCallback() {
                     @Override
                     public void getAppInfo(String xml) {
+                        if(xml.isEmpty()){
+                            //没有获取到Applet相关信息,说明网络存在问题，或者token失效，进入登录界面
+                            // isAdded(),Return true if the fragment is currently added to its activity.
+                            // 因为网络是异步的，为了确保view不为Null，先判断fragment is attached to activity，or not
+                            if(isAdded()) {
+                                Intent intent = new Intent(view.getContext(), MainLoginActivity.class);
+                                startActivity(intent);
+
+                            }
+                            return;
+                        }
                         //解析xml
                         TSMResponseEntity entity = MessageBuilder.parseDownLoadXml(xml);
                         //获取List<AppInformation>
@@ -242,8 +258,8 @@ public class AppStoreFragment extends Fragment {
                 });
             }
         }
-        listViewAppStore.setAdapter(busAdapter);
-        loading.setVisibility(View.INVISIBLE);
+//        listViewAppStore.setAdapter(busAdapter);
+//        loading.setVisibility(View.INVISIBLE);
         return view;
     }
 

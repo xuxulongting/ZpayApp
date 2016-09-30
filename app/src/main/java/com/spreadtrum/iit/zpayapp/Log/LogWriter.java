@@ -35,18 +35,18 @@ public class LogWriter {
 		return mLogFile;
 	}
 
-	public void close() throws IOException {
+	public static void close() throws IOException {
 		mWriter.close();
 	}
 
-	public void print(String log) throws IOException {
+	public static void print(String log) throws IOException {
 		mWriter.write(df.format(new Date()));
 		mWriter.write(log);
 		mWriter.write("\r\n");
 		mWriter.flush();
 	}
 
-	public void print(Class cls, String log) throws IOException {
+	public static void print(Class cls, String log) throws IOException {
 		mWriter.write(df.format(new Date()));
 		mWriter.write(cls.getSimpleName() + " ");
 		mWriter.write(log);

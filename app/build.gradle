@@ -30,4 +30,5 @@ dependencies {
     compile project(':baseadapter-recyclerview')
     compile 'com.squareup.okhttp:okhttp:2.4.0'
     compile 'com.zhy:okhttputils:2.6.2'
+    compile project(':volley')
 }

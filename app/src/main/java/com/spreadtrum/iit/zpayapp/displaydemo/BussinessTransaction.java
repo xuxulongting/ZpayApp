@@ -12,7 +12,11 @@ import android.widget.Toast;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.database.AppDisplayDatabaseHelper;
 import com.spreadtrum.iit.zpayapp.message.AppInformation;
+import com.spreadtrum.iit.zpayapp.message.MessageBuilder;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
+import com.spreadtrum.iit.zpayapp.network.bluetooth.SECallbackTSMListener;
+import com.spreadtrum.iit.zpayapp.network.http.HttpResponseCallback;
+import com.spreadtrum.iit.zpayapp.network.http.HttpUtils;
 import com.spreadtrum.iit.zpayapp.network.tcp.TCPTransferData;
 import com.spreadtrum.iit.zpayapp.network.tcp.TsmTaskCompleteCallback;
 import com.spreadtrum.iit.zpayapp.network.tcp.TsmTaskCompleteListener;
@@ -98,6 +102,45 @@ public class BussinessTransaction{
 //
 //            }
 //        });
+    }
+
+    /**
+     * http方式连接TSM，下载应用
+     * @param bluetoothControl  蓝牙连接实例
+     * @param xml   请求xml
+     * @param completeCallback  下载完成响应回调
+     */
+    public void DownloadApplet(final BluetoothControl bluetoothControl, String xml, TsmTaskCompleteCallback completeCallback) {
+        String url="";
+        HttpUtils.xmlStringRequest(url, xml, new HttpResponseCallback<String>() {
+            @Override
+            public void onSuccess(String response) {
+                //解析xml，该xml中包含多条APDU指令
+                byte[] data=null;
+                int length=0;
+                //调用蓝牙
+                if(bluetoothControl!=null){
+                    bluetoothControl.communicateWithJDSe(data,length);
+                    bluetoothControl.setSeCallbackTSMListener(new SECallbackTSMListener() {
+                        //回调TSM
+                        @Override
+                        public void callbackTSM(byte[] responseData, int responseLen) {
+
+                        }
+
+                        @Override
+                        public void errorCallback() {
+
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onError(String errResponse) {
+
+            }
+        });
     }
 
     /**
