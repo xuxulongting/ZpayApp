@@ -9,6 +9,7 @@ import java.util.Map;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-9-28.
+ * 自定义带byte(String)类型参数的，自定义Header的Request
  */
 public class CustomStringRequest extends StringRequest {
     //body内容,在这里是将xml转换成二进制格式

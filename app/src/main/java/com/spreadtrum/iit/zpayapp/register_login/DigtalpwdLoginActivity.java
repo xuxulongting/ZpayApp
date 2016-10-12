@@ -1,7 +1,10 @@
 package com.spreadtrum.iit.zpayapp.register_login;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -10,8 +13,10 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -21,6 +26,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.spreadtrum.iit.zpayapp.R;
+import com.spreadtrum.iit.zpayapp.network.volley_okhttp.RequestQueueUtils;
 import com.spreadtrum.iit.zpayapp.register.RegisterActivity_1;
 
 import org.json.JSONException;
@@ -33,7 +39,11 @@ public class DigtalpwdLoginActivity extends AppCompatActivity implements View.On
     private Button btnLogin;
     private EditText editTextUsername;
     private EditText editTextPwd;
-    private ImageButton btnBack;
+//    private ImageButton btnBack;
+    private TextView textViewRegister;
+    private CheckBox checkBox;
+//    private SharedPreferences pref;
+//    private SharedPreferences.Editor editor;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,8 +52,17 @@ public class DigtalpwdLoginActivity extends AppCompatActivity implements View.On
         editTextUsername = (EditText) findViewById(R.id.id_et_username);
         editTextPwd = (EditText) findViewById(R.id.id_et_pwd);
         btnLogin.setOnClickListener(this);
-        btnBack = (ImageButton) findViewById(R.id.id_iv_arrowback);
-        btnBack.setOnClickListener(this);
+//        btnBack = (ImageButton) findViewById(R.id.id_iv_arrowback);
+//        btnBack.setOnClickListener(this);
+        checkBox = (CheckBox) findViewById(R.id.id_cb_rememberpwd);
+        textViewRegister = (TextView) findViewById(R.id.id_tv_register);
+        textViewRegister.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(DigtalpwdLoginActivity.this,RegisterActivity.class);
+                startActivity(intent);
+            }
+        });
         editTextUsername.addTextChangedListener(new TextWatcher() {
             int cou = 0;
             int selectionEnd = 0;
@@ -93,12 +112,15 @@ public class DigtalpwdLoginActivity extends AppCompatActivity implements View.On
                 }
             }
         });
+        //从sharedPreference中获取用户名和密码
+        getUserInfo();
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.id_btn_login:
+
                 InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 im.hideSoftInputFromWindow(getCurrentFocus().getApplicationWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
                 String userNameStr = editTextUsername.getText().toString();
@@ -107,19 +129,48 @@ public class DigtalpwdLoginActivity extends AppCompatActivity implements View.On
                     Toast.makeText(getApplicationContext(),"请输入用户名和密码",Toast.LENGTH_LONG).show();
                     return;
                 }
+                //sharedPrefrence保存用户名密码
+                saveUserInfo(userNameStr,pwdStr);
                 userLogin(userNameStr,pwdStr);
                 break;
-            case R.id.id_iv_arrowback:
-                //自实现的返回按钮
-                finish();
-                break;
+//            case R.id.id_iv_arrowback:
+//                //自实现的返回按钮
+//                finish();
+//                break;
         }
 
     }
 
+    public void saveUserInfo(String userName,String pwd){
+
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = pref.edit();
+        if(checkBox.isChecked()){
+            editor.putBoolean("remember_userinfo",true);
+            editor.putString("user",userName);
+            editor.putString("password",pwd);
+        }
+        else
+            editor.clear();
+        editor.commit();
+
+    }
+
+    public void getUserInfo(){
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean isRemembered = pref.getBoolean("remember_userinfo",false);
+        if(isRemembered){
+            String userName = pref.getString("user","");
+            String pwd = pref.getString("password","");
+            editTextUsername.setText(userName);
+            editTextPwd.setText(pwd);
+            checkBox.setChecked(true);
+        }
+    }
+
     public void userLogin(String userName,String pwd){
         final AlertDialog dialog = new AlertDialog.Builder(this).setMessage("正在提交信息，请稍候...").show();
-        RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+        RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();//Volley.newRequestQueue(getApplicationContext());
         JSONObject jsonObject = new JSONObject();
         JSONObject jsonRequest = new JSONObject();
         try {

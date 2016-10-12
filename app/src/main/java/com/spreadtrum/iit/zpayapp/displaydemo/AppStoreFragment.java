@@ -30,6 +30,7 @@ import com.spreadtrum.iit.zpayapp.message.TSMResponseEntity;
 import com.spreadtrum.iit.zpayapp.network.webservice.ApplyPersonalizationService;
 import com.spreadtrum.iit.zpayapp.network.webservice.TSMAppInformationCallback;
 import com.spreadtrum.iit.zpayapp.register.MainLoginActivity;
+import com.spreadtrum.iit.zpayapp.register_login.DigtalpwdLoginActivity;
 import com.zhy.adapter.abslistview.CommonAdapter;
 
 import java.io.Serializable;
@@ -224,7 +225,7 @@ public class AppStoreFragment extends Fragment {
                             // isAdded(),Return true if the fragment is currently added to its activity.
                             // 因为网络是异步的，为了确保view不为Null，先判断fragment is attached to activity，or not
                             if(isAdded()) {
-                                Intent intent = new Intent(view.getContext(), MainLoginActivity.class);
+                                Intent intent = new Intent(view.getContext(), DigtalpwdLoginActivity.class);
                                 startActivity(intent);
 
                             }

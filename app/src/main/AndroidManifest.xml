@@ -19,6 +19,8 @@
         <activity
             android:name=".register_login.RegisterActivity"
             android:windowSoftInputMode="adjustNothing|stateHidden">
+            <!--其中adjustNothing设置不影响activity重新绘制view布局，stateHidden第一次进来隐藏软键盘-->
+            <!--代码动态弹出软键盘-->
             <span style="white-space:pre"></span>
         </activity>
         <activity
@@ -35,24 +37,23 @@
         <activity android:name=".login.UserZhiwenLoginActivity"></activity>
         <activity android:name=".display.ApplicationActivity"></activity>
         <activity android:name=".display.SpecialApplicationActivity"></activity>
-
-        <activity android:name=".displaydemo.GuideActivity">
+        <activity android:name=".network.RxJava_Retrofit.TestActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <activity android:name=".displaydemo.GuideActivity">
+
         </activity>
         <activity android:name=".displaydemo.MainDisplayActivity">
 
         </activity>
         <activity android:name=".network.bluetooth.BluetoothSettingsActivity"></activity>
         <activity android:name=".network.webservice.WebserviceActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity android:name=".network.volley_okhttp.VolleyTestDemo">
 

@@ -25,6 +25,7 @@
             android:layout_gravity="right"
             android:src="@drawable/arrow"/>
         <Button
+            android:id="@+id/id_btn_account_safe"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="  帐号与安全"
@@ -58,6 +59,7 @@
             android:layout_gravity="right"
             android:src="@drawable/arrow"/>
         <Button
+            android:id="@+id/id_btn_about_us"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="  关于我们"
@@ -72,7 +74,7 @@
         android:text="  退出登录"
         android:gravity="center"
         android:textSize="80px"
-        android:background="@color/colorGray"
-        android:visibility="invisible"/>
+        android:background="@color/colorPrimary"
+        />
 
 </com.zhy.autolayout.AutoLinearLayout>

@@ -3,10 +3,9 @@ package com.spreadtrum.iit.zpayapp.network.http;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.toolbox.Volley;
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
-import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.CustomStringRequest;
+import com.spreadtrum.iit.zpayapp.network.volley_okhttp.RequestQueueUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -22,14 +21,24 @@ import java.net.URL;
  */
 public class HttpUtils {
 
+
+
+    /**
+     * 使用volley+okhttp发起网络请求，请求webservice服务
+     * @param path
+     * @param entity
+     * @param listener
+     * @param errorListener
+     */
     public static void sendHttpRequestforWebservice(final String path, final byte[] entity,
                                                     Response.Listener listener,Response.ErrorListener errorListener){
-        RequestQueue queue = Volley.newRequestQueue(MyApplication.getContextObject());
+//        RequestQueue queue = Volley.newRequestQueue(MyApplication.getContextObject(),new OkHttpStack());
+        RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();
         CustomStringRequest request = new CustomStringRequest(Request.Method.POST,path,entity,listener,errorListener);
-        queue.add(request);
+        requestQueue.add(request);
     }
     /**
-     * 通过web service获取相关信息
+     * 通过HttpURLConnection发起网络请求，获取web service服务
      * @param path web service url
      * @param entity    soap协议的请求数据
      * @param listener  响应结果回调

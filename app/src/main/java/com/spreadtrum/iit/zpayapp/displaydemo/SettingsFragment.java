@@ -14,22 +14,25 @@ import com.spreadtrum.iit.zpayapp.R;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothSettingsActivity;
+import com.spreadtrum.iit.zpayapp.register_login.DigtalpwdLoginActivity;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-9-5.
  */
 public class SettingsFragment extends Fragment {
+    private Button btnAccountSafe;
     private Button btnBluetooth;
-    private BluetoothControl bluetoothControl=null;
-    private SelectBluetoothDeviceListener listener=null;//=new AppStoreFragment();
-
+    private Button btnAboutUs;
+//    private BluetoothControl bluetoothControl=null;
+//    private SelectBluetoothDeviceListener listener=null;//=new AppStoreFragment();
+//
     public interface SelectBluetoothDeviceListener{
         void onBluetoothDeviceSelected(String devAddr);
     }
-
-    public void setBluetoothDeviceListener(SelectBluetoothDeviceListener listener){
-        this.listener = listener;
-    }
+//
+//    public void setBluetoothDeviceListener(SelectBluetoothDeviceListener listener){
+//        this.listener = listener;
+//    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -40,12 +43,30 @@ public class SettingsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings,container,false);
+        //帐号与安全
+        btnAccountSafe = (Button) view.findViewById(R.id.id_btn_account_safe);
+        btnAccountSafe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(view.getContext(), DigtalpwdLoginActivity.class);
+                startActivity(intent);
+            }
+        });
+        //蓝牙设置
         btnBluetooth = (Button) view.findViewById(R.id.id_btn_ble_settings);
         btnBluetooth.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), BluetoothSettingsActivity.class);
                 startActivityForResult(intent,REQUEST_BLUETOOTH_DEVICE);
+            }
+        });
+        //关于我们
+        btnAboutUs = (Button) view.findViewById(R.id.id_btn_about_us);
+        btnAboutUs.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
             }
         });
         return view;

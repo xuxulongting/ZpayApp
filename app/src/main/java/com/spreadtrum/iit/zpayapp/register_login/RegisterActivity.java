@@ -24,6 +24,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.spreadtrum.iit.zpayapp.R;
+import com.spreadtrum.iit.zpayapp.network.volley_okhttp.RequestQueueUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -159,7 +160,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
     public void userRegister(String userName, String pwd){
         final AlertDialog dialog = new AlertDialog.Builder(this).setMessage("正在提交信息，请稍候...").show();
-        RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+        RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();//Volley.newRequestQueue(getApplicationContext());
         JSONObject jsonObject = new JSONObject();
         JSONObject jsonRequest = new JSONObject();
         try {

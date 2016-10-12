@@ -23,12 +23,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="注册"/>
+            android:text="注册"
+            android:textSize="80px"
+            android:background="@color/colorPrimary"/>
         <Button
             android:id="@+id/id_btn_login"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="登录"/>
+            android:text="登录"
+            android:textSize="80px"
+            android:background="@color/colorPrimary"/>
     </com.zhy.autolayout.AutoLinearLayout>
 </com.zhy.autolayout.AutoLinearLayout>

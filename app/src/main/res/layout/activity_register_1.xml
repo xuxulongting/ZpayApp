@@ -39,16 +39,16 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="用 户 名："
-            android:textSize="70px"/>
+            android:text="用 户 名 ："
+            android:textSize="80px"/>
 
         <EditText
             android:id="@+id/id_et_username"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="帐户名和登录名，最多输入30个字符"
+            android:hint="最多输入30个字符"
             android:textColorHint="@color/colorHint"
-            android:textSize="60px"
+            android:textSize="80px"
             />
 
     </com.zhy.autolayout.AutoLinearLayout>
@@ -63,15 +63,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="密       码："
-            android:textSize="70px"/>
+            android:textSize="80px"/>
 
         <EditText
             android:id="@+id/id_et_pwd"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword"
-            android:textSize="50px"
-            android:hint="建议至少使用两种字符组合，最多输入20个字符"
+            android:textSize="80px"
+            android:hint="最多输入20个字符"
             android:textColorHint="@color/colorHint"/>
 
     </com.zhy.autolayout.AutoLinearLayout>
@@ -86,14 +86,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="重复密码："
-            android:textSize="70px"/>
+            android:textSize="80px"/>
 
         <EditText
             android:id="@+id/id_et_repwd"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword"
-            android:textSize="50px"
+            android:textSize="80px"
             android:hint="请再次输入密码"
             android:textColorHint="@color/colorHint"/>
 
@@ -104,9 +104,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="30dp"
-        android:background="@color/colorPrimary"
+        android:background="@drawable/button_style_1"
         android:text="注册"
-        android:textSize="80px"
+        android:textSize="90px"
         android:textColor="@color/colorAccent"/>
 
 </com.zhy.autolayout.AutoLinearLayout>
