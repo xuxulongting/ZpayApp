@@ -5,8 +5,10 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 import org.xmlpull.v1.XmlSerializer;
 
@@ -20,6 +22,12 @@ public class MessageBuilder {
 	private static StringWriter writer = null;
 	private static int taskIndex = 1;
 
+	/**
+	 * 生成添加TSM业务请求的TaskId的请求实体
+	 * @param appInformation
+	 * @param taskType
+     * @return
+     */
 	public static RequestTaskidEntity getRequestTaskidEntity(AppInformation appInformation,String taskType){
 		RequestTaskidEntity entity=new RequestTaskidEntity();
 		String appid = appInformation.getAppid();
@@ -33,7 +41,7 @@ public class MessageBuilder {
 	}
 
 	/**
-	 * 拼接报文头
+	 * 拼接报文头，访问TSM数据库（应用数据查询/添加TSM任务)
 	 * @param seId
 	 * @param requestType
      */
@@ -57,7 +65,7 @@ public class MessageBuilder {
 	}
 
 	/**
-	 * 拼接报文尾
+	 * 拼接报文尾,访问TSM数据库（应用数据查询/添加TSM任务)
 	 * @return
 	 */
 	private static String buildXML_End() {
@@ -114,51 +122,7 @@ public class MessageBuilder {
 
 	}
 
-	/**
-	 * SE返回数据组成业务报文
-	 * 
-	 * @param apdu
-	 *            APDU对象
-	 * @return
-	 */
-//	private static void message_Response_handle(CAPDUInformation apdu) {
-//		try {
-//			serializer.startTag(null, "RAPDUList");
-//			serializer.startTag(null, "GAPDUInformation");
-//			serializer.startTag(null, "index");
-//			serializer.text(apdu.getIndex());
-//			serializer.endTag(null, "index");
-//			serializer.startTag(null, "APDU");
-//			serializer.text(apdu.getAPDU());
-//			serializer.endTag(null, "APDU");
-//			serializer.startTag(null, "SW");
-//			serializer.text(apdu.getSW());
-//			serializer.endTag(null, "SW");
-//			serializer.endTag(null, "GAPDUInformation");
-//			serializer.endTag(null, "RAPDUList");
-//			serializer.startTag(null, "Result");
-//			serializer.text(apdu.getResult());
-//			serializer.endTag(null, "Result");
-//			serializer.startTag(null, "TaskIndex");
-//			serializer.text(getTaskIndex());
-//			serializer.endTag(null, "TaskIndex");
-////			serializer.endTag(null, "business");
-//		} catch (Exception e) {
-//			throw new RuntimeException(e);
-//		}
-//	}
-//	/**
-//	 * 获取授权码
-//	 * @param businessType
-//	 * @return
-//	 */
-//	public static String apply_authCode_Request(String businessType){
-//		serializer = Xml.newSerializer();
-//		writer = new StringWriter();
-//		buildXML_Header(businessType);
-//		String xml = buildXML_End();
-//		return xml;
-//	}
+
 
 	/**
 	 * 生成请求报文（应用数据查询）
@@ -192,25 +156,7 @@ public class MessageBuilder {
 		return xml;
 	}
 
-//	/**
-//	 * 应用报文APDU处理
-//	 *
-//	 * @param businessType
-//	 *            交易类型
-//	 * @param appAID
-//	 *            待申请应用AID
-//	 * @param apdu
-//	 *            应用下载指令集
-//	 * @return
-//	 */
-//	public static String do_Bussiness_Progress(String businessType, String appAID, CAPDUInformation apdu) {
-//		serializer = Xml.newSerializer();
-//		writer = new StringWriter();
-//		buildXML_Header(businessType);
-//		message_Response_handle(apdu);
-//		String xml = buildXML_End();
-//		return xml;
-//	}
+
 
 	private static String getTaskIndex() {
 		DecimalFormat df = new DecimalFormat("0000");
@@ -218,8 +164,7 @@ public class MessageBuilder {
 	}
 
 	/**
-	 * 下载响应xml转换成实体
-	 * 
+	 * 解析访问TSM数据库请求的响应xml
 	 * @param xml
 	 * @return
 	 */
@@ -286,10 +231,10 @@ public class MessageBuilder {
 	}
 
 	/**
-	 * 操作结果
+	 * 获取TSM返回结果（成功 or 失败）
 	 * 
 	 * @param xml
-	 * @return
+	 * @return 0为处理成功，非零为处理异常
 	 */
 	public static String getResultDes(String xml) {
 		String res = "";
@@ -305,7 +250,7 @@ public class MessageBuilder {
 				case XmlPullParser.START_DOCUMENT:
 					break;
 				case XmlPullParser.START_TAG:
-					if ("resultDes".equals(nodeName)) {
+					if ("result".equals(nodeName)) {
 						res = parser.nextText();
 					}
 					break;
@@ -318,9 +263,225 @@ public class MessageBuilder {
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();
+			return null;
 		}
 		return res;
 	}
+
+	/**
+	 * 生成客户端业务发起请求数据XML
+	 * @param seId
+	 * @param imei
+	 * @param phone
+	 * @param sessionId
+     * @param taskId
+     */
+	public static String buildBussinessRequestXml(String seId,String imei,String phone,
+												String sessionId,String taskId){
+		serializer = Xml.newSerializer();
+		writer = new StringWriter();
+		try {
+			serializer.setOutput(writer);
+			serializer.startDocument("UTF-8", true);
+			serializer.startTag(null, "tsm");
+			serializer.attribute(null, "version", "01");
+			serializer.startTag(null,"clientInfo");
+			serializer.attribute(null,"clientType","1");
+			serializer.attribute(null,"clientVer","01");
+			serializer.startTag(null,"terminalInfo");
+			serializer.startTag(null,"seid");
+			serializer.text(seId);
+			serializer.endTag(null,"seid");
+			serializer.startTag(null,"imei");
+			serializer.text(imei);
+			serializer.endTag(null,"imei");
+			serializer.startTag(null,"phone");
+			serializer.text(phone);
+			serializer.endTag(null,"phone");
+			serializer.endTag(null,"terminalInfo");
+			serializer.startTag(null,"request");
+			serializer.startTag(null,"sessionID");
+			serializer.text(sessionId);
+			serializer.endTag(null,"sessionID");
+			serializer.startTag(null,"taskID");
+			serializer.text(taskId);
+			serializer.endTag(null,"taskID");
+			serializer.endTag(null,"request");
+			serializer.startTag(null,"chksum");
+			serializer.endTag(null,"chksum");
+			serializer.endTag(null,"tsm");
+
+		} catch (IOException e) {
+//			e.printStackTrace();
+			return null;
+		}
+		return writer.toString().trim();
+	}
+
+	/**
+	 * 解析TSM平台业务响应数据APDU
+	 * @param xml
+	 * @param sessionId
+	 * @param taskId
+     * @return
+     */
+	public static List<APDUInfo> parseBussinessResponseXml(String xml,String sessionId,String taskId){
+		List<APDUInfo> apduInfoList = null;
+		APDUInfo apduInfo = null;
+		try {
+			XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+			XmlPullParser parser = factory.newPullParser();
+			parser.setInput(new StringReader(xml));
+			int eventType = parser.getEventType();
+			while (eventType!=XmlPullParser.END_DOCUMENT){
+				String nodeName = parser.getName();
+				switch (eventType){
+					case  XmlPullParser.START_DOCUMENT:
+						break;
+					case XmlPullParser.START_TAG:
+						if(nodeName.equals("sessionID")){
+							if(!sessionId.equals(parser.nextText())) {
+								return null;
+							}
+						}
+						else if(nodeName.equals("taskID")){
+							if(!taskId.equals(parser.nextText())){
+								return null;
+							}
+						}
+						else if(nodeName.equals("APDUList")){
+							apduInfoList = new ArrayList<>();
+						}
+						else if(nodeName.equals("APDUInfo")){
+							apduInfo = new APDUInfo();
+						}
+						else if(nodeName.equals("index")){
+							apduInfo.setIndex(parser.nextText());
+						}
+						else if(nodeName.equals("APDU")){
+							apduInfo.setAPDU(parser.nextText());
+						}
+						else if(nodeName.equals("SW")){
+							apduInfo.setSW(parser.nextText());
+						}
+						break;
+					case XmlPullParser.END_TAG:
+						if(nodeName.equals("APDUInfo")){
+							apduInfoList.add(apduInfo);
+						}
+						break;
+					default:
+						break;
+				}
+				parser.next();
+			}
+		} catch (XmlPullParserException e) {
+//			e.printStackTrace();
+			return null;
+		} catch (IOException e) {
+//			e.printStackTrace();
+			return null;
+		}
+
+		return apduInfoList;
+	}
+
+	/**
+	 * App返回SE业务执行数据XML
+	 *
+	 * @param apdu
+	 *            APDU对象
+	 * @return
+	 */
+	private static String message_Response_handle(String seId,String imei,String phone,
+												String sessionId,String taskId,APDUInfo apdu,String result) {
+		serializer = Xml.newSerializer();
+		writer = new StringWriter();
+		try {
+			serializer.setOutput(writer);
+			serializer.startDocument("UTF-8", true);
+			serializer.startTag(null, "tsm");
+			serializer.attribute(null, "version", "01");
+			serializer.startTag(null,"clientInfo");
+			serializer.attribute(null,"clientType","1");
+			serializer.attribute(null,"clientVer","01");
+			serializer.startTag(null,"terminalInfo");
+			serializer.startTag(null,"seid");
+			serializer.text(seId);
+			serializer.endTag(null,"seid");
+			serializer.startTag(null,"imei");
+			serializer.text(imei);
+			serializer.endTag(null,"imei");
+			serializer.startTag(null,"phone");
+			serializer.text(phone);
+			serializer.endTag(null,"phone");
+			serializer.endTag(null,"terminalInfo");
+			serializer.startTag(null,"request");
+			serializer.startTag(null,"sessionID");
+			serializer.text(sessionId);
+			serializer.endTag(null,"sessionID");
+			serializer.startTag(null,"taskID");
+			serializer.text(taskId);
+			serializer.endTag(null,"taskID");
+			serializer.startTag(null, "result");
+			serializer.text(result);
+			serializer.endTag(null, "Result");
+			serializer.startTag(null,"RAPDUList");
+			serializer.startTag(null,"APDUInfo");
+			serializer.startTag(null,"index");
+			serializer.text(apdu.getIndex());
+			serializer.endTag(null,"index");
+			serializer.startTag(null,"APDU");
+			serializer.text(apdu.getAPDU());
+			serializer.endTag(null,"APDU");
+			serializer.startTag(null,"SW");
+			serializer.text(apdu.getSW());
+			serializer.endTag(null,"SW");
+			serializer.endTag(null,"APDUInfo");
+			serializer.endTag(null,"RAPDUList");
+			serializer.endTag(null,"request");
+			serializer.startTag(null,"chksum");
+			serializer.endTag(null,"chksum");
+			serializer.endTag(null,"tsm");
+
+		} catch (IOException e) {
+//			e.printStackTrace();
+			return null;
+		}
+		return writer.toString().trim();
+	}
+//	/**
+//	 * 获取授权码
+//	 * @param businessType
+//	 * @return
+//	 */
+//	public static String apply_authCode_Request(String businessType){
+//		serializer = Xml.newSerializer();
+//		writer = new StringWriter();
+//		buildXML_Header(businessType);
+//		String xml = buildXML_End();
+//		return xml;
+//	}
+
+	//	/**
+//	 * 应用报文APDU处理
+//	 *
+//	 * @param businessType
+//	 *            交易类型
+//	 * @param appAID
+//	 *            待申请应用AID
+//	 * @param apdu
+//	 *            应用下载指令集
+//	 * @return
+//	 */
+//	public static String do_Bussiness_Progress(String businessType, String appAID, CAPDUInformation apdu) {
+//		serializer = Xml.newSerializer();
+//		writer = new StringWriter();
+//		buildXML_Header(businessType);
+//		message_Response_handle(apdu);
+//		String xml = buildXML_End();
+//		return xml;
+//	}
 
 }

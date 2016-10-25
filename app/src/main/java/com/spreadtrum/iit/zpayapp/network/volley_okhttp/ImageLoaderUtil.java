@@ -1,4 +1,4 @@
-package com.spreadtrum.iit.zpayapp.displaydemo;
+package com.spreadtrum.iit.zpayapp.network.volley_okhttp;
 
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
@@ -15,6 +15,7 @@ import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.R;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.database.AppDisplayDatabaseHelper;
+import com.spreadtrum.iit.zpayapp.displaydemo.ImageFileCache;
 import com.spreadtrum.iit.zpayapp.message.AppInformation;
 import com.zhy.http.okhttp.OkHttpUtils;
 import com.zhy.http.okhttp.callback.BitmapCallback;

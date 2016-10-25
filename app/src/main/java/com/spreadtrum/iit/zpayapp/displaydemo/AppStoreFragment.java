@@ -21,15 +21,17 @@ import android.widget.ListView;
 
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.R;
+import com.spreadtrum.iit.zpayapp.bussiness.BussinessTransaction;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.database.AppDisplayDatabaseHelper;
 import com.spreadtrum.iit.zpayapp.database.DatabaseHandler;
 import com.spreadtrum.iit.zpayapp.message.AppInformation;
 import com.spreadtrum.iit.zpayapp.message.MessageBuilder;
 import com.spreadtrum.iit.zpayapp.message.TSMResponseEntity;
+import com.spreadtrum.iit.zpayapp.network.bluetooth.BLEPreparedCallbackListener;
+import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
 import com.spreadtrum.iit.zpayapp.network.webservice.ApplyPersonalizationService;
 import com.spreadtrum.iit.zpayapp.network.webservice.TSMAppInformationCallback;
-import com.spreadtrum.iit.zpayapp.register.MainLoginActivity;
 import com.spreadtrum.iit.zpayapp.register_login.DigtalpwdLoginActivity;
 import com.zhy.adapter.abslistview.CommonAdapter;
 
@@ -215,48 +217,63 @@ public class AppStoreFragment extends Fragment {
             }
             else {
                 //从网络获取appInformation
-                String requestType = "dbquery";
-                String requestData = "applistquery";
-                ApplyPersonalizationService.getAppinfoFromWebservice(MyApplication.seId, requestType, requestData, new TSMAppInformationCallback() {
-                    @Override
-                    public void getAppInfo(String xml) {
-                        if(xml.isEmpty()){
-                            //没有获取到Applet相关信息,说明网络存在问题，或者token失效，进入登录界面
-                            // isAdded(),Return true if the fragment is currently added to its activity.
-                            // 因为网络是异步的，为了确保view不为Null，先判断fragment is attached to activity，or not
-                            if(isAdded()) {
-                                Intent intent = new Intent(view.getContext(), DigtalpwdLoginActivity.class);
-                                startActivity(intent);
-
-                            }
-                            return;
-                        }
-                        //解析xml
-                        TSMResponseEntity entity = MessageBuilder.parseDownLoadXml(xml);
-                        //获取List<AppInformation>
-                        LogUtil.debug("get applist");
-                        appList = entity.getAppInformationList();
-                        //appInfoPrepared=true;
-                        //获取全局变量map中的值给appList
-                        for (Map.Entry<String, Boolean> entry : MyApplication.appInstalling.entrySet()) {
-                            String index = entry.getKey();
-                            Boolean installing = entry.getValue();
-                            for (int i = 0; i < appList.size(); i++) {
-                                AppInformation appInfo = appList.get(i);
-                                if (appInfo.getIndex().equals(index)) {
-                                    appInfo.setAppinstalling(installing);
-                                }
-                            }
-                        }
-                        //从网络获取数据，必须使用消息的方式，因为网络获取数据是异步的
-                        handler.sendEmptyMessage(0);
+                final String requestType = "dbquery";
+                final String requestData = "applistquery";
+                if(MyApplication.seId.equals("")){
+                    MyApplication app = (MyApplication) MyApplication.getContextObject();
+                    String bleDevAddr = app.getBluetoothDevAddr();
+                    if(bleDevAddr.isEmpty())
+                        return view;
+                    BluetoothControl bluetoothControl = BluetoothControl.getInstance(MyApplication.getContextObject(),
+                            bleDevAddr);
+                    bluetoothControl.setBlePreparedCallbackListener(new BLEPreparedCallbackListener() {
+                        @Override
+                        public void onBLEPrepared() {
+                            ApplyPersonalizationService.getAppinfoFromWebservice(MyApplication.seId, requestType, requestData,
+                                    new TSMAppInformationCallback() {
+                                        @Override
+                                        public void getAppInfo(String xml) {
+                                            if(xml.isEmpty()){
+                                                //没有获取到Applet相关信息,说明网络存在问题，或者token失效，进入登录界面
+                                                // isAdded(),Return true if the fragment is currently added to its activity.
+                                                // 因为网络是异步的，为了确保view不为Null，先判断fragment is attached to activity，or not
+//                            if(isAdded()) {
+//                                Intent intent = new Intent(view.getContext(), DigtalpwdLoginActivity.class);
+//                                startActivity(intent);
+//
+//                            }
+                                                return;
+                                            }
+                                            //解析xml
+                                            TSMResponseEntity entity = MessageBuilder.parseDownLoadXml(xml);
+                                            //获取List<AppInformation>
+                                            LogUtil.debug("get applist");
+                                            appList = entity.getAppInformationList();
+                                            //appInfoPrepared=true;
+                                            //获取全局变量map中的值给appList
+                                            for (Map.Entry<String, Boolean> entry : MyApplication.appInstalling.entrySet()) {
+                                                String index = entry.getKey();
+                                                Boolean installing = entry.getValue();
+                                                for (int i = 0; i < appList.size(); i++) {
+                                                    AppInformation appInfo = appList.get(i);
+                                                    if (appInfo.getIndex().equals(index)) {
+                                                        appInfo.setAppinstalling(installing);
+                                                    }
+                                                }
+                                            }
+                                            //从网络获取数据，必须使用消息的方式，因为网络获取数据是异步的
+                                            handler.sendEmptyMessage(0);
 //                        busAdapter = new AppStoreCommonAdapter(view.getContext(), R.layout.list_item_appstore, appList,listViewAppStore,updatePicHandler);
-                        //将数据写入数据库
-                        SQLiteDatabase dbWrite = dbHelper.getWritableDatabase();
-                        new DatabaseHandler().insertDB(dbWrite, appList);
-                        MyApplication.dataFromNet = true;
-                    }
-                });
+                                            //将数据写入数据库
+                                            SQLiteDatabase dbWrite = dbHelper.getWritableDatabase();
+                                            new DatabaseHandler().insertDB(dbWrite, appList);
+                                            MyApplication.dataFromNet = true;
+                                        }
+                                    });
+                        }
+                    });
+                }
+
             }
         }
 //        listViewAppStore.setAdapter(busAdapter);

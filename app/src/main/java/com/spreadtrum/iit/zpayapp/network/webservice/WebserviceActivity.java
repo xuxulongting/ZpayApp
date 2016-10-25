@@ -54,7 +54,7 @@ public class WebserviceActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
         btnTestWebService = (Button) findViewById(R.id.id_test_webservice);
 //        imageView = (ImageView) findViewById(R.id.id_iv_test);
-        networkImageView = (NetworkImageView) findViewById(R.id.network_image_view);
+//        networkImageView = (NetworkImageView) findViewById(R.id.network_image_view);
         btnTestWebService.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

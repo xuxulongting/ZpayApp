@@ -18,12 +18,21 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="webservice"/>
+    <Button
+        android:id="@+id/id_btn_text_linux_server"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="LINUX server"/>
     <com.android.volley.toolbox.NetworkImageView
         android:id="@+id/network_image_view"
-        android:layout_width="400px"
-        android:layout_height="400px"
+        android:layout_width="40px"
+        android:layout_height="40px"
         android:layout_gravity="center_horizontal"
         />
+    <ImageView
+        android:id="@+id/id_iv_testvolley"
+        android:layout_width="match_parent"
+        android:layout_height="400px" />
 
 
 

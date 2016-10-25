@@ -27,6 +27,7 @@ import com.spreadtrum.iit.zpayapp.message.RequestTaskidEntity;
 import com.spreadtrum.iit.zpayapp.message.TSMResponseEntity;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BLEPreparedCallbackListener;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
+import com.spreadtrum.iit.zpayapp.network.volley_okhttp.ImageLoaderUtil;
 import com.spreadtrum.iit.zpayapp.network.webservice.ApplyPersonalizationService;
 import com.spreadtrum.iit.zpayapp.network.webservice.TSMAppInformationCallback;
 

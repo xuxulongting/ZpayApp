@@ -1,8 +1,12 @@
 package com.spreadtrum.iit.zpayapp.network.volley_okhttp;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.toolbox.StringRequest;
+import com.spreadtrum.iit.zpayapp.common.MyApplication;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +43,11 @@ public class CustomStringRequest extends StringRequest {
         HashMap<String, String> headers = new HashMap<String, String>();
         headers.put("Content-Type", "text/xml; charset=utf-8");
         headers.put("Content-Length",String.valueOf(entity.length));
+        //添加自定义字段
+        SharedPreferences pref = MyApplication.getContextObject().getSharedPreferences("token", Context.MODE_PRIVATE);
+        String token = pref.getString("token","");
+//        String token = "12132432aaa";
+        headers.put("token",token);
         return headers;
     }
 

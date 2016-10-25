@@ -1,17 +1,12 @@
 package com.spreadtrum.iit.zpayapp.displaydemo;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -19,25 +14,21 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.R;
+import com.spreadtrum.iit.zpayapp.bussiness.BussinessTransaction;
 import com.spreadtrum.iit.zpayapp.common.ByteUtil;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
-import com.spreadtrum.iit.zpayapp.database.AppDisplayDatabaseHelper;
-import com.spreadtrum.iit.zpayapp.display.Card;
 import com.spreadtrum.iit.zpayapp.message.AppInformation;
 import com.spreadtrum.iit.zpayapp.message.MessageBuilder;
 import com.spreadtrum.iit.zpayapp.message.RequestTaskidEntity;
 import com.spreadtrum.iit.zpayapp.message.TSMResponseEntity;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BLEPreparedCallbackListener;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
-import com.spreadtrum.iit.zpayapp.network.tcp.TCPTransferData;
 import com.spreadtrum.iit.zpayapp.network.tcp.TsmTaskCompleteCallback;
-import com.spreadtrum.iit.zpayapp.network.tcp.TsmTaskCompleteListener;
+import com.spreadtrum.iit.zpayapp.network.volley_okhttp.ImageLoaderUtil;
 import com.spreadtrum.iit.zpayapp.network.webservice.ApplyPersonalizationService;
 import com.spreadtrum.iit.zpayapp.network.webservice.TSMAppInformationCallback;
 

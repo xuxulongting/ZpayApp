@@ -26,6 +26,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.spreadtrum.iit.zpayapp.R;
+import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.RequestQueueUtils;
 import com.spreadtrum.iit.zpayapp.register.RegisterActivity_1;
 
@@ -143,7 +144,7 @@ public class DigtalpwdLoginActivity extends AppCompatActivity implements View.On
 
     public void saveUserInfo(String userName,String pwd){
 
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences pref = getSharedPreferences("userinfo",MODE_PRIVATE);//PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = pref.edit();
         if(checkBox.isChecked()){
             editor.putBoolean("remember_userinfo",true);
@@ -157,7 +158,7 @@ public class DigtalpwdLoginActivity extends AppCompatActivity implements View.On
     }
 
     public void getUserInfo(){
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences pref = getSharedPreferences("userinfo",MODE_PRIVATE);//PreferenceManager.getDefaultSharedPreferences(this);
         boolean isRemembered = pref.getBoolean("remember_userinfo",false);
         if(isRemembered){
             String userName = pref.getString("user","");
@@ -174,15 +175,19 @@ public class DigtalpwdLoginActivity extends AppCompatActivity implements View.On
         JSONObject jsonObject = new JSONObject();
         JSONObject jsonRequest = new JSONObject();
         try {
-            jsonObject.put("version","1.0");
+            //获取App版本信息
+            MyApplication app = MyApplication.getInstance();
+            JSONObject jsonAppInfo = app.getAppInfo();
+            String versionName = jsonAppInfo.getString("versionName");
+            jsonObject.put("version",versionName);
             jsonObject.put("logName",userName);
             jsonObject.put("logPwd",pwd);
-            String params = jsonObject.toString();
-            jsonRequest.put("params",params);
+//            String params = jsonObject.toString();
+//            jsonRequest.put("params",params);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, LOGIN_URL, jsonRequest,
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, LOGIN_URL, jsonObject,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -215,5 +220,5 @@ public class DigtalpwdLoginActivity extends AppCompatActivity implements View.On
         requestQueue.add(request);
     }
 
-    public static String LOGIN_URL="http://host:port/app/login";
+    public static String LOGIN_URL="http://10.0.70.93:8080/Test/register";
 }

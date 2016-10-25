@@ -2,11 +2,17 @@ package com.spreadtrum.iit.zpayapp.common;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 
+import com.baidu.mapapi.SDKInitializer;
+import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +30,7 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        SDKInitializer.initialize(this);
         context = getApplicationContext();
     }
     public static Context getContextObject(){
@@ -53,11 +60,31 @@ public class MyApplication extends Application {
            }
         }
     };
+
+    public JSONObject getAppInfo(){
+        JSONObject jsonObject = new JSONObject();
+        String pkgName = getPackageName();
+        String versionName="";
+        int versionCode=0;
+        try {
+            versionName = getPackageManager().getPackageInfo(pkgName,0).versionName;
+            versionCode = getPackageManager().getPackageInfo(pkgName,0).versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        try {
+            jsonObject.put("versionName",versionName);
+            jsonObject.put("versionCode",versionCode);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject;
+    }
     public static boolean dataFromNet = false;
     public static final int DOWNLOAD_SUCCESS=0;
     public static final int DOWNLOAD_FAILED=1;
     public static final int DELETE_SUCCESS=2;
     public static final int DELETE_FAILED=3;
 
-    public static final String seId="451000000000000020160328000000010005";
+    public static String seId="";//="451000000000000020160328000000010005";
 }

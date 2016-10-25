@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -18,14 +17,12 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CursorAdapter;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
-import android.widget.TextView;
 
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.R;
+import com.spreadtrum.iit.zpayapp.bussiness.BussinessTransaction;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.database.AppDisplayDatabaseHelper;
 import com.spreadtrum.iit.zpayapp.database.DatabaseHandler;
@@ -35,11 +32,9 @@ import com.spreadtrum.iit.zpayapp.message.TSMResponseEntity;
 import com.spreadtrum.iit.zpayapp.network.webservice.ApplyPersonalizationService;
 import com.spreadtrum.iit.zpayapp.network.webservice.TSMAppInformationCallback;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.Inflater;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-9-21.

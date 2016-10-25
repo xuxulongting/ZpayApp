@@ -27,7 +27,7 @@
         <Button
             android:id="@+id/id_btn_account_safe"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="180px"
             android:text="  帐号与安全"
             android:gravity="start|center"
             android:textSize="80px"
@@ -44,7 +44,7 @@
         <Button
             android:id="@+id/id_btn_ble_settings"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="180px"
             android:text="  蓝牙设置"
             android:gravity="start|center"
             android:textSize="80px"
@@ -61,7 +61,7 @@
         <Button
             android:id="@+id/id_btn_about_us"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="180px"
             android:text="  关于我们"
             android:gravity="start|center"
             android:textSize="80px"

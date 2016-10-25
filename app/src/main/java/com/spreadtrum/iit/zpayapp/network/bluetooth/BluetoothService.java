@@ -97,8 +97,6 @@ public class BluetoothService extends android.app.Service{
                 intentAction = ACTION_GATT_CONNECTED;
                 connectionState = STATE_CONNECTED;
                 //broadcastUpdate(intentAction);
-                //修改MTU size
-                //bluetoothGatt.requestMtu(30);
                 LogUtil.info(TAG, "Connected to GATT server.");
                 // Attempts to discover services after successful connection.
                 boolean bDiscoveryService = bluetoothGatt.discoverServices();
@@ -356,12 +354,6 @@ public class BluetoothService extends android.app.Service{
                 }
             }
         }
-    }
-
-    public void seResponseDataToZero()
-    {
-        Arrays.fill(seResponseData,(byte)0);
-        seDataLength = 0;
     }
 
     public static String bytesToHexString(byte[] bytes) {

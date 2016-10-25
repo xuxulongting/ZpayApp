@@ -26,8 +26,8 @@ import java.net.URL;
  * Created by SPREADTRUM\ting.long on 16-9-7.
  */
 public class ApplyPersonalizationService {
-//    public static final String WEBSERVICE_PATH = "http://10.0.64.120:6893/SPRDTSMDbService.asmx";
-    public static final String WEBSERVICE_PATH = "http://192.168.1.150:6893/SPRDTSMDbService.asmx";
+    public static final String WEBSERVICE_PATH = "http://10.0.64.120:6893/SPRDTSMDbService.asmx";
+//    public static final String WEBSERVICE_PATH = "http://192.168.1.150:6893/SPRDTSMDbService.asmx";
     /**
      * 通过web service接口，获取相关信息
      * @param xml 请求xml
@@ -124,22 +124,22 @@ public class ApplyPersonalizationService {
         return null;
     }
 
-    public static void test(String xml){
-        String soap = readSoap("soap11.xml");
-        soap = soap.replace("123",xml);
-        byte[] entity = soap.getBytes();
-        HttpUtils.sendHttpRequestforWebservice(WEBSERVICE_PATH, entity, new Response.Listener() {
-            @Override
-            public void onResponse(Object response) {
-                LogUtil.debug((String) response);
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                LogUtil.warn(error.getMessage());
-            }
-        });
-    }
+//    public static void test(String xml){
+//        String soap = readSoap("soap11.xml");
+//        soap = soap.replace("123",xml);
+//        byte[] entity = soap.getBytes();
+//        HttpUtils.sendHttpRequestforWebservice(WEBSERVICE_PATH, entity, new Response.Listener() {
+//            @Override
+//            public void onResponse(Object response) {
+//                LogUtil.debug((String) response);
+//            }
+//        }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                LogUtil.warn(error.getMessage());
+//            }
+//        });
+//    }
 
     private static String parseSOAP(InputStream inputStream,String keywords) {
         XmlPullParser xmlPullParser = Xml.newPullParser();
@@ -202,6 +202,7 @@ public class ApplyPersonalizationService {
         String requestXml = MessageBuilder.doBussinessRequest(seId,requestType,requestData);
         //base64加密
         String requestXmlBase64 = Base64.encodeToString(requestXml.getBytes(),Base64.DEFAULT);
+        LogUtil.debug(requestXmlBase64);
         //发送soap请求，并获取xml结果
         ApplyPersonalizationService.getTSMAppInformation(requestXmlBase64,callback);
     }

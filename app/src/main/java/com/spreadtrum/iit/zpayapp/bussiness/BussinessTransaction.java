@@ -1,4 +1,4 @@
-package com.spreadtrum.iit.zpayapp.displaydemo;
+package com.spreadtrum.iit.zpayapp.bussiness;
 
 import android.app.Service;
 import android.content.ContentValues;
@@ -9,8 +9,15 @@ import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.Response.Listener;
+import com.android.volley.VolleyError;
+import com.spreadtrum.iit.zpayapp.common.ByteUtil;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.database.AppDisplayDatabaseHelper;
+import com.spreadtrum.iit.zpayapp.message.APDUInfo;
 import com.spreadtrum.iit.zpayapp.message.AppInformation;
 import com.spreadtrum.iit.zpayapp.message.MessageBuilder;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
@@ -20,13 +27,21 @@ import com.spreadtrum.iit.zpayapp.network.http.HttpUtils;
 import com.spreadtrum.iit.zpayapp.network.tcp.TCPTransferData;
 import com.spreadtrum.iit.zpayapp.network.tcp.TsmTaskCompleteCallback;
 import com.spreadtrum.iit.zpayapp.network.tcp.TsmTaskCompleteListener;
+import com.spreadtrum.iit.zpayapp.network.volley_okhttp.CustomStringRequest;
+import com.spreadtrum.iit.zpayapp.network.volley_okhttp.RequestQueueUtils;
+import com.spreadtrum.iit.zpayapp.network.webservice.ApplyPersonalizationService;
+
+import java.util.List;
+import java.util.Random;
+
+import static java.lang.Integer.parseInt;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-9-19.
  */
 public class BussinessTransaction{
-    public static final String ACTION_BUSSINESS_EXECUTED_SUCCESS="com.spreadtrum.iit.zpayapp.displaydemo.BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS";
-    public static final String ACTION_BUSSINESS_EXECUTED_FAILED="com.spreadtrum.iit.zpayapp.displaydemo.BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED";
+    public static final String ACTION_BUSSINESS_EXECUTED_SUCCESS="com.spreadtrum.iit.zpayapp.bussiness.BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS";
+    public static final String ACTION_BUSSINESS_EXECUTED_FAILED="com.spreadtrum.iit.zpayapp.bussiness.BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED";
     private AppDisplayDatabaseHelper dbHelper=null;
 
     /**
@@ -40,7 +55,6 @@ public class BussinessTransaction{
                             AppInformation appInformation,TsmTaskCompleteCallback completeCallback){
         //BLE准备好，开始发送数据
         TCPTransferData tcpTransferData = new TCPTransferData();
-//        tcpTransferData.SyncApplet(bluetoothControl, taskId);
         tcpTransferData.SyncApplet(bluetoothControl,taskId,completeCallback);
     }
 
@@ -55,22 +69,8 @@ public class BussinessTransaction{
                                final AppInformation appInformation, TsmTaskCompleteCallback completeCallback){
         //BLE准备好，开始发送数据
         TCPTransferData tcpTransferData = new TCPTransferData();
-//        tcpTransferData.SyncApplet(bluetoothControl, taskId);
         tcpTransferData.DownloadApplet(bluetoothControl,taskId,completeCallback);
-        //android 视图控件只能在主线程中去访问，用消息的方式
-//        tcpTransferData.setTsmTaskCompleteListener(new TsmTaskCompleteListener() {
-//            @Override
-//            public void onTaskExecutedSuccess() {
-//                broadcastUpdate(ACTION_BUSSINESS_EXECUTED_SUCCESS,appInformation,"download");
-//                MyApplication.handler.sendEmptyMessage(MyApplication.DOWNLOAD_SUCCESS);
-//            }
-//
-//            @Override
-//            public void onTaskExecutedFailed(){
-//                broadcastUpdate(ACTION_BUSSINESS_EXECUTED_FAILED,appInformation,"download");
-//                MyApplication.handler.sendEmptyMessage(MyApplication.DOWNLOAD_FAILED);
-//            }
-//        });
+
     }
 
     /**
@@ -84,24 +84,7 @@ public class BussinessTransaction{
                                     final AppInformation appInformation,TsmTaskCompleteCallback completeCallback){
         //BLE准备好，开始发送数据
         TCPTransferData tcpTransferData = new TCPTransferData();
-        //tcpTransferData.SyncApplet(bluetoothControl, taskId);
         tcpTransferData.DeleteApplet(bluetoothControl,taskId,completeCallback);
-        //android 视图控件只能在主线程中去访问，用消息的方式
-//        tcpTransferData.setTsmTaskCompleteListener(new TsmTaskCompleteListener() {
-//            @Override
-//            public void onTaskExecutedSuccess() {
-//                broadcastUpdate(ACTION_BUSSINESS_EXECUTED_SUCCESS,appInformation,"delete");
-//                MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_SUCCESS);
-//
-//            }
-//
-//            @Override
-//            public void onTaskExecutedFailed(){
-//                broadcastUpdate(ACTION_BUSSINESS_EXECUTED_FAILED,appInformation,"delete");
-//                MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_FAILED);
-//
-//            }
-//        });
     }
 
     /**
@@ -141,6 +124,81 @@ public class BussinessTransaction{
 
             }
         });
+    }
+
+    /**
+     * volley-okhttp方式连接TSM，处理下载任务
+     * @param bluetoothControl
+     * @param sessionId
+     * @param taskId
+     * @param xml   客户端业务发起请求数据XML，通过buildBussinessRequestXml()获取
+     * @param callback
+     */
+    public void DownloadApplet(final BluetoothControl bluetoothControl,final String sessionId, final String taskId,
+                               String xml, final TsmTaskCompleteCallback callback){
+        String url = "";
+        RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();
+        CustomStringRequest stringRequest = new CustomStringRequest(Request.Method.POST,url,xml.getBytes(), new Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                //解析xml，该xml中包含多条APDU指令
+                List<APDUInfo> apduInfoList = MessageBuilder.parseBussinessResponseXml(response,sessionId,taskId);
+                if(apduInfoList==null)
+                    return;
+                if(bluetoothControl==null)
+                    return;
+                handleApduList(bluetoothControl,apduInfoList,0,callback);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+    }
+
+    /**
+     * 通过蓝牙发送给SE，循环处理APDU指令
+     * @param bluetoothControl
+     * @param apduInfoList
+     * @param i List中第i个APDUInfo
+     * @param callback
+     */
+    public void handleApduList(final BluetoothControl bluetoothControl, final List<APDUInfo> apduInfoList, final int i, final TsmTaskCompleteCallback callback){
+        //所有APDU指令处理完毕
+        if(i==(apduInfoList.size()-1)){
+            callback.onTaskExecutedSuccess();
+        }
+        APDUInfo apduInfo = apduInfoList.get(i);
+        final byte []sw = apduInfo.getSW().getBytes();
+        int index = ByteUtil.parseInt(apduInfo.getIndex(),10,0);
+        byte []apdu = apduInfo.getAPDU().getBytes();
+        bluetoothControl.communicateWithJDSe(apdu,apdu.length);
+        bluetoothControl.setSeCallbackTSMListener(new SECallbackTSMListener() {
+            @Override
+            public void callbackTSM(byte[] responseData, int responseLen) {
+                //APDU执行结果与期望结果一致
+                if(responseData.equals(sw)){
+                    handleApduList(bluetoothControl,apduInfoList,i+1,callback);
+                }
+                else
+                    callback.onTaskExecutedFailed();
+            }
+
+            @Override
+            public void errorCallback() {
+                callback.onTaskExecutedFailed();
+            }
+        });
+    }
+
+    private byte[] getSessionId(int byteOfLen){
+        byte[] byteOfRandom = new byte[byteOfLen];
+        Random ra =new Random();
+        for(int i=0;i<byteOfLen;i++){
+            byteOfRandom[i] = (byte) ra.nextInt(255);
+        }
+        return byteOfRandom;
     }
 
     /**
