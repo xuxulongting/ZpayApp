@@ -1,13 +1,9 @@
 package com.spreadtrum.iit.zpayapp.bussiness;
 
-import android.app.Service;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -20,16 +16,16 @@ import com.spreadtrum.iit.zpayapp.database.AppDisplayDatabaseHelper;
 import com.spreadtrum.iit.zpayapp.message.APDUInfo;
 import com.spreadtrum.iit.zpayapp.message.AppInformation;
 import com.spreadtrum.iit.zpayapp.message.MessageBuilder;
+import com.spreadtrum.iit.zpayapp.message.TSMResponseData;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.SECallbackTSMListener;
 import com.spreadtrum.iit.zpayapp.network.http.HttpResponseCallback;
 import com.spreadtrum.iit.zpayapp.network.http.HttpUtils;
+import com.spreadtrum.iit.zpayapp.network.NetParameter;
 import com.spreadtrum.iit.zpayapp.network.tcp.TCPTransferData;
 import com.spreadtrum.iit.zpayapp.network.tcp.TsmTaskCompleteCallback;
-import com.spreadtrum.iit.zpayapp.network.tcp.TsmTaskCompleteListener;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.CustomStringRequest;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.RequestQueueUtils;
-import com.spreadtrum.iit.zpayapp.network.webservice.ApplyPersonalizationService;
 
 import java.util.List;
 import java.util.Random;
@@ -136,18 +132,20 @@ public class BussinessTransaction{
      */
     public void DownloadApplet(final BluetoothControl bluetoothControl,final String sessionId, final String taskId,
                                String xml, final TsmTaskCompleteCallback callback){
-        String url = "";
+
+        String url = NetParameter.TSM_URL;
         RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();
         CustomStringRequest stringRequest = new CustomStringRequest(Request.Method.POST,url,xml.getBytes(), new Listener<String>() {
             @Override
             public void onResponse(String response) {
                 //解析xml，该xml中包含多条APDU指令
-                List<APDUInfo> apduInfoList = MessageBuilder.parseBussinessResponseXml(response,sessionId,taskId);
+                TSMResponseData tsmResponseData = MessageBuilder.parseBussinessResponseXml(response,sessionId,taskId);
+                List<APDUInfo> apduInfoList = tsmResponseData.getApduInfoList();
                 if(apduInfoList==null)
                     return;
                 if(bluetoothControl==null)
                     return;
-                handleApduList(bluetoothControl,apduInfoList,0,callback);
+//                handleApduList(bluetoothControl,apduInfoList,0,callback);
             }
         }, new Response.ErrorListener() {
             @Override
@@ -164,35 +162,39 @@ public class BussinessTransaction{
      * @param i List中第i个APDUInfo
      * @param callback
      */
-    public void handleApduList(final BluetoothControl bluetoothControl, final List<APDUInfo> apduInfoList, final int i, final TsmTaskCompleteCallback callback){
-        //所有APDU指令处理完毕
-        if(i==(apduInfoList.size()-1)){
-            callback.onTaskExecutedSuccess();
-        }
-        APDUInfo apduInfo = apduInfoList.get(i);
+    public void handleApduList(final BluetoothControl bluetoothControl, final List<APDUInfo> apduInfoList,
+                                       final int i, final TransactionCallback callback){
+        final APDUInfo apduInfo = apduInfoList.get(i);
         final byte []sw = apduInfo.getSW().getBytes();
-        int index = ByteUtil.parseInt(apduInfo.getIndex(),10,0);
+        final int index = ByteUtil.parseInt(apduInfo.getIndex(),10,0);
         byte []apdu = apduInfo.getAPDU().getBytes();
         bluetoothControl.communicateWithJDSe(apdu,apdu.length);
         bluetoothControl.setSeCallbackTSMListener(new SECallbackTSMListener() {
             @Override
             public void callbackTSM(byte[] responseData, int responseLen) {
                 //APDU执行结果与期望结果一致
-                if(responseData.equals(sw)){
+                APDUInfo info = new APDUInfo();
+                info.setIndex(String.valueOf(index));
+                info.setSW(new String(responseData,responseLen-2,2));
+                info.setAPDU(new String(responseData,0,responseLen-2));
+                if(info.getSW().equals(sw)){
                     handleApduList(bluetoothControl,apduInfoList,i+1,callback);
+                    if((i+1)==apduInfoList.size()){
+                        callback.onTransactionSuccess(info);
+                    }
                 }
                 else
-                    callback.onTaskExecutedFailed();
+                    callback.onTransactionFailed(info);
             }
 
             @Override
             public void errorCallback() {
-                callback.onTaskExecutedFailed();
+                callback.onTransactionFailed(apduInfo);
             }
         });
     }
 
-    private byte[] getSessionId(int byteOfLen){
+    private byte[] generateSessionId(int byteOfLen){
         byte[] byteOfRandom = new byte[byteOfLen];
         Random ra =new Random();
         for(int i=0;i<byteOfLen;i++){
@@ -239,5 +241,6 @@ public class BussinessTransaction{
     public static final String TASK_TYPE_DOWNLOAD="D1";
     public static final String TASK_TYPE_DELETE="D2";
     public static final String TASK_TYPE_SYNC="DA";
+
 
 }

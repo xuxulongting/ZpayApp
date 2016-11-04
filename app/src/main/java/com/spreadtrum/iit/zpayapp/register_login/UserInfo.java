@@ -41,5 +41,15 @@ public class UserInfo {
     public String loginPwd;
     public String checkCode;
 
+    public boolean isRemembered() {
+        return isRemembered;
+    }
+
+    public void setRemembered(boolean remembered) {
+        isRemembered = remembered;
+    }
+
+    public boolean isRemembered;
+
 
 }

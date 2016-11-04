@@ -1,5 +1,6 @@
 package com.spreadtrum.iit.zpayapp.displaydemo;
 
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.graphics.Color;
@@ -12,6 +13,7 @@ import android.widget.Button;
 import android.widget.Switch;
 
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
+import com.spreadtrum.iit.zpayapp.PullToRefreshLayoutTellH.PullToRefreshLayout;
 import com.spreadtrum.iit.zpayapp.R;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
@@ -22,11 +24,13 @@ import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothSettingsActivity;
 /**
  * Created by SPREADTRUM\ting.long on 16-9-1.
  */
-public class MainDisplayActivity extends AppCompatActivity implements View.OnClickListener,SettingsFragment.SelectBluetoothDeviceListener {
+public class MainDisplayActivity extends BaseActivity implements View.OnClickListener,
+        SettingsFragment.SelectBluetoothDeviceListener{
     private Button btnAppStore;
     private Button btnAppService;
     private Button btnAppLocal;
     private Button btnAppSettings;
+    private AppStoreFragment selectedFragment;
     //public static String bluetoothDevAddr="";
 
     @Override
@@ -46,6 +50,7 @@ public class MainDisplayActivity extends AppCompatActivity implements View.OnCli
 //        fm.beginTransaction().replace(R.id.id_main,appStoreFragment,"AppStoreFragment").commit();
         getFragment(FRAGMENT_APP_STORE);
         setButtonColor(FRAGMENT_APP_STORE);
+        LogUtil.debug("dataFromNet is "+MyApplication.dataFromNet);
     }
 
     /**
@@ -120,7 +125,6 @@ public class MainDisplayActivity extends AppCompatActivity implements View.OnCli
         switch(para){
             case FRAGMENT_APP_STORE:
                 AppStoreFragment appStoreFragment = new AppStoreFragment();
-//                TestFragment testFragment = new TestFragment();
                 fm.beginTransaction().replace(R.id.id_main,appStoreFragment,"AppStoreFragment").commit();
                 break;
             case FRAGMENT_APP_SERVICE:
@@ -151,6 +155,25 @@ public class MainDisplayActivity extends AppCompatActivity implements View.OnCli
     }
 
     @Override
+    protected void onRestart() {
+        LogUtil.debug("MainDisplayActivity onRestart");
+        super.onRestart();
+    }
+
+    @Override
+    protected void onResume() {
+//        LogUtil.debug("MainDisplayActivity onResume");
+//        selectedFragment.onBackPressed();
+        super.onResume();
+    }
+
+    @Override
+    public void onBackPressed() {
+//        selectedFragment.onBackPressed();
+        super.onBackPressed();
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
         LogUtil.debug("MainDisplayActivity onPause");
@@ -171,10 +194,37 @@ public class MainDisplayActivity extends AppCompatActivity implements View.OnCli
         LogUtil.debug("MainDisplayActivity onDestroy");
 
     }
+
+    /**
+     * 关闭BluetoothSettingsActivity后的回调
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==SettingsFragment.REQUEST_BLUETOOTH_DEVICE){
+            LogUtil.debug("onActivityResult");
+            if(requestCode == REQUEST_BLUETOOTH_DEVICE && resultCode == RESULT_BLUETOOTH_DEVICE) {
+                String bluetoothDevAddr = data.getStringExtra("BLE_ADDR");
+                MyApplication app = (MyApplication) getApplication();
+                app.setBluetoothDevAddr(bluetoothDevAddr);
+            }
+        }
+    }
     public static final int FRAGMENT_APP_STORE=0;
     public static final int FRAGMENT_APP_SERVICE=1;
     public static final int FRAGMENT_APP_LOCAL=2;
     public static final int FRAGMENT_APP_SETTINGS=3;
+
+    public static final int REQUEST_BLUETOOTH_DEVICE=1;
+    public static final int RESULT_BLUETOOTH_DEVICE=2;
+
+//    @Override
+//    public void setFragment(AppStoreFragment fragmentBackHandler) {
+//        this.selectedFragment = fragmentBackHandler;
+//    }
 //    public enum FragmentName {FRAGMENT_APP_STORE, FRAGMENT_APP_SERVICE,
 //                FRAGMENT_APP_LOCAL,FRAGMENT_APP_SETTINGS};
 }

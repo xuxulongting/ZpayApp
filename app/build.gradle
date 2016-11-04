@@ -6,12 +6,12 @@ repositories {
     }
 }
 android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.1"
+    compileSdkVersion 23
+    buildToolsVersion "23.0.1"
 
     defaultConfig {
         applicationId "com.spreadtrum.iit.zpayapp"
-        minSdkVersion 21
+        minSdkVersion 16
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
@@ -35,9 +35,9 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:24.1.0'
+    compile 'com.android.support:appcompat-v7:23.1.0'
     compile 'com.zhy:autolayout:1.4.3'
-    compile 'com.android.support:recyclerview-v7:24.1.0'
+    compile 'com.android.support:recyclerview-v7:23.1.0'
     compile project(':base-adapter-library')
     compile project(':baseadapter-recyclerview')
 //    compile 'com.squareup.okhttp:okhttp:2.4.0'

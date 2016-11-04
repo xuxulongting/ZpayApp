@@ -34,10 +34,6 @@
 
         </activity>
         <activity android:name=".register.RegisterActivity_1"></activity>
-        <activity android:name=".RegisterActivity_1"></activity>
-        <activity android:name=".RegisterActivity_2"></activity>
-        <activity android:name=".RegisterActivity_3"></activity>
-        <activity android:name=".RegisterActivity_4"></activity>
         <activity android:name=".login.UserDigitalPwdLoginActivity"></activity>
         <activity android:name=".login.UserZhiwenLoginActivity"></activity>
         <activity android:name=".display.ApplicationActivity"></activity>
@@ -45,13 +41,15 @@
         <activity android:name=".network.RxJava_Retrofit.TestActivity">
 
         </activity>
-
-        <activity android:name=".displaydemo.GuideActivity">
+        <activity android:name=".displaydemo.WelcomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity android:name=".displaydemo.GuideActivity">
+
         </activity>
         <activity android:name=".displaydemo.MainDisplayActivity">
 
@@ -64,6 +62,10 @@
 
         </activity>
         <activity android:name=".displaydemo.SpecialAppActivity">
+
+        </activity>
+
+        <activity android:name=".displaydemo.AboutActivity">
 
         </activity>
 

@@ -3,9 +3,8 @@ package com.spreadtrum.iit.zpayapp.register_login;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.annotation.BoolRes;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -16,7 +15,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -24,21 +22,17 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.R;
-import com.spreadtrum.iit.zpayapp.RegisterActivity_1;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
+import com.spreadtrum.iit.zpayapp.common.MySharedPreference;
 import com.spreadtrum.iit.zpayapp.displaydemo.MainDisplayActivity;
+import com.spreadtrum.iit.zpayapp.network.ResultCallback;
+import com.spreadtrum.iit.zpayapp.network.ZAppStoreApi;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.RequestQueueUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-9-29.
@@ -163,18 +157,80 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
+    public void userRegister(final String userName, String pwd){
+        //获取App版本信息
+        MyApplication app = MyApplication.getInstance();
+        PackageInfo info = app.getPackageInfo();
+        String versionName = info.versionName;
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("version",versionName);
+            jsonObject.put("logName",userName);
+            jsonObject.put("logPwd",pwd);
+            jsonObject.put("checkCode","123456");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        final AlertDialog dialog = new AlertDialog.Builder(this).setMessage("正在提交信息，请稍候...").show();
+        ZAppStoreApi.register(userName, pwd, versionName, "123456", new ResultCallback<JSONObject>() {
+            @Override
+            public void onPreStart() {
 
+            }
 
-    public void userRegister(String userName, String pwd){
+            @Override
+            public void onSuccess(JSONObject response) {
+                dialog.dismiss();
+                try {
+                    String result = response.getString("result");
+                    if(result.equals("0")){
+                        String errorCode = response.getString("errorCode");
+                        String errorMsg = response.getString("errorMsg");
+                        Toast.makeText(getApplicationContext(),"注册失败",Toast.LENGTH_LONG).show();
+                    }
+                    else {
+                        String userId = response.getString("userId");
+                        String token = response.getString("token");
+                        LogUtil.debug("register token is:"+token);
+                        //将userName存入sharedPreference
+                        MySharedPreference.saveUserInfo(MyApplication.getContextObject(),true,userName,"");
+                        //将token存入sharedPreference,文件名为/"token“
+                        MySharedPreference.saveToken(MyApplication.getContextObject(),token);
+//                        SharedPreferences pref = getSharedPreferences("token",MODE_PRIVATE);//PreferenceManager.getDefaultSharedPreferences(RegisterActivity.this);
+//                        SharedPreferences.Editor editor = pref.edit();
+//                        editor.putString("token",token);
+//                        editor.commit();
+                        Toast.makeText(getApplicationContext(),"注册成功",Toast.LENGTH_LONG).show();
+                        //go to MainDisplayActivity
+                        Intent intent = new Intent(RegisterActivity.this,MainDisplayActivity.class);
+                        startActivity(intent);
+                        finish();
+
+                    }
+                } catch (JSONException e) {
+                    LogUtil.debug("JSONException: "+e.getMessage());
+//                            e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailed(String error) {
+                dialog.dismiss();
+                Toast.makeText(getApplicationContext(),"注册失败",Toast.LENGTH_LONG).show();
+                LogUtil.debug(error);
+            }
+        });
+    }
+
+    public void userRegister1(String userName, String pwd){
         final AlertDialog dialog = new AlertDialog.Builder(this).setMessage("正在提交信息，请稍候...").show();
         RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();//Volley.newRequestQueue(getApplicationContext());
         JSONObject jsonObject = new JSONObject();
-        JSONObject jsonRequest = new JSONObject();
         try {
             //获取App版本信息
             MyApplication app = MyApplication.getInstance();
-            JSONObject jsonAppInfo = app.getAppInfo();
-            String versionName = jsonAppInfo.getString("versionName");
+            PackageInfo info = app.getPackageInfo();
+            String versionName = info.versionName;
             //构造请求body内容
             jsonObject.put("version",versionName);
             jsonObject.put("logName",userName);

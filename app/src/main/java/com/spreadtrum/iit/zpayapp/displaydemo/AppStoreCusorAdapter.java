@@ -28,7 +28,7 @@ import com.spreadtrum.iit.zpayapp.message.TSMResponseEntity;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BLEPreparedCallbackListener;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.ImageLoaderUtil;
-import com.spreadtrum.iit.zpayapp.network.webservice.ApplyPersonalizationService;
+import com.spreadtrum.iit.zpayapp.network.webservice.TSMPersonalizationWebservice;
 import com.spreadtrum.iit.zpayapp.network.webservice.TSMAppInformationCallback;
 
 import java.util.ArrayList;
@@ -233,7 +233,7 @@ public class AppStoreCusorAdapter extends CursorAdapter{
                         //同步应用
 //                                    entity.setTasktype(TASK_TYPE_SYNC);
 //                                    entity.setTaskcommand("DA0103");
-                        ApplyPersonalizationService.getTSMTaskid(MyApplication.seId, "dbinsert", entity, new TSMAppInformationCallback() {
+                        TSMPersonalizationWebservice.getTSMTaskid(MyApplication.seId, "dbinsert", entity, new TSMAppInformationCallback() {
                             @Override
                             public void getAppInfo(String xml) {
                                 //解析xml

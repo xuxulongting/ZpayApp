@@ -54,21 +54,21 @@ public final class ByteUtil {
 		return s1;
 	}
 
-	public static String byteArrayToHexString(byte[] data) {
-		if (data == null) {
-			return "";
-		}
-		StringBuffer sb = new StringBuffer();
-		int tmp;
-		for (int i = 0; i < data.length; i++) {
-			tmp = data[i] >= 0 ? data[i] : 256 + data[i];
-			if (tmp < 16) {
-				sb.append('0');
-			}
-			sb.append(Integer.toHexString(tmp));
-		}
-		return sb.toString().toUpperCase(Locale.CHINA);
-	}
+//	public static String byteArrayToHexString(byte[] data, int responseLen) {
+//		if (data == null || responseLen==0) {
+//			return "";
+//		}
+//		StringBuffer sb = new StringBuffer();
+//		int tmp;
+//		for (int i = 0; i < data.length; i++) {
+//			tmp = data[i] >= 0 ? data[i] : 256 + data[i];
+//			if (tmp < 16) {
+//				sb.append('0');
+//			}
+//			sb.append(Integer.toHexString(tmp));
+//		}
+//		return sb.toString().toUpperCase(Locale.CHINA);
+//	}
 
 	/**
 	 * 将16进制String转换成byte[]数组，例如：String appid="1542" --> byte[] bAppid={21,66};
@@ -205,14 +205,15 @@ public final class ByteUtil {
 		return str.getBytes(encoder);	
 	}
 	}
-	
+
 	/**
 	 * 给定字符串 ，根据传入字符串 ，截取的字节长度，进行截取操作，考虑汉字的情况
-	 * @param  传入原字符串
-	 * @param len
+	 * @param srcstr
+	 * @param bytelen
+	 * @param encoder
 	 * @return
-	 * @throws UnsupportedEncodingException 
-	 */
+	 * @throws UnsupportedEncodingException
+     */
 	public static String intactInterceptBytes(String srcstr,int bytelen,String encoder) throws UnsupportedEncodingException{
 		byte[] b=srcstr.getBytes(encoder); 
 		if (b.length<=bytelen){

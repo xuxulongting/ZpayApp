@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * Created by SPREADTRUM\ting.long on 16-9-26.
  */
-public class GuideActivity extends AppCompatActivity implements View.OnClickListener, ViewPager.OnPageChangeListener, View.OnTouchListener {
+public class GuideActivity extends BaseActivity implements View.OnClickListener, ViewPager.OnPageChangeListener, View.OnTouchListener {
     private ViewPager viewPager;
     private ViewPagerAdapter vpAdapter;
     private List<View> views;

@@ -20,9 +20,6 @@ import java.net.URL;
  * Created by SPREADTRUM\ting.long on 16-8-26.
  */
 public class HttpUtils {
-
-
-
     /**
      * 使用volley+okhttp发起网络请求，请求webservice服务
      * @param path

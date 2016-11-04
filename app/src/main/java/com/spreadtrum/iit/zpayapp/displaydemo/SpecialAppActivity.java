@@ -16,6 +16,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.ImageLoader;
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.R;
 import com.spreadtrum.iit.zpayapp.bussiness.BussinessTransaction;
@@ -28,8 +30,10 @@ import com.spreadtrum.iit.zpayapp.message.TSMResponseEntity;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BLEPreparedCallbackListener;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
 import com.spreadtrum.iit.zpayapp.network.tcp.TsmTaskCompleteCallback;
+import com.spreadtrum.iit.zpayapp.network.volley_okhttp.BitmapCache;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.ImageLoaderUtil;
-import com.spreadtrum.iit.zpayapp.network.webservice.ApplyPersonalizationService;
+import com.spreadtrum.iit.zpayapp.network.volley_okhttp.RequestQueueUtils;
+import com.spreadtrum.iit.zpayapp.network.webservice.TSMPersonalizationWebservice;
 import com.spreadtrum.iit.zpayapp.network.webservice.TSMAppInformationCallback;
 
 import java.io.File;
@@ -37,7 +41,7 @@ import java.io.File;
 /**
  * Created by SPREADTRUM\ting.long on 16-9-2.
  */
-public class SpecialAppActivity extends AppCompatActivity {
+public class SpecialAppActivity extends BaseActivity {
 
     private TextView textViewAppName,textViewAppType,textViewSpName,textViewAppSize,textViewAppDesc;
     private ImageView imageViewIcon;
@@ -89,12 +93,9 @@ public class SpecialAppActivity extends AppCompatActivity {
         String appType = appInformation.getApptype();
         String spName = appInformation.getSpname();
         String appDesc = appInformation.getAppdesc();
-//        Bitmap bitmap = appInformation.getBitmap();
         String picUrl = appInformation.getPicurl();
-        String localPicpath = appInformation.getLocalpicpath();
+//        String localPicpath = appInformation.getLocalpicpath();
         final String appInstalled = appInformation.getAppinstalled();
-//        int resourceIdIcon = appInformation.getIconviewid();
-
         boolean isInstalling = appInformation.isAppinstalling(appIndex);
 
         textViewAppName = (TextView) findViewById(R.id.id_tv_appname);
@@ -112,14 +113,21 @@ public class SpecialAppActivity extends AppCompatActivity {
         textViewAppSize.setText(appSize);
         textViewSpName.setText(spName);
         textViewAppDesc.setText("\t\t"+appDesc);
-//        imageViewIcon.setImageResource(resourceIdIcon);
-        if(localPicpath==null){
-            File file = new File(ImageFileCache.getAppDir(),picUrl.substring(picUrl.lastIndexOf("/")+1));
-            localPicpath = file.getAbsolutePath();
-        }
-        Bitmap bitmap = ImageLoaderUtil.getLoacalBitmap(localPicpath);
+        //加载图片
+//        if(localPicpath==null){
+//            File file = new File(ImageFileCache.getAppDir(),picUrl.substring(picUrl.lastIndexOf("/")+1));
+//            localPicpath = file.getAbsolutePath();
+//        }
+//        Bitmap bitmap = ImageLoaderUtil.getLoacalBitmap(localPicpath);
 //        imageViewIcon.setImageBitmap(bitmap);
-        imageViewIcon.setImageBitmap(bitmap);
+        //使用volley下载图片，并使用LruCache进行缓存
+        RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();
+        ImageLoader imageLoader = new ImageLoader(requestQueue,new BitmapCache());
+        ImageLoader.ImageListener imageListener = imageLoader.getImageListener(imageViewIcon,R.drawable.refresh,R.drawable.refresh);
+        int maxImageViewWidth = imageViewIcon.getMaxWidth();//获取imageview最大宽度和高度
+        int maxImageViewHeight = imageViewIcon.getMaxHeight();
+        imageLoader.get(picUrl,imageListener,maxImageViewWidth,maxImageViewHeight);//通过ImageView的最大宽度和高度对图片进行压缩
+
         if(isInstalling){
             btnOpera.setVisibility(View.INVISIBLE);
 //            progressBar.setVisibility(View.VISIBLE);
@@ -180,7 +188,7 @@ public class SpecialAppActivity extends AppCompatActivity {
 //                                String strCmd = AppStoreFragment.TASK_TYPE_DOWNLOAD+"05"+ByteUtil.bytesToString(bAppid,5);
 //                                entity.setTaskcommand(strCmd);
                                 RequestTaskidEntity entity=MessageBuilder.getRequestTaskidEntity(appInformation,BussinessTransaction.TASK_TYPE_DOWNLOAD);
-                                ApplyPersonalizationService.getTSMTaskid(MyApplication.seId, "dbinsert", entity, new TSMAppInformationCallback() {
+                                TSMPersonalizationWebservice.getTSMTaskid(MyApplication.seId, "dbinsert", entity, new TSMAppInformationCallback() {
                                     @Override
                                     public void getAppInfo(String xml) {
                                         //解析xml
@@ -260,7 +268,7 @@ public class SpecialAppActivity extends AppCompatActivity {
 //                                                String strCmd = AppStoreFragment.TASK_TYPE_DELETE+"05"+ ByteUtil.bytesToString(bAppid,5);
 //                                                entity.setTaskcommand(strCmd);
                                                 RequestTaskidEntity entity = MessageBuilder.getRequestTaskidEntity(appInformation,BussinessTransaction.TASK_TYPE_DELETE);
-                                                ApplyPersonalizationService.getTSMTaskid(MyApplication.seId, "dbinsert", entity, new TSMAppInformationCallback() {
+                                                TSMPersonalizationWebservice.getTSMTaskid(MyApplication.seId, "dbinsert", entity, new TSMAppInformationCallback() {
                                                     @Override
                                                     public void getAppInfo(String xml) {
                                                         //解析xml

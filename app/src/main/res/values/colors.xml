@@ -7,4 +7,5 @@
     <color name="colorWhite">#FFF</color>
     <color name="colorGreen">#bec1be</color>
     <color name="colorHint">#FFBEC1BE</color>
+    <color name="colorDarkGray">#FF151615</color>
 </resources>

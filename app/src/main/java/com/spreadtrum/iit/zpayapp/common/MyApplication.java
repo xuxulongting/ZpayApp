@@ -2,7 +2,10 @@ package com.spreadtrum.iit.zpayapp.common;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.Network;
 import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
@@ -14,6 +17,7 @@ import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,6 +36,7 @@ public class MyApplication extends Application {
         super.onCreate();
         SDKInitializer.initialize(this);
         context = getApplicationContext();
+        registerActivityLifecycleCallbacks(new ActivityLifecycleListener());
     }
     public static Context getContextObject(){
         return context;
@@ -61,30 +66,48 @@ public class MyApplication extends Application {
         }
     };
 
-    public JSONObject getAppInfo(){
-        JSONObject jsonObject = new JSONObject();
-        String pkgName = getPackageName();
-        String versionName="";
-        int versionCode=0;
+//    public JSONObject getAppInfo(){
+//        JSONObject jsonObject = new JSONObject();
+//        String pkgName = context.getPackageName();
+//        String versionName="";
+//        int versionCode=0;
+//        try {
+//            versionName = context.getPackageManager().getPackageInfo(pkgName,0).versionName;
+//            versionCode = context.getPackageManager().getPackageInfo(pkgName,0).versionCode;
+//        } catch (PackageManager.NameNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        try {
+//            jsonObject.put("versionName",versionName);
+//            jsonObject.put("versionCode",versionCode);
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+//        return jsonObject;
+//    }
+
+    public PackageInfo getPackageInfo(){
+        PackageInfo info = null;
+        String pkgName = context.getPackageName();
         try {
-            versionName = getPackageManager().getPackageInfo(pkgName,0).versionName;
-            versionCode = getPackageManager().getPackageInfo(pkgName,0).versionCode;
+            info = context.getPackageManager().getPackageInfo(pkgName,0);
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
-        try {
-            jsonObject.put("versionName",versionName);
-            jsonObject.put("versionCode",versionCode);
-        } catch (JSONException e) {
-            e.printStackTrace();
+        if (info==null){
+            info = new PackageInfo();
         }
-        return jsonObject;
+        return info;
     }
+
     public static boolean dataFromNet = false;
     public static final int DOWNLOAD_SUCCESS=0;
     public static final int DOWNLOAD_FAILED=1;
     public static final int DELETE_SUCCESS=2;
     public static final int DELETE_FAILED=3;
 
-    public static String seId="";//="451000000000000020160328000000010005";
+    public static String seId="451000000000000020160328000000010005";
+
+    public static final String WEBSERVICE_PATH = "http://10.0.64.120:6893/SPRDTSMDbService.asmx";
+//    public static final String WEBSERVICE_PATH = "http://192.168.1.150:6893/SPRDTSMDbService.asmx";
 }

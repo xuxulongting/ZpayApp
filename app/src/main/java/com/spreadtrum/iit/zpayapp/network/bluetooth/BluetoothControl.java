@@ -1,5 +1,7 @@
 package com.spreadtrum.iit.zpayapp.network.bluetooth;
 
+import android.app.AlertDialog;
+import android.app.Notification;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
@@ -9,6 +11,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.os.Message;
 import android.widget.Toast;
 
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
@@ -18,6 +21,12 @@ import com.spreadtrum.iit.zpayapp.common.MyApplication;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
+
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 
 /**
@@ -141,37 +150,7 @@ public class BluetoothControl {
                         bluetoothService.setOpenSECallbackListener(new OpenSECallbackListener() {
                             @Override
                             public void onSEOpenedSuccess() {
-                                //获取SeId 00A4040007A0000001510000
-                                byte[] command1 = {0x00,(byte)0xA4,0x04,0x00,0x07,(byte)0xA0,0x00,0x00,0x01,0x51,0x00,0x00};
-
-                                communicateWithJDSe(command1,command1.length);
-                                setSeCallbackTSMListener(new SECallbackTSMListener() {
-                                    @Override
-                                    public void callbackTSM(byte[] responseData, int responseLen) {
-                                        byte[] command2 = {(byte)0x80,(byte)0xCA,0x00,0x45,0x00};
-                                        communicateWithJDSe(command2,command2.length);
-                                        setSeCallbackTSMListener(new SECallbackTSMListener() {
-                                            @Override
-                                            public void callbackTSM(byte[] responseData, int responseLen) {
-
-                                                MyApplication.seId = new String(responseData,0,responseData.length-2);
-                                                //回调
-                                                blePreparedCallbackListener.onBLEPrepared();
-                                            }
-
-                                            @Override
-                                            public void errorCallback() {
-
-                                            }
-                                        });
-                                    }
-
-                                    @Override
-                                    public void errorCallback() {
-
-                                    }
-                                });
-
+                                blePreparedCallbackListener.onBLEPrepared();
                             }
 
                             @Override
@@ -200,6 +179,7 @@ public class BluetoothControl {
             }
         }
     };
+
 
     /**
      * private构造函数

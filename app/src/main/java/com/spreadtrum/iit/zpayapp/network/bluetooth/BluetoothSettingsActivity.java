@@ -97,7 +97,7 @@ public class BluetoothSettingsActivity extends AppCompatActivity {
             Toast.makeText(this,"Turned on",Toast.LENGTH_LONG).show();
         }
         else{
-            Toast.makeText(this,"Already Turn on",Toast.LENGTH_LONG).show();
+//            Toast.makeText(this,"Already Turn on",Toast.LENGTH_LONG).show();
         }
     }
 
@@ -125,6 +125,13 @@ public class BluetoothSettingsActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+//        if(bluetoothReceiver!=null)
+//            unregisterReceiver(bluetoothReceiver);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
         if(bluetoothReceiver!=null)
             unregisterReceiver(bluetoothReceiver);
     }

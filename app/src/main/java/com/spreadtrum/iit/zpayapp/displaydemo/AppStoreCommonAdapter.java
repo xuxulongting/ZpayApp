@@ -2,7 +2,6 @@ package com.spreadtrum.iit.zpayapp.displaydemo;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
 import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
@@ -10,6 +9,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
@@ -26,14 +26,17 @@ import com.spreadtrum.iit.zpayapp.network.bluetooth.BLEPreparedCallbackListener;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
 import com.spreadtrum.iit.zpayapp.network.tcp.TsmTaskCompleteCallback;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.BitmapCache;
-import com.spreadtrum.iit.zpayapp.network.volley_okhttp.ImageLoaderUtil;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.RequestQueueUtils;
-import com.spreadtrum.iit.zpayapp.network.webservice.ApplyPersonalizationService;
+import com.spreadtrum.iit.zpayapp.network.webservice.TSMPersonalizationWebservice;
 import com.spreadtrum.iit.zpayapp.network.webservice.TSMAppInformationCallback;
 import com.zhy.adapter.abslistview.CommonAdapter;
 import com.zhy.adapter.abslistview.ViewHolder;
 
 import java.util.List;
+
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-9-26.
@@ -69,7 +72,7 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
 
     /**
      * AppStoreFragment的Adapter构造函数
-     * @param context   上下文
+     * @param context   上下文，必须是view上下文，而不是application上下文
      * @param layoutId  item view的资源Id
      * @param datas item view要绑定的数据
      * @param parent    这里指ListView
@@ -92,26 +95,7 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
         imageView.setImageResource(R.drawable.refresh);//空白图片记得加上，否则，在图片下载成功之前，会显示重复利用的itemview的图片
         String url = item.getPicurl();
         imageView.setTag(url);
-        //使用okhttp下载图片并保存在SD卡中
-//        if(item.getLocalpicpath()==null){
-//            if(item.isPicdownloading()==false) {
-//                //网络下载图片保存并显示
-//                new ImageLoaderUtil(updatePicHandler).DownloadImage(url,item,listViewAppStore);
-//                item.setPicdownloading(true);//主要是为了防止图片重复下载，另外，增加这个约束以后，图片也不会出现乱序的问题了（现在还不知道原因）
-//            }
-//
-//        }
-//        else{
-//            //查找本地图片
-//            Bitmap bitmap = ImageLoaderUtil.getLoacalBitmap(item.getLocalpicpath());
-//            if(bitmap==null){
-//                //本地图片缓存被清空
-//                new ImageLoaderUtil(updatePicHandler).DownloadImage(url,item,listViewAppStore);
-//            }
-//            else
-//                viewHolder.setImageBitmap(R.id.id_iv_appicon,bitmap);
-//        }
-        //使用volley下载图片，并使用LruCache进行缓存
+        //使用volley下载图片，并使用LruCache进行Memmory缓存，并自带Disk缓存
         RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();
         ImageLoader imageLoader = new ImageLoader(requestQueue,new BitmapCache());
         ImageLoader.ImageListener imageListener = imageLoader.getImageListener(imageView,R.drawable.refresh,R.drawable.refresh);
@@ -174,20 +158,11 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
                     @Override
                     public void onBLEPrepared() {
                         //BLE已连接上，且SE通道已打开
-                        LogUtil.debug("onBLEPrepared");
-//                        //获取taskid
-//                        RequestTaskidEntity entity=new RequestTaskidEntity();
-//                        String appid = item.getAppid();
-//                        byte[] bAppid = new byte[5];
-//                        byte[] data = ByteUtil.StringToByteArray(appid);
-//                        System.arraycopy(data,0,bAppid,5-data.length,data.length);
-//
-//                        entity.setTasktype(AppStoreFragment.TASK_TYPE_DOWNLOAD);
-//                        String strCmd = AppStoreFragment.TASK_TYPE_DOWNLOAD+"05"+ByteUtil.bytesToString(bAppid,5);
-//                        entity.setTaskcommand(strCmd);
                         //获取task id
-                        RequestTaskidEntity entity = MessageBuilder.getRequestTaskidEntity(item, BussinessTransaction.TASK_TYPE_DOWNLOAD);
-                        ApplyPersonalizationService.getTSMTaskid(MyApplication.seId, "dbinsert", entity, new TSMAppInformationCallback() {
+                        RequestTaskidEntity entity = MessageBuilder.getRequestTaskidEntity(item,
+                                BussinessTransaction.TASK_TYPE_DOWNLOAD);
+                        TSMPersonalizationWebservice.getTSMTaskid(MyApplication.seId, "dbinsert", entity,
+                                new TSMAppInformationCallback() {
                             @Override
                             public void getAppInfo(String xml) {
                                 //解析xml
@@ -211,7 +186,17 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
                                         transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS,
                                                 appInformation,"download");
 
-                                        MyApplication.handler.sendEmptyMessage(MyApplication.DOWNLOAD_SUCCESS);
+                                        //（1)使用RxJava实现从当前线程跳转到主线程
+                                        Observable.just(MyApplication.DOWNLOAD_SUCCESS)
+                                                .observeOn(AndroidSchedulers.mainThread())
+                                                .subscribe(new Action1<Integer>() {
+                                                    @Override
+                                                    public void call(Integer integer) {
+                                                        Toast.makeText(MyApplication.getContextObject(),"帮卡成功",Toast.LENGTH_LONG);
+                                                    }
+                                                });
+                                         //（2)使用消息方式发送消息到主线程进行操作
+//                                        MyApplication.handler.sendEmptyMessage(MyApplication.DOWNLOAD_SUCCESS);
                                     }
 
                                     @Override

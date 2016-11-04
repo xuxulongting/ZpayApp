@@ -3,8 +3,8 @@ package com.spreadtrum.iit.zpayapp.register_login;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -15,7 +15,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,11 +23,16 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
+import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.R;
+import com.spreadtrum.iit.zpayapp.common.ActivityManager;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
+import com.spreadtrum.iit.zpayapp.common.MySharedPreference;
+import com.spreadtrum.iit.zpayapp.displaydemo.MainDisplayActivity;
+import com.spreadtrum.iit.zpayapp.network.NetParameter;
+import com.spreadtrum.iit.zpayapp.network.ResultCallback;
+import com.spreadtrum.iit.zpayapp.network.ZAppStoreApi;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.RequestQueueUtils;
-import com.spreadtrum.iit.zpayapp.register.RegisterActivity_1;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -114,7 +118,16 @@ public class DigtalpwdLoginActivity extends AppCompatActivity implements View.On
             }
         });
         //从sharedPreference中获取用户名和密码
-        getUserInfo();
+//        getUserInfo();
+        UserInfo userInfo = MySharedPreference.getUserInfo(this);
+        boolean isRemembered = userInfo.isRemembered();
+        String userName = userInfo.getLoginName();
+        editTextUsername.setText(userName);
+        if(isRemembered){
+            String pwd = userInfo.getLoginPwd();
+            editTextPwd.setText(pwd);
+            checkBox.setChecked(true);
+        }
     }
 
     @Override
@@ -131,7 +144,8 @@ public class DigtalpwdLoginActivity extends AppCompatActivity implements View.On
                     return;
                 }
                 //sharedPrefrence保存用户名密码
-                saveUserInfo(userNameStr,pwdStr);
+//                saveUserInfo(userNameStr,pwdStr);
+                MySharedPreference.saveUserInfo(this,checkBox.isChecked(),userNameStr,pwdStr);
                 userLogin(userNameStr,pwdStr);
                 break;
 //            case R.id.id_iv_arrowback:
@@ -142,83 +156,141 @@ public class DigtalpwdLoginActivity extends AppCompatActivity implements View.On
 
     }
 
-    public void saveUserInfo(String userName,String pwd){
+//    public void saveUserInfo(String userName,String pwd){
+//
+//        SharedPreferences pref = getSharedPreferences("userinfo",MODE_PRIVATE);//PreferenceManager.getDefaultSharedPreferences(this);
+//        SharedPreferences.Editor editor = pref.edit();
+//        if(checkBox.isChecked()){
+//            editor.putBoolean("remember_userinfo",true);
+//            editor.putString("user",userName);
+//            editor.putString("password",pwd);
+//        }
+//        else
+//            editor.clear();
+//        editor.commit();
+//
+//    }
+//
+//    public void getUserInfo(){
+//        SharedPreferences pref = getSharedPreferences("userinfo",MODE_PRIVATE);//PreferenceManager.getDefaultSharedPreferences(this);
+//        boolean isRemembered = pref.getBoolean("remember_userinfo",false);
+//        if(isRemembered){
+//            String userName = pref.getString("user","");
+//            String pwd = pref.getString("password","");
+//            editTextUsername.setText(userName);
+//            editTextPwd.setText(pwd);
+//            checkBox.setChecked(true);
+//        }
+//    }
 
-        SharedPreferences pref = getSharedPreferences("userinfo",MODE_PRIVATE);//PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = pref.edit();
-        if(checkBox.isChecked()){
-            editor.putBoolean("remember_userinfo",true);
-            editor.putString("user",userName);
-            editor.putString("password",pwd);
-        }
-        else
-            editor.clear();
-        editor.commit();
 
-    }
-
-    public void getUserInfo(){
-        SharedPreferences pref = getSharedPreferences("userinfo",MODE_PRIVATE);//PreferenceManager.getDefaultSharedPreferences(this);
-        boolean isRemembered = pref.getBoolean("remember_userinfo",false);
-        if(isRemembered){
-            String userName = pref.getString("user","");
-            String pwd = pref.getString("password","");
-            editTextUsername.setText(userName);
-            editTextPwd.setText(pwd);
-            checkBox.setChecked(true);
-        }
-    }
 
     public void userLogin(String userName,String pwd){
-        final AlertDialog dialog = new AlertDialog.Builder(this).setMessage("正在提交信息，请稍候...").show();
-        RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();//Volley.newRequestQueue(getApplicationContext());
-        JSONObject jsonObject = new JSONObject();
-        JSONObject jsonRequest = new JSONObject();
-        try {
-            //获取App版本信息
-            MyApplication app = MyApplication.getInstance();
-            JSONObject jsonAppInfo = app.getAppInfo();
-            String versionName = jsonAppInfo.getString("versionName");
-            jsonObject.put("version",versionName);
-            jsonObject.put("logName",userName);
-            jsonObject.put("logPwd",pwd);
-//            String params = jsonObject.toString();
-//            jsonRequest.put("params",params);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, LOGIN_URL, jsonObject,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        dialog.dismiss();
-                        try {
-                            String result = response.getString("result");
-                            if(result.equals("0")){
-                                String errorCode = response.getString("errorCode");
-                                String errorMsg = response.getString("errorMsg");
-                                dialog.dismiss();
-                                Toast.makeText(getApplicationContext(),"登录失败",Toast.LENGTH_LONG).show();
-                            }
-                            else {
-                                String userId = response.getString("userId");
-                                String token = response.getString("token");
-                                dialog.dismiss();
-                                Toast.makeText(getApplicationContext(),"登录成功",Toast.LENGTH_LONG).show();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
+        //获取App版本信息
+        MyApplication app = MyApplication.getInstance();
+        PackageInfo info = app.getPackageInfo();
+        String versionName = info.versionName;
+        final AlertDialog.Builder builder = new AlertDialog.Builder(DigtalpwdLoginActivity.this).setMessage("正在提交信息，请稍候...");
+        final AlertDialog dialog = builder.show();
+        ZAppStoreApi.login(userName, pwd, versionName, new ResultCallback<JSONObject>() {
             @Override
-            public void onErrorResponse(VolleyError error) {
+            public void onPreStart() {
+
+            }
+
+            @Override
+            public void onSuccess(JSONObject response) {
                 dialog.dismiss();
+                try {
+                    String result = response.getString("result");
+                    if(result.equals("0")){
+                        String errorCode = response.getString("errorCode");
+                        String errorMsg = response.getString("errorMsg");
+                        dialog.dismiss();
+                        LogUtil.debug("error code:"+errorCode+",errorMsg:"+errorMsg);
+                        Toast.makeText(getApplicationContext(),"登录失败",Toast.LENGTH_LONG).show();
+                    }
+                    else {
+                        String userId = response.getString("userId");
+                        String token = response.getString("token");
+                        dialog.dismiss();
+                        LogUtil.debug("login success, token is :"+token);
+                        MySharedPreference.saveToken(MyApplication.getContextObject(),token);
+                        Toast.makeText(getApplicationContext(),"登录成功",Toast.LENGTH_LONG).show();
+                        if (!ActivityManager.getInstance().hasActivity()){
+                            Intent intent = new Intent(DigtalpwdLoginActivity.this, MainDisplayActivity.class);
+                            startActivity(intent);
+                        }
+                        finish();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailed(String error) {
                 Toast.makeText(getApplicationContext(),"登录失败",Toast.LENGTH_LONG).show();
             }
         });
-        requestQueue.add(request);
+//        //获取App版本信息
+//        MyApplication app = MyApplication.getInstance();
+//        PackageInfo info = app.getPackageInfo();
+//        String versionName = info.versionName;
+//        final AlertDialog dialog = new AlertDialog.Builder(this).setMessage("正在提交信息，请稍候...").show();
+//        RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();//Volley.newRequestQueue(getApplicationContext());
+//        JSONObject jsonObject = new JSONObject();
+//        try {
+//            jsonObject.put("version",versionName);
+//            jsonObject.put("logName",userName);
+//            jsonObject.put("logPwd",pwd);
+////            String params = jsonObject.toString();
+////            jsonRequest.put("params",params);
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+//        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, NetParameter.LOGIN_URL, jsonObject,
+//                new Response.Listener<JSONObject>() {
+//                    @Override
+//                    public void onResponse(JSONObject response) {
+//                        dialog.dismiss();
+//                        try {
+//                            String result = response.getString("result");
+//                            if(result.equals("0")){
+//                                String errorCode = response.getString("errorCode");
+//                                String errorMsg = response.getString("errorMsg");
+//                                dialog.dismiss();
+//                                LogUtil.debug("error code:"+errorCode+",errorMsg:"+errorMsg);
+//                                Toast.makeText(getApplicationContext(),"登录失败",Toast.LENGTH_LONG).show();
+//                            }
+//                            else {
+//                                String userId = response.getString("userId");
+//                                String token = response.getString("token");
+//                                dialog.dismiss();
+//                                LogUtil.debug("login success, token is :"+token);
+////                                saveToken(token);
+//                                MySharedPreference.saveToken(MyApplication.getContextObject(),token);
+//                                Toast.makeText(getApplicationContext(),"登录成功",Toast.LENGTH_LONG).show();
+//                                if (!ActivityManager.getInstance().hasActivity()){
+//                                    Intent intent = new Intent(DigtalpwdLoginActivity.this, MainDisplayActivity.class);
+//                                    startActivity(intent);
+//                                }
+//                                finish();
+//                            }
+//                        } catch (JSONException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                dialog.dismiss();
+//                Toast.makeText(getApplicationContext(),"登录失败",Toast.LENGTH_LONG).show();
+//            }
+//        });
+//        requestQueue.add(request);
     }
 
-    public static String LOGIN_URL="http://10.0.70.93:8080/Test/register";
+//    public static String LOGIN_URL="http://10.0.70.93:8080/TSM/register";
+
 }

@@ -1,6 +1,7 @@
 package com.spreadtrum.iit.zpayapp.message;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.text.DecimalFormat;
@@ -154,13 +155,6 @@ public class MessageBuilder {
 		messageRequestTaskidHandle(entity);
 		String xml = buildXML_End();
 		return xml;
-	}
-
-
-
-	private static String getTaskIndex() {
-		DecimalFormat df = new DecimalFormat("0000");
-		return df.format(++taskIndex);
 	}
 
 	/**
@@ -326,8 +320,9 @@ public class MessageBuilder {
 	 * @param taskId
      * @return
      */
-	public static List<APDUInfo> parseBussinessResponseXml(String xml,String sessionId,String taskId){
-		List<APDUInfo> apduInfoList = null;
+	public static TSMResponseData parseBussinessResponseXml(String xml,String sessionId,String taskId){
+		TSMResponseData tsmResponseData = new TSMResponseData();
+		List<APDUInfo> apduInfoList = tsmResponseData.apduInfoList;
 		APDUInfo apduInfo = null;
 		try {
 			XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
@@ -341,14 +336,18 @@ public class MessageBuilder {
 						break;
 					case XmlPullParser.START_TAG:
 						if(nodeName.equals("sessionID")){
-							if(!sessionId.equals(parser.nextText())) {
+							String session = parser.nextText();
+							if(!sessionId.equals(session)) {
 								return null;
 							}
+							tsmResponseData.sessionId = session;
 						}
 						else if(nodeName.equals("taskID")){
-							if(!taskId.equals(parser.nextText())){
+							String task = parser.nextText();
+							if(!taskId.equals(task)){
 								return null;
 							}
+							tsmResponseData.taskId = task;
 						}
 						else if(nodeName.equals("APDUList")){
 							apduInfoList = new ArrayList<>();
@@ -384,7 +383,7 @@ public class MessageBuilder {
 			return null;
 		}
 
-		return apduInfoList;
+		return tsmResponseData;
 	}
 
 	/**
@@ -394,7 +393,7 @@ public class MessageBuilder {
 	 *            APDU对象
 	 * @return
 	 */
-	private static String message_Response_handle(String seId,String imei,String phone,
+	public static String message_Response_handle(String seId,String imei,String phone,
 												String sessionId,String taskId,APDUInfo apdu,String result) {
 		serializer = Xml.newSerializer();
 		writer = new StringWriter();
@@ -450,6 +449,55 @@ public class MessageBuilder {
 			return null;
 		}
 		return writer.toString().trim();
+	}
+
+	/**
+	 * 从XML中获取sessionId,taskId等参数组成TSMRequestData数据结构
+	 * @param requestXml
+	 * @return
+     */
+	public static TSMRequestData getTSMRequestDataFromXml(String requestXml){
+		TSMRequestData tsmRequestData = new TSMRequestData();
+		try {
+			XmlPullParserFactory xmlPullParserFactory = XmlPullParserFactory.newInstance();
+			XmlPullParser parser = xmlPullParserFactory.newPullParser();
+			parser.setInput(new StringReader(requestXml));
+			int eventType = parser.getEventType();
+			while (eventType!=XmlPullParser.END_DOCUMENT){
+				String nodeName = parser.getName();
+				switch (eventType){
+					case XmlPullParser.START_DOCUMENT:
+						break;
+					case XmlPullParser.START_TAG:
+						if (nodeName.equals("seid")){
+							tsmRequestData.setSeId(parser.nextText());
+						}
+						else if(nodeName.equals("imei")){
+							tsmRequestData.setImei(parser.nextText());
+						}
+						else if (nodeName.equals("phone"))
+						{
+							tsmRequestData.setPhone(parser.nextText());
+						}
+						else if (nodeName.equals("sessionID")){
+							tsmRequestData.setSessionId(parser.nextText());
+						}
+						else if (nodeName.equals("taskID")){
+							tsmRequestData.setTaskId(parser.nextText());
+						}
+						break;
+					case XmlPullParser.END_TAG:
+						break;
+					default:
+						break;
+				}
+			}
+		} catch (XmlPullParserException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return tsmRequestData;
 	}
 //	/**
 //	 * 获取授权码

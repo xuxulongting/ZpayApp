@@ -18,33 +18,39 @@
         />
     </com.zhy.autolayout.AutoLinearLayout>
 
-    <com.zhy.autolayout.AutoLinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1" >
+    <!--<com.zhy.autolayout.AutoLinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_weight="1" >-->
 
-        <com.zhy.autolayout.AutoLinearLayout
-            android:layout_gravity="center"
-            android:id="@+id/id_ll_loading"
+        <!--<com.zhy.autolayout.AutoLinearLayout-->
+            <!--android:layout_gravity="center"-->
+            <!--android:id="@+id/id_ll_loading"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:orientation="vertical">-->
+
+            <!--<ProgressBar-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content" />-->
+
+            <!--<TextView-->
+                <!--android:gravity="center"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="数据加载中,请稍后..."-->
+                <!--android:textSize="80px" />-->
+        <!--</com.zhy.autolayout.AutoLinearLayout>-->
+    <!--</com.zhy.autolayout.AutoLinearLayout>-->
+
+    <com.spreadtrum.iit.zpayapp.PullToRefreshLayoutTellH.PullToRefreshLayout
+        android:id="@+id/refresh_widget"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ListView
+            android:id="@+id/id_listview_bus"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <ProgressBar
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:gravity="center"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="数据加载中,请稍后..."
-                android:textSize="80px" />
-        </com.zhy.autolayout.AutoLinearLayout>
-    </com.zhy.autolayout.AutoLinearLayout>
-    <ListView
-        android:id="@+id/id_listview_bus"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </ListView>
+            android:layout_height="wrap_content">
+        </ListView>
+    </com.spreadtrum.iit.zpayapp.PullToRefreshLayoutTellH.PullToRefreshLayout>
 </com.zhy.autolayout.AutoLinearLayout>
