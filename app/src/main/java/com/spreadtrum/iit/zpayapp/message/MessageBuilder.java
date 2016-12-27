@@ -295,6 +295,8 @@ public class MessageBuilder {
 			serializer.endTag(null,"phone");
 			serializer.endTag(null,"terminalInfo");
 			serializer.startTag(null,"request");
+			serializer.attribute(null,"type","0");
+			serializer.attribute(null,"index","0");
 			serializer.startTag(null,"sessionID");
 			serializer.text(sessionId);
 			serializer.endTag(null,"sessionID");
@@ -302,8 +304,10 @@ public class MessageBuilder {
 			serializer.text(taskId);
 			serializer.endTag(null,"taskID");
 			serializer.endTag(null,"request");
-			serializer.startTag(null,"chksum");
-			serializer.endTag(null,"chksum");
+			serializer.startTag(null,"MAC");
+			serializer.endTag(null,"MAC");
+//			serializer.startTag(null,"chksum");
+//			serializer.endTag(null,"chksum");
 			serializer.endTag(null,"tsm");
 
 		} catch (IOException e) {
@@ -335,6 +339,10 @@ public class MessageBuilder {
 					case  XmlPullParser.START_DOCUMENT:
 						break;
 					case XmlPullParser.START_TAG:
+						if(nodeName.equals("type")){
+							String operateType = parser.getAttributeValue(0);
+							tsmResponseData.setOperateType(operateType);
+						}
 						if(nodeName.equals("sessionID")){
 							String session = parser.nextText();
 							if(!sessionId.equals(session)) {
@@ -348,6 +356,18 @@ public class MessageBuilder {
 								return null;
 							}
 							tsmResponseData.taskId = task;
+						}
+						else if(nodeName.equals("finishFlag")){
+							String finishFlag = parser.nextText();
+							tsmResponseData.setFinishFlag(finishFlag);
+						}
+						else if(nodeName.equals("result")){
+							String resultResponse = parser.nextText();
+							tsmResponseData.setResultResponse(resultResponse);
+						}
+						else if (nodeName.equals("description")){
+							String desResponse = parser.nextText();
+							tsmResponseData.setDesResponse(desResponse);
 						}
 						else if(nodeName.equals("APDUList")){
 							apduInfoList = new ArrayList<>();
@@ -393,7 +413,7 @@ public class MessageBuilder {
 	 *            APDU对象
 	 * @return
 	 */
-	public static String message_Response_handle(String seId,String imei,String phone,
+	public static String message_Response_handle(String seId,String imei,String phone,String requestType,
 												String sessionId,String taskId,APDUInfo apdu,String result) {
 		serializer = Xml.newSerializer();
 		writer = new StringWriter();
@@ -417,6 +437,7 @@ public class MessageBuilder {
 			serializer.endTag(null,"phone");
 			serializer.endTag(null,"terminalInfo");
 			serializer.startTag(null,"request");
+			serializer.attribute(null,"type",requestType);
 			serializer.startTag(null,"sessionID");
 			serializer.text(sessionId);
 			serializer.endTag(null,"sessionID");
@@ -440,8 +461,9 @@ public class MessageBuilder {
 			serializer.endTag(null,"APDUInfo");
 			serializer.endTag(null,"RAPDUList");
 			serializer.endTag(null,"request");
-			serializer.startTag(null,"chksum");
-			serializer.endTag(null,"chksum");
+			serializer.startTag(null,"MAC");
+			serializer.text("reserved");
+			serializer.endTag(null,"MAC");
 			serializer.endTag(null,"tsm");
 
 		} catch (IOException e) {

@@ -204,10 +204,10 @@ public class DigtalpwdLoginActivity extends AppCompatActivity implements View.On
                 try {
                     String result = response.getString("result");
                     if(result.equals("0")){
-                        String errorCode = response.getString("errorCode");
+//                        String errorCode = response.getString("errorCode");
                         String errorMsg = response.getString("errorMsg");
                         dialog.dismiss();
-                        LogUtil.debug("error code:"+errorCode+",errorMsg:"+errorMsg);
+                        LogUtil.debug("errorMsg:"+errorMsg);
                         Toast.makeText(getApplicationContext(),"登录失败",Toast.LENGTH_LONG).show();
                     }
                     else {

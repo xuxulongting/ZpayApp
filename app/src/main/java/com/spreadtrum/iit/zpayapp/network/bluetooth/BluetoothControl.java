@@ -1,7 +1,5 @@
 package com.spreadtrum.iit.zpayapp.network.bluetooth;
 
-import android.app.AlertDialog;
-import android.app.Notification;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
@@ -11,22 +9,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.os.Message;
 import android.widget.Toast;
 
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
+import com.spreadtrum.iit.zpayapp.common.AppConfig;
 import com.spreadtrum.iit.zpayapp.common.ByteUtil;
-import com.spreadtrum.iit.zpayapp.common.ConditionCompile;
-import com.spreadtrum.iit.zpayapp.common.MyApplication;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeMap;
-
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 
 /**
@@ -44,6 +34,10 @@ public class BluetoothControl {
     private BluetoothGattCharacteristic writeCharacteristic;
     private static BluetoothControl bluetoothControl=null;
     private BLEPreparedCallbackListener blePreparedCallbackListener;
+
+
+
+    private boolean bStopTransferApdu = false;
     //展讯蓝牙
     private int sendTime=0;
     private int sendCount=0;
@@ -71,6 +65,14 @@ public class BluetoothControl {
     public static final byte CHECKPARA_RECV = 0x13;
     public static final byte PARAMCODE_OPENSE = 0x03;
     public static final byte PARAMCODE_CLOSESE = 0x04;
+
+    public boolean isbStopTransferApdu() {
+        return bStopTransferApdu;
+    }
+
+    public void setbStopTransferApdu(boolean bStopTransferApdu) {
+        this.bStopTransferApdu = bStopTransferApdu;
+    }
 
     /**
      * 获取BluetoothService对象
@@ -132,7 +134,7 @@ public class BluetoothControl {
                 case BluetoothService.ACTION_GATT_SERVICES_DISCOVERED:
                     LogUtil.debug(TAG,"services discovered");
                     gattServiceList = bluetoothService.getSupportedGattServices();
-                    if(ConditionCompile.JDBLE){
+                    if(AppConfig.JDBLE){
                         seCommService = getSpecialGattService(gattServiceList,JD_SERVICE);
                         notifyCharacteristic = getSpecialCharacteristic(seCommService,JD_NOTIFY_CHARACTERISTIC);
                         writeCharacteristic = getSpecialCharacteristic(seCommService,JD_WRITE_CHARACTERISTIC);
@@ -207,12 +209,15 @@ public class BluetoothControl {
             bluetoothControl = new BluetoothControl(context,selBleDevAddr);
         }else{
             //如果BluetoothControl实例已经创建，则延时，先返回bluetoothControl对象，再回调onBLEPrepared()
-            DelayThread();
+            createNewThread();
         }
         return bluetoothControl;
     }
 
-    public static void DelayThread(){
+    /**
+     * 创建新的线程，在这个新的线程里，与TSM和SE交互
+     */
+    public static void createNewThread(){
         LogUtil.debug("DelayThread");
         new Thread(new Runnable() {
             @Override
@@ -232,6 +237,9 @@ public class BluetoothControl {
         mContext.unregisterReceiver(gattUpdateReceiver);
     }
 
+    /**
+     * 与蓝牙服务解绑,停止蓝牙服务
+     */
     public void bluetoothUnbindService()
     {
         mContext.unbindService(serviceConnection);
@@ -428,9 +436,6 @@ public class BluetoothControl {
      * @param length
      */
     public void communicateWithJDSe(final byte[] byteofdata,final int length){
-        //int apduLength = length;    //待发送的apdu指令的长度
-        //int apduSentLength = 0;     //已发送的apdu指令长度（蓝牙每次发送20字节）
-        //int packages;   //待发送的包数
         int packageNum=0;           //包序号
         int total_package;      //总包数
         //计算total_package
@@ -531,46 +536,6 @@ public class BluetoothControl {
 
                 }
             });
-//            while ((packages>1) || ((packages==1) && (mod==0))){
-//                packageNum+=1;
-//                data[0]=(byte)(((byte)(total_package << 4)) | ((byte)(packageNum))) ;
-//                System.arraycopy(byteofdata,apduSentLength,data,1,19);
-//                //确保上次写完成
-//                while (!bluetoothService.bWriteCharacteristic) {
-//
-//                }
-//                writeCharacteristic.setValue(data);
-//                bluetoothService.wirteCharacteristic(writeCharacteristic);
-//                bluetoothService.bWriteCharacteristic=false;
-//                LogUtil.debug(TAG,"send to BLE:"+ByteUtil.bytesToHexString(data,data.length));
-//                apduLength -= 19;
-//                apduSentLength +=19;
-//                packages-=1;
-//            }
-//            if(mod!=0){
-//                byte[] lastPackage = new byte[mod+1];
-//                packageNum+=1;
-//                lastPackage[0]=(byte)(((byte)(total_package << 4)) | ((byte)(packageNum))) ;
-//                System.arraycopy(byteofdata,apduSentLength,lastPackage,1,mod);
-//                //确保上次写完成
-//                while (!bluetoothService.bWriteCharacteristic) {
-//
-//                }
-//                writeCharacteristic.setValue(lastPackage);
-//                bluetoothService.wirteCharacteristic(writeCharacteristic);
-//                bluetoothService.bWriteCharacteristic=false;
-//                LogUtil.debug(TAG,"send to BLE:"+ByteUtil.bytesToHexString(lastPackage,lastPackage.length));
-//                apduLength-=mod;
-//                apduSentLength+=mod;
-//                packages-=1;
-//            }
-//            if(apduLength==0 && apduSentLength==length)
-//            {
-//                LogUtil.debug(TAG,"apdu send success!");
-//            }
-//            else
-//                LogUtil.debug("apdu send failed!");
-
         }
 
     }
@@ -659,28 +624,6 @@ public class BluetoothControl {
                 LogUtil.debug(TAG,"onResponseRead send to BLE:"+ByteUtil.bytesToHexString(responseDataToBle,responseDataToBle.length));
             }
         });
-
-
-//        while((sendTime>1 && mod>0) || (sendTime>0 && mod==0)){
-//            sendData[0]=(byte)(sendTime-1);
-//            System.arraycopy(byteofdata,sendCount,sendData,1,19);
-//            sendCount+=19;
-//            writeCharacteristic.setValue(sendData);
-//            bluetoothService.wirteCharacteristic(writeCharacteristic);
-//            sendTime-=1;
-//            LogUtil.debug(TAG,"send to BLE:"+bytesToHexString(sendData));
-//        }
-//        //sendTime=0,mod>0,剩余字节数不足19,重新定义缓冲区
-//        if(sendTime==0){
-//            byte []data=new byte[length-sendCount+1];
-//            data[0]=(byte)0;
-//            System.arraycopy(byteofdata,sendCount,data,1,length-sendCount);
-//            writeCharacteristic.setValue(data);
-//            bluetoothService.wirteCharacteristic(writeCharacteristic);
-//            LogUtil.debug(TAG,"send to BLE:"+bytesToHexString(data));
-//        }
-//        writeCharacteristic.setValue(byteofdata);
-//        bluetoothService.wirteCharacteristic(writeCharacteristic);
     }
 
     private static IntentFilter makeGattUpdateIntentFilter() {

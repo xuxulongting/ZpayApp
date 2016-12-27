@@ -38,7 +38,43 @@ public class TSMResponseData {
 
     }
 
+    public String getFinishFlag() {
+        return finishFlag;
+    }
+
+    public void setFinishFlag(String finishFlag) {
+        this.finishFlag = finishFlag;
+    }
+
+    public String getResultResponse() {
+        return resultResponse;
+    }
+
+    public void setResultResponse(String resultResponse) {
+        this.resultResponse = resultResponse;
+    }
+
+    public String getDesResponse() {
+        return desResponse;
+    }
+
+    public void setDesResponse(String desResponse) {
+        this.desResponse = desResponse;
+    }
+
+    public String getOperateType() {
+        return operateType;
+    }
+
+    public void setOperateType(String operateType) {
+        this.operateType = operateType;
+    }
+
+    public String operateType;
     public List<APDUInfo> apduInfoList;
     public String taskId;
     public String sessionId;
+    public String finishFlag;
+    public String resultResponse;
+    public String desResponse;
 }

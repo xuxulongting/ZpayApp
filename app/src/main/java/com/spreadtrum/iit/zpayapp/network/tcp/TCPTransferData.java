@@ -207,20 +207,6 @@ public class TCPTransferData {
                 tsmTaskCompleteCallback.onTaskExecutedFailed();
             }
         });
-
-
-//        TCPByteRequest request = new TCPByteRequest(tcpSocket, input, new TCPResponse.Listener<byte[]>() {
-//            @Override
-//            public void onResponse(byte[] response, int responseLen) {
-//
-//            }
-//        }, new TCPResponse.ErrorListener() {
-//            @Override
-//            public void onErrorResponse(Object response) {
-//
-//            }
-//        });
-//        request.start();
     }
 
     public void appRequest(TCPSocket tcpSocket, byte[] input, final TsmTaskCompleteCallback tsmTaskCompleteCallback){

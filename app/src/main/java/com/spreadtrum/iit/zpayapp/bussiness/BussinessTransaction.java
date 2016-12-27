@@ -134,7 +134,7 @@ public class BussinessTransaction{
                                String xml, final TsmTaskCompleteCallback callback){
 
         String url = NetParameter.TSM_URL;
-        RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();
+//        RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();
         CustomStringRequest stringRequest = new CustomStringRequest(Request.Method.POST,url,xml.getBytes(), new Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -153,6 +153,7 @@ public class BussinessTransaction{
 
             }
         });
+        RequestQueueUtils.getInstance().addToRequestQueue(stringRequest);
     }
 
     /**
@@ -168,6 +169,11 @@ public class BussinessTransaction{
         final byte []sw = apduInfo.getSW().getBytes();
         final int index = ByteUtil.parseInt(apduInfo.getIndex(),10,0);
         byte []apdu = apduInfo.getAPDU().getBytes();
+        //停止传输APDU
+        if (bluetoothControl.isbStopTransferApdu()) {
+            callback.onTransactionFailed(apduInfo);
+            return;
+        }
         bluetoothControl.communicateWithJDSe(apdu,apdu.length);
         bluetoothControl.setSeCallbackTSMListener(new SECallbackTSMListener() {
             @Override
@@ -194,14 +200,7 @@ public class BussinessTransaction{
         });
     }
 
-    private byte[] generateSessionId(int byteOfLen){
-        byte[] byteOfRandom = new byte[byteOfLen];
-        Random ra =new Random();
-        for(int i=0;i<byteOfLen;i++){
-            byteOfRandom[i] = (byte) ra.nextInt(255);
-        }
-        return byteOfRandom;
-    }
+
 
     /**
      * 应用下载/删除完成后，发送广播

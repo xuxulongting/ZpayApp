@@ -109,6 +109,9 @@ public class SettingsFragment extends Fragment {
         return view;
     }
 
+    /**
+     * 退出登录
+     */
     private void userLogout(){
         //获取token
         String token = getToken();
@@ -182,85 +185,85 @@ public class SettingsFragment extends Fragment {
     /**
      * 退出登录
      */
-    private void userLogout1(){
-        //获取token
-        String token = getToken();
-        if(token.equals("")){
-            Toast.makeText(MyApplication.getContextObject(),"您还没有登录",Toast.LENGTH_LONG).show();
-            return;
-        }
-//        final AlertDialog dialog = new AlertDialog.Builder(MyApplication.getContextObject())
-//                .setMessage("正在退出，请稍候...").show();
-        JSONObject jsonObject = new JSONObject();
-        try {
-            //获取App版本信息
-            MyApplication app = MyApplication.getInstance();
-//            JSONObject jsonAppInfo = app.getAppInfo();
-//            String versionName = jsonAppInfo.getString("versionName");
-            PackageInfo info = app.getPackageInfo();
-            String versionName = info.versionName;
-            //获取logName
-            UserInfo userInfo = MySharedPreference.getUserInfo(MyApplication.getContextObject());
-            String user = userInfo.getLoginName();
-            jsonObject.put("version",versionName);
-            jsonObject.put("logName",user);
-            jsonObject.put("token",token);
-            final RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();
-            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, NetParameter.LOGOUT_URL, jsonObject,
-                    new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(final JSONObject response) {
-                            try {
-                                final String result = response.getString("result");
-                                Observable.just(result)
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribe(new Action1<String>() {
-                                            @Override
-                                            public void call(String s) {
-                                                if(s.equals("0")){
-//                                                    dialog.dismiss();
-                                                    Toast.makeText(MyApplication.getContextObject(),"退出失败",Toast.LENGTH_LONG).show();
-                                                }
-                                                else {
-//                                                    dialog.dismiss();
-                                                    Toast.makeText(MyApplication.getContextObject(),"退出成功",Toast.LENGTH_LONG).show();
-
-                                                    Intent intent = new Intent(getActivity(),DigtalpwdLoginActivity.class);
-                                                    startActivity(intent);
-                                                    ActivityManager.getInstance().finishAllActivity();
-                                                }
-                                            }
-                                        });
-                            } catch (JSONException e) {
-                                LogUtil.debug("userLogout JSONException"+e.getMessage());
-//                                e.printStackTrace();
-                            }
-
-                        }
-                    }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Observable.just(0)
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(new Action1<Integer>() {
-                                @Override
-                                public void call(Integer integer) {
-//                                    dialog.dismiss();
-                                    Toast.makeText(MyApplication.getContextObject(),"退出失败",Toast.LENGTH_LONG).show();
-                                }
-                            });
-
-                }
-            });
-            requestQueue.add(jsonObjectRequest);
-        } catch (JSONException e) {
-//            e.printStackTrace();
-            LogUtil.debug("userLogout JSONException"+e.getMessage());
-        }
-
-
-
-    }
+//    private void userLogout1(){
+//        //获取token
+//        String token = getToken();
+//        if(token.equals("")){
+//            Toast.makeText(MyApplication.getContextObject(),"您还没有登录",Toast.LENGTH_LONG).show();
+//            return;
+//        }
+////        final AlertDialog dialog = new AlertDialog.Builder(MyApplication.getContextObject())
+////                .setMessage("正在退出，请稍候...").show();
+//        JSONObject jsonObject = new JSONObject();
+//        try {
+//            //获取App版本信息
+//            MyApplication app = MyApplication.getInstance();
+////            JSONObject jsonAppInfo = app.getAppInfo();
+////            String versionName = jsonAppInfo.getString("versionName");
+//            PackageInfo info = app.getPackageInfo();
+//            String versionName = info.versionName;
+//            //获取logName
+//            UserInfo userInfo = MySharedPreference.getUserInfo(MyApplication.getContextObject());
+//            String user = userInfo.getLoginName();
+//            jsonObject.put("version",versionName);
+//            jsonObject.put("logName",user);
+//            jsonObject.put("token",token);
+//            final RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();
+//            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, NetParameter.LOGOUT_URL, jsonObject,
+//                    new Response.Listener<JSONObject>() {
+//                        @Override
+//                        public void onResponse(final JSONObject response) {
+//                            try {
+//                                final String result = response.getString("result");
+//                                Observable.just(result)
+//                                        .observeOn(AndroidSchedulers.mainThread())
+//                                        .subscribe(new Action1<String>() {
+//                                            @Override
+//                                            public void call(String s) {
+//                                                if(s.equals("0")){
+////                                                    dialog.dismiss();
+//                                                    Toast.makeText(MyApplication.getContextObject(),"退出失败",Toast.LENGTH_LONG).show();
+//                                                }
+//                                                else {
+////                                                    dialog.dismiss();
+//                                                    Toast.makeText(MyApplication.getContextObject(),"退出成功",Toast.LENGTH_LONG).show();
+//
+//                                                    Intent intent = new Intent(getActivity(),DigtalpwdLoginActivity.class);
+//                                                    startActivity(intent);
+//                                                    ActivityManager.getInstance().finishAllActivity();
+//                                                }
+//                                            }
+//                                        });
+//                            } catch (JSONException e) {
+//                                LogUtil.debug("userLogout JSONException"+e.getMessage());
+////                                e.printStackTrace();
+//                            }
+//
+//                        }
+//                    }, new Response.ErrorListener() {
+//                @Override
+//                public void onErrorResponse(VolleyError error) {
+//                    Observable.just(0)
+//                            .observeOn(AndroidSchedulers.mainThread())
+//                            .subscribe(new Action1<Integer>() {
+//                                @Override
+//                                public void call(Integer integer) {
+////                                    dialog.dismiss();
+//                                    Toast.makeText(MyApplication.getContextObject(),"退出失败",Toast.LENGTH_LONG).show();
+//                                }
+//                            });
+//
+//                }
+//            });
+//            requestQueue.add(jsonObjectRequest);
+//        } catch (JSONException e) {
+////            e.printStackTrace();
+//            LogUtil.debug("userLogout JSONException"+e.getMessage());
+//        }
+//
+//
+//
+//    }
 
     /**
      * 从SharedPreferences中获取token值
@@ -275,7 +278,19 @@ public class SettingsFragment extends Fragment {
         return token;
     }
 
-
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        LogUtil.debug("onActivityResult--SettingsFragment");
+        if(requestCode==SettingsFragment.REQUEST_BLUETOOTH_DEVICE){
+            LogUtil.debug("onActivityResult");
+            if(requestCode == REQUEST_BLUETOOTH_DEVICE && resultCode == RESULT_BLUETOOTH_DEVICE) {
+                String bluetoothDevAddr = data.getStringExtra("BLE_ADDR");
+                MyApplication app = (MyApplication) getActivity().getApplication();
+                app.setBluetoothDevAddr(bluetoothDevAddr);
+            }
+        }
+    }
 
     public static final int REQUEST_BLUETOOTH_DEVICE=1;
     public static final int RESULT_BLUETOOTH_DEVICE=2;

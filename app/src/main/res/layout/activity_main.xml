@@ -23,6 +23,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="LINUX server"/>
+    <Button
+        android:id="@+id/id_btn_heartbeat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="HeartBeat Test"/>
     <com.android.volley.toolbox.NetworkImageView
         android:id="@+id/network_image_view"
         android:layout_width="40px"

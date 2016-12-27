@@ -57,34 +57,14 @@ public class MyApplication extends Application {
                    Toast.makeText(MyApplication.getContextObject(),"绑卡失败",Toast.LENGTH_LONG).show();
                    break;
                case DELETE_SUCCESS:
-                   Toast.makeText(MyApplication.getContextObject(),"取消绑卡成功",Toast.LENGTH_LONG).show();
+                   Toast.makeText(MyApplication.getContextObject(),"解绑成功",Toast.LENGTH_LONG).show();
                    break;
                case DELETE_FAILED:
-                   Toast.makeText(MyApplication.getContextObject(),"取消绑卡失败",Toast.LENGTH_LONG).show();
+                   Toast.makeText(MyApplication.getContextObject(),"解绑失败",Toast.LENGTH_LONG).show();
                    break;
            }
         }
     };
-
-//    public JSONObject getAppInfo(){
-//        JSONObject jsonObject = new JSONObject();
-//        String pkgName = context.getPackageName();
-//        String versionName="";
-//        int versionCode=0;
-//        try {
-//            versionName = context.getPackageManager().getPackageInfo(pkgName,0).versionName;
-//            versionCode = context.getPackageManager().getPackageInfo(pkgName,0).versionCode;
-//        } catch (PackageManager.NameNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//        try {
-//            jsonObject.put("versionName",versionName);
-//            jsonObject.put("versionCode",versionCode);
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
-//        return jsonObject;
-//    }
 
     public PackageInfo getPackageInfo(){
         PackageInfo info = null;
@@ -106,8 +86,7 @@ public class MyApplication extends Application {
     public static final int DELETE_SUCCESS=2;
     public static final int DELETE_FAILED=3;
 
-    public static String seId="451000000000000020160328000000010005";
+    public static String seId="";//"451000000000000020160328000000010003";
 
-    public static final String WEBSERVICE_PATH = "http://10.0.64.120:6893/SPRDTSMDbService.asmx";
-//    public static final String WEBSERVICE_PATH = "http://192.168.1.150:6893/SPRDTSMDbService.asmx";
+//    public static final String WEBSERVICE_PATH = "http://10.0.64.120:6893/SPRDTSMDbService.asmx";
 }

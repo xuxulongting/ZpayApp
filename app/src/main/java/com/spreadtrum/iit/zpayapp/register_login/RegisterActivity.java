@@ -184,8 +184,9 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                 try {
                     String result = response.getString("result");
                     if(result.equals("0")){
-                        String errorCode = response.getString("errorCode");
-                        String errorMsg = response.getString("errorMsg");
+//                        String errorCode = response.getString("errorCode");
+//                        String errorMsg = response.getString("errorMsg");
+//                        LogUtil.debug("errorMsg:"+errorMsg);
                         Toast.makeText(getApplicationContext(),"注册失败",Toast.LENGTH_LONG).show();
                     }
                     else {
@@ -222,72 +223,72 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         });
     }
 
-    public void userRegister1(String userName, String pwd){
-        final AlertDialog dialog = new AlertDialog.Builder(this).setMessage("正在提交信息，请稍候...").show();
-        RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();//Volley.newRequestQueue(getApplicationContext());
-        JSONObject jsonObject = new JSONObject();
-        try {
-            //获取App版本信息
-            MyApplication app = MyApplication.getInstance();
-            PackageInfo info = app.getPackageInfo();
-            String versionName = info.versionName;
-            //构造请求body内容
-            jsonObject.put("version",versionName);
-            jsonObject.put("logName",userName);
-            jsonObject.put("logPwd",pwd);
-            jsonObject.put("checkCode","123456");
-//            String params = jsonObject.toString();
-//            jsonRequest.put("params",params);
-//            LogUtil.debug(jsonObject.toString());
-//            LogUtil.debug(jsonRequest.toString());
-        } catch (JSONException e) {
-            LogUtil.debug("JSONException: "+e.getMessage());
-//            e.printStackTrace();
-        }
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, REGISTER_URL, jsonObject,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        dialog.dismiss();
-                        try {
-                            String result = response.getString("result");
-                            if(result.equals("0")){
-                                String errorCode = response.getString("errorCode");
-                                String errorMsg = response.getString("errorMsg");
-
-                                Toast.makeText(getApplicationContext(),"注册失败",Toast.LENGTH_LONG).show();
-                            }
-                            else {
-                                String userId = response.getString("userId");
-                                String token = response.getString("token");
-                                //将token存入sharedPreference,文件名为/"token“
-                                SharedPreferences pref = getSharedPreferences("token",MODE_PRIVATE);//PreferenceManager.getDefaultSharedPreferences(RegisterActivity.this);
-                                SharedPreferences.Editor editor = pref.edit();
-                                editor.putString("token",token);
-                                editor.commit();
-                                Toast.makeText(getApplicationContext(),"注册成功",Toast.LENGTH_LONG).show();
-                                //go to MainDisplayActivity
-                                Intent intent = new Intent(RegisterActivity.this,MainDisplayActivity.class);
-                                startActivity(intent);
-                                finish();
-
-                            }
-                        } catch (JSONException e) {
-                            LogUtil.debug("JSONException: "+e.getMessage());
-//                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                dialog.dismiss();
-                Toast.makeText(getApplicationContext(),"注册失败",Toast.LENGTH_LONG).show();
-                LogUtil.debug(error.getMessage());
-            }
-        });
-        requestQueue.add(request);
-
-    }
+//    public void userRegister1(String userName, String pwd){
+//        final AlertDialog dialog = new AlertDialog.Builder(this).setMessage("正在提交信息，请稍候...").show();
+//        RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();//Volley.newRequestQueue(getApplicationContext());
+//        JSONObject jsonObject = new JSONObject();
+//        try {
+//            //获取App版本信息
+//            MyApplication app = MyApplication.getInstance();
+//            PackageInfo info = app.getPackageInfo();
+//            String versionName = info.versionName;
+//            //构造请求body内容
+//            jsonObject.put("version",versionName);
+//            jsonObject.put("logName",userName);
+//            jsonObject.put("logPwd",pwd);
+//            jsonObject.put("checkCode","123456");
+////            String params = jsonObject.toString();
+////            jsonRequest.put("params",params);
+////            LogUtil.debug(jsonObject.toString());
+////            LogUtil.debug(jsonRequest.toString());
+//        } catch (JSONException e) {
+//            LogUtil.debug("JSONException: "+e.getMessage());
+////            e.printStackTrace();
+//        }
+//        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, REGISTER_URL, jsonObject,
+//                new Response.Listener<JSONObject>() {
+//                    @Override
+//                    public void onResponse(JSONObject response) {
+//                        dialog.dismiss();
+//                        try {
+//                            String result = response.getString("result");
+//                            if(result.equals("0")){
+//                                String errorCode = response.getString("errorCode");
+//                                String errorMsg = response.getString("errorMsg");
+//
+//                                Toast.makeText(getApplicationContext(),"注册失败",Toast.LENGTH_LONG).show();
+//                            }
+//                            else {
+//                                String userId = response.getString("userId");
+//                                String token = response.getString("token");
+//                                //将token存入sharedPreference,文件名为/"token“
+//                                SharedPreferences pref = getSharedPreferences("token",MODE_PRIVATE);//PreferenceManager.getDefaultSharedPreferences(RegisterActivity.this);
+//                                SharedPreferences.Editor editor = pref.edit();
+//                                editor.putString("token",token);
+//                                editor.commit();
+//                                Toast.makeText(getApplicationContext(),"注册成功",Toast.LENGTH_LONG).show();
+//                                //go to MainDisplayActivity
+//                                Intent intent = new Intent(RegisterActivity.this,MainDisplayActivity.class);
+//                                startActivity(intent);
+//                                finish();
+//
+//                            }
+//                        } catch (JSONException e) {
+//                            LogUtil.debug("JSONException: "+e.getMessage());
+////                            e.printStackTrace();
+//                        }
+//                    }
+//                }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                dialog.dismiss();
+//                Toast.makeText(getApplicationContext(),"注册失败",Toast.LENGTH_LONG).show();
+//                LogUtil.debug(error.getMessage());
+//            }
+//        });
+//        requestQueue.add(request);
+//
+//    }
 
     public static String REGISTER_URL="http://10.0.70.93:8080/Test/register";//10.0.70.93/Test/register
 }

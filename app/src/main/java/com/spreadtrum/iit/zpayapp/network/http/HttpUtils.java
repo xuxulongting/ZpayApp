@@ -30,9 +30,10 @@ public class HttpUtils {
     public static void sendHttpRequestforWebservice(final String path, final byte[] entity,
                                                     Response.Listener listener,Response.ErrorListener errorListener){
 //        RequestQueue queue = Volley.newRequestQueue(MyApplication.getContextObject(),new OkHttpStack());
-        RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();
+//        RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();
         CustomStringRequest request = new CustomStringRequest(Request.Method.POST,path,entity,listener,errorListener);
-        requestQueue.add(request);
+//        requestQueue.add(request);
+        RequestQueueUtils.getInstance().addToRequestQueue(request);
     }
     /**
      * 通过HttpURLConnection发起网络请求，获取web service服务

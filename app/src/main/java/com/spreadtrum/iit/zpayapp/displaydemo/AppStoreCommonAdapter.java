@@ -38,6 +38,8 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 
+import static java.lang.Thread.currentThread;
+
 /**
  * Created by SPREADTRUM\ting.long on 16-9-26.
  */
@@ -70,6 +72,17 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
 //        mContext = context;
 //    }
 
+    /** AppStoreFragment的Adapter构造函数
+    * @param context   上下文，必须是view上下文，而不是application上下文
+    * @param layoutId  item view的资源Id
+    * @param datas item view要绑定的数据
+    */
+    public AppStoreCommonAdapter(Context context,int layoutId,List datas){
+        super(context, layoutId, datas);
+        appList = datas;
+        mContext = context;
+    }
+
     /**
      * AppStoreFragment的Adapter构造函数
      * @param context   上下文，必须是view上下文，而不是application上下文
@@ -79,7 +92,8 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
      * @param updateHandler 下载图片后，以消息的方式更新appList的Handler，这样，就不必从数据库读取
      */
     public AppStoreCommonAdapter(Context context,int layoutId,List datas,View parent,Handler updateHandler){
-        super(context, layoutId, datas);
+//        super(context, layoutId, datas);
+        this(context,layoutId,datas);
         appList = datas;
         mContext = context;
         listViewAppStore = (ListView) parent;
@@ -96,7 +110,7 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
         String url = item.getPicurl();
         imageView.setTag(url);
         //使用volley下载图片，并使用LruCache进行Memmory缓存，并自带Disk缓存
-        RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();
+        RequestQueue requestQueue = RequestQueueUtils.getInstance().getRequestQueue();
         ImageLoader imageLoader = new ImageLoader(requestQueue,new BitmapCache());
         ImageLoader.ImageListener imageListener = imageLoader.getImageListener(imageView,R.drawable.refresh,R.drawable.refresh);
         int maxImageViewWidth = imageView.getMaxWidth();//获取imageview最大宽度和高度
@@ -165,6 +179,7 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
                                 new TSMAppInformationCallback() {
                             @Override
                             public void getAppInfo(String xml) {
+
                                 //解析xml
                                 TSMResponseEntity entity = MessageBuilder.parseDownLoadXml(xml);
                                 String taskId = entity.getTaskId();
@@ -213,6 +228,14 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
                     }
                 });
                 //}
+            }
+        });
+
+        //单击，则取消绑定
+        linearLayoutBar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
             }
         });
     }

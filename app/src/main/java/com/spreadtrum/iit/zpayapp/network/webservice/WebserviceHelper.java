@@ -28,11 +28,67 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
+import static java.lang.Thread.currentThread;
+
 /**
  * Created by SPREADTRUM\ting.long on 16-11-3.
  */
 
 public class WebserviceHelper {
+
+    /**
+     * 获取SEID
+     * @param bluetoothControl 蓝牙句柄
+     * @param callback  返回SEID回调结果
+     */
+    public static void getSeId(final BluetoothControl bluetoothControl, final ResultCallback callback){
+        //获取SeId 00A4040007A0000001510000
+        byte[] command1 = {0x00,(byte)0xA4,0x04,0x00,0x07,(byte)0xA0,0x00,0x00,0x01,0x51,0x00,0x00};
+
+        bluetoothControl.communicateWithJDSe(command1,command1.length);
+        bluetoothControl.setSeCallbackTSMListener(new SECallbackTSMListener() {
+            @Override
+            public void callbackTSM(byte[] responseData, int responseLen) {
+//                //RxJava转换线程测试用
+//                String message = "test";
+//                if(responseLen!=0)
+//                    message = ByteUtil.bytesToHexString(responseData,responseLen);
+//                Observable.just(message)
+//                        .subscribeOn(Schedulers.io())
+//                        .observeOn(AndroidSchedulers.mainThread())
+//                        .subscribe(new Action1<String>() {
+//                            @Override
+//                            public void call(String s) {
+//                                Toast.makeText(MyApplication.getContextObject(),"result:"+s,Toast.LENGTH_LONG).show();
+//                            }
+//                        });
+                byte[] command2 = {(byte)0x80,(byte)0xCA,0x00,0x45,0x00};
+                bluetoothControl.communicateWithJDSe(command2,command2.length);
+                bluetoothControl.setSeCallbackTSMListener(new SECallbackTSMListener() {
+                    @Override
+                    public void callbackTSM(byte[] responseData, int responseLen) {
+
+//                        MyApplication.seId = new String(responseData,0,responseData.length-2);
+                        //69168380826800042200000300000001255255
+                        //45105350524400041600000300000001FFFF
+                        MyApplication.seId = ByteUtil.bytesToHexString(responseData,responseLen-2);
+                        callback.onSuccess(MyApplication.seId);
+                        LogUtil.debug("SeId:"+MyApplication.seId);
+                    }
+
+                    @Override
+                    public void errorCallback() {
+
+                    }
+                });
+            }
+
+            @Override
+            public void errorCallback() {
+
+            }
+        });
+    }
     /**
      * 获取seid
      * @param bluetoothControl
@@ -45,27 +101,31 @@ public class WebserviceHelper {
         bluetoothControl.setSeCallbackTSMListener(new SECallbackTSMListener() {
             @Override
             public void callbackTSM(byte[] responseData, int responseLen) {
-                //RxJava转换线程测试用
-                String message = "test";
-                if(responseLen!=0)
-                    message = ByteUtil.bytesToHexString(responseData,responseLen);
-                Observable.just(message)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action1<String>() {
-                            @Override
-                            public void call(String s) {
-                                Toast.makeText(MyApplication.getContextObject(),"result:"+s,Toast.LENGTH_LONG).show();
-                            }
-                        });
+//                //RxJava转换线程测试用
+//                String message = "test";
+//                if(responseLen!=0)
+//                    message = ByteUtil.bytesToHexString(responseData,responseLen);
+//                Observable.just(message)
+//                        .subscribeOn(Schedulers.io())
+//                        .observeOn(AndroidSchedulers.mainThread())
+//                        .subscribe(new Action1<String>() {
+//                            @Override
+//                            public void call(String s) {
+//                                Toast.makeText(MyApplication.getContextObject(),"result:"+s,Toast.LENGTH_LONG).show();
+//                            }
+//                        });
                 byte[] command2 = {(byte)0x80,(byte)0xCA,0x00,0x45,0x00};
                 bluetoothControl.communicateWithJDSe(command2,command2.length);
                 bluetoothControl.setSeCallbackTSMListener(new SECallbackTSMListener() {
                     @Override
                     public void callbackTSM(byte[] responseData, int responseLen) {
 
-                        MyApplication.seId = new String(responseData,0,responseData.length-2);
+//                        MyApplication.seId = new String(responseData,0,responseData.length-2);
+                        //69168380826800042200000300000001255255
+                        //45105350524400041600000300000001FFFF
+                        MyApplication.seId = ByteUtil.bytesToHexString(responseData,responseLen-2);
                         getListDataWithSeid(MyApplication.seId,callback);
+                        LogUtil.debug("SeId:"+MyApplication.seId);
                     }
 
                     @Override
@@ -86,12 +146,13 @@ public class WebserviceHelper {
         //从网络获取appInformation
         final String requestType = "dbquery";
         final String requestData = "applistquery";
-
+        LogUtil.debug("THREAD","getListDataWithSeid: "+String.valueOf(currentThread().getId()));
         //(2)从网络获取数据，使用消息的方式，因为网络获取数据是异步的
         TSMPersonalizationWebservice.getAppinfoFromWebservice(seId, requestType, requestData,
                 new TSMAppInformationCallback() {
                     @Override
                     public void getAppInfo(String xml) {
+                        LogUtil.debug("THREAD","getAppInfo: "+String.valueOf(currentThread().getId()));
                         if(xml.isEmpty()) {
                             callback.onFailed("网络异常");
                             return;

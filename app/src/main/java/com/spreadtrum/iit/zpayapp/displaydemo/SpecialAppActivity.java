@@ -63,7 +63,7 @@ public class SpecialAppActivity extends BaseActivity {
             if (bussinessType.equals("download")) {
                 appInformation.setAppinstalled("yes");
                 linearLayoutBar.setVisibility(View.INVISIBLE);
-                btnOpera.setText("取消绑卡");
+                btnOpera.setText("解绑");
                 btnOpera.setVisibility(View.VISIBLE);
             } else {
                 appInformation.setAppinstalled("no");
@@ -121,7 +121,7 @@ public class SpecialAppActivity extends BaseActivity {
 //        Bitmap bitmap = ImageLoaderUtil.getLoacalBitmap(localPicpath);
 //        imageViewIcon.setImageBitmap(bitmap);
         //使用volley下载图片，并使用LruCache进行缓存
-        RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();
+        RequestQueue requestQueue = RequestQueueUtils.getInstance().getRequestQueue();
         ImageLoader imageLoader = new ImageLoader(requestQueue,new BitmapCache());
         ImageLoader.ImageListener imageListener = imageLoader.getImageListener(imageViewIcon,R.drawable.refresh,R.drawable.refresh);
         int maxImageViewWidth = imageViewIcon.getMaxWidth();//获取imageview最大宽度和高度
@@ -136,7 +136,7 @@ public class SpecialAppActivity extends BaseActivity {
         else
         {
             if(appInstalled.equals("yes")) {
-                btnOpera.setText("取消绑卡");
+                btnOpera.setText("解绑");
             }
             btnOpera.setVisibility(View.VISIBLE);
 //            progressBar.setVisibility(View.INVISIBLE);
@@ -221,7 +221,7 @@ public class SpecialAppActivity extends BaseActivity {
                     //}
 
 
-                }else if (btnOpera.getText().equals("取消绑卡")){
+                }else if (btnOpera.getText().equals("解绑")){
                     new AlertDialog.Builder(SpecialAppActivity.this)
                             .setTitle("提示")
                             .setMessage("确认解除绑定?")

@@ -40,7 +40,7 @@ public class VolleyTestDemo extends AppCompatActivity {
             public void onClick(View view) {
                 String url="http://10.0.70.31:7788/token";
                 String xml = "dasDADADa";
-                RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();
+//                RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();
                 CustomStringRequest request = new CustomStringRequest(Request.Method.POST, url, xml.getBytes(),
                         new Response.Listener<String>() {
                             @Override
@@ -53,40 +53,41 @@ public class VolleyTestDemo extends AppCompatActivity {
                         LogUtil.debug(error.getMessage());
                     }
                 });
-                requestQueue.add(request);
+//                requestQueue.add(request);
+                RequestQueueUtils.getInstance().addToRequestQueue(request);
             }
         });
         btnTestVolley.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                String url = "http://10.0.64.120:6893/SPRDTSMDbService.asmx";
-//                RequestQueue queue = Volley.newRequestQueue(VolleyTestDemo.this);
-//                 StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-//                    @Override
-//                    public void onResponse(String response) {
-//                        LogUtil.debug(response);
-//                    }
-//                }, new Response.ErrorListener() {
-//                    @Override
-//                    public void onErrorResponse(VolleyError error) {
-//                        LogUtil.warn(error.getMessage());
-//                    }
-//                }){
-//                     @Override
-//                     protected Map<String, String> getParams() throws AuthFailureError {
-//                         return super.getParams();
-//                     }
-//                 };
-//                queue.add(stringRequest);
+                String url = "http://10.0.64.120:6893/SPRDTSMDbService.asmx";
+                RequestQueue queue = Volley.newRequestQueue(VolleyTestDemo.this);
+                 StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        LogUtil.debug(response);
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        LogUtil.warn(error.getMessage());
+                    }
+                }){
+                     @Override
+                     protected Map<String, String> getParams() throws AuthFailureError {
+                         return super.getParams();
+                     }
+                 };
+                queue.add(stringRequest);
 
-                String url = "http://img4.imgtn.bdimg.com/it/u=3123432318,2547934550&fm=21&gp=0.jpg";
-                RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();
-                ImageLoader imageLoader = new ImageLoader(requestQueue,new BitmapCache());
-                ImageLoader.ImageListener imageListener = imageLoader.getImageListener(imageView,
-                        R.drawable.refresh,R.drawable.refresh);
-                int maxWidth = imageView.getMaxWidth();
-                int maxHeight = imageView.getMaxHeight();
-                imageLoader.get(url,imageListener,maxWidth,maxHeight);
+//                String url = "http://img4.imgtn.bdimg.com/it/u=3123432318,2547934550&fm=21&gp=0.jpg";
+//                RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();
+//                ImageLoader imageLoader = new ImageLoader(requestQueue,new BitmapCache());
+//                ImageLoader.ImageListener imageListener = imageLoader.getImageListener(imageView,
+//                        R.drawable.refresh,R.drawable.refresh);
+//                int maxWidth = imageView.getMaxWidth();
+//                int maxHeight = imageView.getMaxHeight();
+//                imageLoader.get(url,imageListener,maxWidth,maxHeight);
             }
         });
     }

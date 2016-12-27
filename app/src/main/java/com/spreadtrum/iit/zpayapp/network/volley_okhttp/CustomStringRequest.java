@@ -46,17 +46,13 @@ public class CustomStringRequest extends StringRequest {
         HashMap<String, String> headers = new HashMap<String, String>();
         headers.put("Content-Type", "text/xml; charset=utf-8");
         headers.put("Content-Length",String.valueOf(entity.length));
-        //添加自定义字段
-//        SharedPreferences pref = MyApplication.getContextObject().getSharedPreferences("token", Context.MODE_PRIVATE);
-//        String token = pref.getString("token","204");
-        String token = MySharedPreference.getToken(MyApplication.getContextObject());
-        LogUtil.debug("token is :"+token);
-        headers.put("token",token);
-//        pref = MyApplication.getContextObject().getSharedPreferences("userinfo",Context.MODE_PRIVATE);
-//        String user = pref.getString("user","");
-        UserInfo userInfo = MySharedPreference.getUserInfo(MyApplication.getContextObject());
-        String user = userInfo.getLoginName();
-        headers.put("user",user);
+        //添加自定义字段,配合前置Linux服务器
+//        String token = MySharedPreference.getToken(MyApplication.getContextObject());
+//        LogUtil.debug("token is :"+token);
+//        headers.put("token",token);
+//        UserInfo userInfo = MySharedPreference.getUserInfo(MyApplication.getContextObject());
+//        String user = userInfo.getLoginName();
+//        headers.put("user",user);
         return headers;
     }
 

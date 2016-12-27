@@ -33,9 +33,14 @@ import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.database.AppDisplayDatabaseHelper;
 import com.spreadtrum.iit.zpayapp.database.DatabaseHandler;
 import com.spreadtrum.iit.zpayapp.message.AppInformation;
+import com.spreadtrum.iit.zpayapp.message.TSMRequestData;
+import com.spreadtrum.iit.zpayapp.network.HeartBeatThread;
 import com.spreadtrum.iit.zpayapp.network.NetworkUtils;
 import com.spreadtrum.iit.zpayapp.network.ResultCallback;
 import com.spreadtrum.iit.zpayapp.network.ZAppStoreApi;
+import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
+import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothSettingsActivity;
+import com.spreadtrum.iit.zpayapp.network.webservice.WebserviceHelper;
 import com.spreadtrum.iit.zpayapp.register_login.DigtalpwdLoginActivity;
 import com.zhy.adapter.abslistview.CommonAdapter;
 
@@ -48,6 +53,8 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
+
+import static com.spreadtrum.iit.zpayapp.common.MyApplication.seId;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-9-1.
@@ -76,6 +83,7 @@ public class AppStoreFragment extends Fragment {
     private BroadcastReceiver bussinessUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            LogUtil.debug("onReceive:"+intent.getAction());
             Bundle bundle = intent.getExtras();
             AppInformation appInformation = (AppInformation) bundle.getSerializable("BUSSINESS_UPDATE");
 
@@ -112,25 +120,6 @@ public class AppStoreFragment extends Fragment {
         return bussinessUpdateIntentFilter;
     }
 
-    /**
-     * 当图片下载完成后，更新变量appList,主要是更新localpicpath
-     * 使用volley imageloader，不需要记录图片在SD卡上的位置了
-     */
-    public Handler updatePicHandler = new Handler(){
-        public void handleMessage(Message msg){
-            if(msg.what==0){
-                AppInformation appInfo = (AppInformation) msg.obj;
-                for(int i=0;i<appList.size();i++){
-                    if (appList.get(i).getIndex().equals(appInfo.getIndex())){
-                        appList.set(i,appInfo);
-                    }
-                }
-            }
-        }
-    };
-
-
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -161,7 +150,7 @@ public class AppStoreFragment extends Fragment {
             public void handleMessage(Message msg) {
                 if (msg.what == 0) {
                     //创建adapter，绑定listview的itemview的内容
-                    busAdapter = new AppStoreCommonAdapter(view.getContext(), R.layout.list_item_appstore, appList,listViewAppStore,updatePicHandler);
+                    busAdapter = new AppStoreCommonAdapter(view.getContext(), R.layout.list_item_appstore, appList);//,listViewAppStore,updatePicHandler);
                 }
                 listViewAppStore.setAdapter(busAdapter);
             }
@@ -170,7 +159,7 @@ public class AppStoreFragment extends Fragment {
         if(appList!=null){
             /////////同一个线程内，尽量不要用消息的方式，效率低////////////////
             busAdapter = new AppStoreCommonAdapter(view.getContext(), R.layout.list_item_appstore,
-                    appList,listViewAppStore,updatePicHandler);
+                    appList);//,listViewAppStore,updatePicHandler);
             listViewAppStore.setAdapter(busAdapter);
         }
         else {
@@ -221,7 +210,7 @@ public class AppStoreFragment extends Fragment {
                     }
                 }
                 busAdapter = new AppStoreCommonAdapter(view.getContext(), R.layout.list_item_appstore,
-                        appList,listViewAppStore,updatePicHandler);
+                        appList);//,listViewAppStore,updatePicHandler);
                 listViewAppStore.setAdapter(busAdapter);
             }
         }
@@ -240,10 +229,9 @@ public class AppStoreFragment extends Fragment {
         if(appList!=null){
             /////////同一个线程内，尽量不要用消息的方式，效率低////////////////
             busAdapter = new AppStoreCommonAdapter(MyApplication.getContextObject(), R.layout.list_item_appstore,
-                    appList,listViewAppStore,updatePicHandler);
+                    appList);//,listViewAppStore,updatePicHandler);
             listViewAppStore.setAdapter(busAdapter);
             super.onResume();
-//            loading.setVisibility(View.INVISIBLE);
         }
         else {
             if (mRefreshLayout != null) {
@@ -259,6 +247,30 @@ public class AppStoreFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         //注册receiver
         getActivity().registerReceiver(bussinessUpdateReceiver,makeBussinessUpdateIntentFilter());
+        //创建Thread，发送心跳包
+        MyApplication app = (MyApplication) MyApplication.getContextObject();
+        final BluetoothControl bluetoothControl = BluetoothControl.getInstance(app,app.getBluetoothDevAddr());
+
+        WebserviceHelper.getSeId(bluetoothControl, new ResultCallback<String>() {
+            @Override
+            public void onPreStart() {
+
+            }
+
+            @Override
+            public void onSuccess(String response) {
+                //成功返回SEID
+                TSMRequestData requestData = new TSMRequestData();
+                requestData.setSeId(response);
+                new HeartBeatThread(bluetoothControl,requestData);
+            }
+
+            @Override
+            public void onFailed(String error) {
+
+            }
+        });
+
     }
 
 
@@ -310,16 +322,16 @@ public class AppStoreFragment extends Fragment {
     public void getListDataFromTSM(final Context context){
         MyApplication app = (MyApplication) MyApplication.getContextObject();
         String bleDevAddr="";
-//        //检查蓝牙设备地址
-//        bleDevAddr = app.getBluetoothDevAddr();
-//        if (bleDevAddr.isEmpty()) {
-//            Toast.makeText(MyApplication.getContextObject(), "请选择蓝牙设备", Toast.LENGTH_LONG).show();
-//            //停止刷新，否则下次mRefreshLayout.setRefreshing(true);不再起作用
-//            mRefreshLayout.setRefreshing(false);
+        //检查蓝牙设备地址
+        bleDevAddr = app.getBluetoothDevAddr();
+        if (bleDevAddr.isEmpty()) {
+            Toast.makeText(MyApplication.getContextObject(), "请选择蓝牙设备", Toast.LENGTH_LONG).show();
+            //停止刷新，否则下次mRefreshLayout.setRefreshing(true);不再起作用
+            mRefreshLayout.setRefreshing(false);
 //            Intent intent = new Intent(getActivity(), BluetoothSettingsActivity.class);
 //            startActivity(intent);
-//            return;
-//        }
+            return;
+        }
         ZAppStoreApi.getListDataFromTSM(bleDevAddr, new ResultCallback<List<AppInformation>>() {
             @Override
             public void onPreStart() {
@@ -338,7 +350,7 @@ public class AppStoreFragment extends Fragment {
                                 MyApplication.dataFromNet = true;
                                 mRefreshLayout.setRefreshing(false);
                                 busAdapter = new AppStoreCommonAdapter(context, R.layout.list_item_appstore,
-                                        appList,listViewAppStore,updatePicHandler);
+                                        appList);//,listViewAppStore,updatePicHandler);
                                 listViewAppStore.setAdapter(busAdapter);
                             }
                         });
@@ -399,8 +411,6 @@ public class AppStoreFragment extends Fragment {
                     imgDone.setVisibility(View.GONE);
                     imageView.setVisibility(View.VISIBLE);
                     imageView.setRotation(180);
-//                    LogUtil.debug("getListDataFromTSM2");
-//                    getListDataFromTSM();
                 } else {
                     textView.setText("下拉刷新");
                     imgDone.setVisibility(View.GONE);

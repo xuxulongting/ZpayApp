@@ -204,6 +204,7 @@ public class MainDisplayActivity extends BaseActivity implements View.OnClickLis
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        LogUtil.debug("onActivityResult--");
         if(requestCode==SettingsFragment.REQUEST_BLUETOOTH_DEVICE){
             LogUtil.debug("onActivityResult");
             if(requestCode == REQUEST_BLUETOOTH_DEVICE && resultCode == RESULT_BLUETOOTH_DEVICE) {

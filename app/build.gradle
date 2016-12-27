@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId "com.spreadtrum.iit.zpayapp"
-        minSdkVersion 16
+        minSdkVersion 18
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"

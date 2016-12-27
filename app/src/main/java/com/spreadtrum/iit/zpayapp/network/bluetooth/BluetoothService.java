@@ -19,9 +19,8 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
-import com.spreadtrum.iit.zpayapp.common.ConditionCompile;
+import com.spreadtrum.iit.zpayapp.common.AppConfig;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -259,7 +258,7 @@ public class BluetoothService extends android.app.Service{
             intent.putExtra(EXTRA_DATA, String.valueOf(heartRate));
         } else {
             //使用金电手环
-            if (ConditionCompile.JDBLE) {
+            if (AppConfig.JDBLE) {
                 final byte[] data = characteristic.getValue();
                 LogUtil.debug(TAG, "receive from ble:" + bytesToHexString(data));
                 if((data[1]==BluetoothControl.SETPARA_RECV) && (data[0]==0x10)){
@@ -273,7 +272,7 @@ public class BluetoothService extends android.app.Service{
                         openSECallbackListener.onSEOpenedFailed();
                     }
                 }
-                else if(data[1]==BluetoothControl.APDU_RECV){
+                else if((data[1]==BluetoothControl.APDU_RECV) && (totalPackage==0)){
                     totalPackage=(data[0]&0xF0)>>4;
                     packageNum=data[0]&0x0F;
                     int totalLength = data[3];//(data[2]<<8) + //由于APDU指令长度最大为256,则data[2]应该一直是0x00
@@ -284,18 +283,21 @@ public class BluetoothService extends android.app.Service{
                         seResponseLength+=256;
                     if(totalLength!=(seResponseLength+2)){
                         LogUtil.debug(TAG,"receive apdu response failed");
-                        return;
+//                        return;
                     }
-                    System.arraycopy(data,6,seResponseData,0,data.length-6);
-                    seDataLength = data.length-6;
+                    else {
+                        System.arraycopy(data, 6, seResponseData, 0, data.length - 6);
+                        seDataLength = data.length - 6;
+                    }
                 }
                 else
                 {
+                    //不是最后一包
                     if((totalPackage-1)!=packageNum){
-                        //检查包的顺序是否正确
+                        //检查包的顺序是否正确，即使不正确也交给TSM去处理
                         if((totalPackage!=((data[0]&0xF0)>>4))||((packageNum+1)!=(data[0]&0x0F))){
                             LogUtil.debug(TAG,"receive APDU response failed");
-                            return;
+//                            return;
                         }
                     }
                     packageNum=data[0]&0x0F;
@@ -307,8 +309,10 @@ public class BluetoothService extends android.app.Service{
 //                        callbackTSMListener.callbackTSM(seResponseData, seDataLength);
 //                    }
                 }
+                //最后一包
                 if((totalPackage-1)==packageNum){
                     //将数据发送给TSM处理
+                    totalPackage=0;
                     LogUtil.debug("callbackTSMListener");
                     callbackTSMListener.callbackTSM(seResponseData, seDataLength);
                 }
