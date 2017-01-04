@@ -25,6 +25,7 @@ public class AppDisplayDatabaseHelper extends SQLiteOpenHelper {
             + "spname text,"
             + "appdesc text,"
             + "appinstalled text not null,"
+            + "applocked text not null,"
             + "appid text not null, "
             + "localpicpath text)";
     public AppDisplayDatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {

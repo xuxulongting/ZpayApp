@@ -35,7 +35,7 @@ public class TSMResponseData {
     }
 
     public TSMResponseData(){
-
+        apduInfoList = new ArrayList<APDUInfo>();
     }
 
     public String getFinishFlag() {

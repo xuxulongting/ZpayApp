@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.baidu.mapapi.SDKInitializer;
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
+import com.spreadtrum.iit.zpayapp.network.HeartBeatThread;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
 
 import org.json.JSONException;
@@ -37,6 +38,8 @@ public class MyApplication extends Application {
         SDKInitializer.initialize(this);
         context = getApplicationContext();
         registerActivityLifecycleCallbacks(new ActivityLifecycleListener());
+        //创建Thread，发送心跳包
+        new HeartBeatThread().start();
     }
     public static Context getContextObject(){
         return context;

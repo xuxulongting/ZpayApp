@@ -12,8 +12,11 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import android.util.Base64;
 
 
 /**
@@ -59,7 +62,12 @@ public class HttpUtils {
                     int res = conn.getResponseCode();
                     if(listener!=null){
                         if(res==200){
-                            listener.onSuccess(conn.getInputStream());
+                            InputStream inputStream = conn.getInputStream();
+                            String response = inputStream.toString();
+                            byte[] decodeByte = Base64.decode(response,Base64.DEFAULT);
+                            String responseXml = new String(decodeByte);
+                            LogUtil.debug(responseXml);
+                            listener.onSuccess(inputStream);
                             //return parseSOAP(conn.getInputStream());
                         }
                         else

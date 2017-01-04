@@ -10,6 +10,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
+import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.common.ByteUtil;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.database.AppDisplayDatabaseHelper;
@@ -166,9 +167,12 @@ public class BussinessTransaction{
     public void handleApduList(final BluetoothControl bluetoothControl, final List<APDUInfo> apduInfoList,
                                        final int i, final TransactionCallback callback){
         final APDUInfo apduInfo = apduInfoList.get(i);
-        final byte []sw = apduInfo.getSW().getBytes();
+//        final byte []sw = apduInfo.getSW().getBytes();
         final int index = ByteUtil.parseInt(apduInfo.getIndex(),10,0);
-        byte []apdu = apduInfo.getAPDU().getBytes();
+//        LogUtil.debug("handleApduList",apduInfo.getAPDU());
+        String apduStr = apduInfo.getAPDU();
+        byte []apdu = ByteUtil.StringToByteArray(apduStr);
+//        byte []apdu = apduInfo.getAPDU().getBytes();
         //停止传输APDU
         if (bluetoothControl.isbStopTransferApdu()) {
             callback.onTransactionFailed(apduInfo);
@@ -181,13 +185,21 @@ public class BussinessTransaction{
                 //APDU执行结果与期望结果一致
                 APDUInfo info = new APDUInfo();
                 info.setIndex(String.valueOf(index));
-                info.setSW(new String(responseData,responseLen-2,2));
-                info.setAPDU(new String(responseData,0,responseLen-2));
-                if(info.getSW().equals(sw)){
-                    handleApduList(bluetoothControl,apduInfoList,i+1,callback);
+                String apdu = ByteUtil.bytesToHexString(responseData,responseLen-2);
+                byte[] byteOfsw = new byte[2];
+                System.arraycopy(responseData,responseLen-2,byteOfsw,0,2);
+                String sw = ByteUtil.bytesToHexString(byteOfsw,2);
+//                info.setSW(new String(responseData,responseData.length-2,2));
+//                info.setAPDU(new String(responseData,0,responseData.length-2));
+                info.setAPDU(apdu);
+                info.setSW(sw);
+                if(info.getSW().equals(apduInfo.getSW())){
                     if((i+1)==apduInfoList.size()){
                         callback.onTransactionSuccess(info);
                     }
+                    else
+                        handleApduList(bluetoothControl,apduInfoList,i+1,callback);
+
                 }
                 else
                     callback.onTransactionFailed(info);

@@ -38,6 +38,7 @@ import com.spreadtrum.iit.zpayapp.network.HeartBeatThread;
 import com.spreadtrum.iit.zpayapp.network.NetworkUtils;
 import com.spreadtrum.iit.zpayapp.network.ResultCallback;
 import com.spreadtrum.iit.zpayapp.network.ZAppStoreApi;
+import com.spreadtrum.iit.zpayapp.network.bluetooth.BLEPreparedCallbackListener;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothSettingsActivity;
 import com.spreadtrum.iit.zpayapp.network.webservice.WebserviceHelper;
@@ -84,32 +85,36 @@ public class AppStoreFragment extends Fragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             LogUtil.debug("onReceive:"+intent.getAction());
-            Bundle bundle = intent.getExtras();
-            AppInformation appInformation = (AppInformation) bundle.getSerializable("BUSSINESS_UPDATE");
+            if(intent.getAction().equals(HeartBeatThread.ACTION_BUSSINESS_REMOTE_MANAGEMENT)){
+                LogUtil.debug("HEARTBEAT","receive :"+intent.getAction());
+                getListDataFromTSM(context);
+            }
+            else {
+                Bundle bundle = intent.getExtras();
+                AppInformation appInformation = (AppInformation) bundle.getSerializable("BUSSINESS_UPDATE");
 
-            //AppInformation appInformation = (AppInformation) intent.getSerializableExtra("BUSSINESS_UPDATE");
-            appInformation.setAppinstalling(false);
-            if(intent.getAction().equals(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS)) {
+                //AppInformation appInformation = (AppInformation) intent.getSerializableExtra("BUSSINESS_UPDATE");
+                appInformation.setAppinstalling(false);
+                if (intent.getAction().equals(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS)) {
 
-                //String bussinessType = intent.getStringExtra("BUSSINESS_TYPE");
-                String bussinessType = bundle.getString("BUSSINESS_TYPE");
-                if (bussinessType.equals("download")) {
-                    appInformation.setAppinstalled("yes");
-                } else {
-                    appInformation.setAppinstalled("no");
-                }
-                //修改全局变量map中的值
+                    //String bussinessType = intent.getStringExtra("BUSSINESS_TYPE");
+                    String bussinessType = bundle.getString("BUSSINESS_TYPE");
+                    if (bussinessType.equals("download")) {
+                        appInformation.setAppinstalled("yes");
+                    } else {
+                        appInformation.setAppinstalled("no");
+                    }
+                    //修改全局变量map中的值
 //                MyApplication.appInstalling.put(appInformation.getIndex(), appInformation.isAppinstalling());
 
+                } else {
+                    //不需要更新appinstalled状态
+                }
+                //更新applist
+                appList.set(appInformation.getIndexForlistview(), appInformation);
+                //刷新Listview
+                busAdapter.notifyDataSetChanged();
             }
-            else
-            {
-                //不需要更新appinstalled状态
-            }
-            //更新applist
-            appList.set(appInformation.getIndexForlistview(),appInformation);
-            //刷新Listview
-            busAdapter.notifyDataSetChanged();
         }
     };
 
@@ -117,6 +122,7 @@ public class AppStoreFragment extends Fragment {
         IntentFilter bussinessUpdateIntentFilter = new IntentFilter();
         bussinessUpdateIntentFilter.addAction(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS);
         bussinessUpdateIntentFilter.addAction(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED);
+        bussinessUpdateIntentFilter.addAction(HeartBeatThread.ACTION_BUSSINESS_REMOTE_MANAGEMENT);
         return bussinessUpdateIntentFilter;
     }
 
@@ -163,7 +169,7 @@ public class AppStoreFragment extends Fragment {
             listViewAppStore.setAdapter(busAdapter);
         }
         else {
-            LogUtil.debug("appList is not null");
+            LogUtil.debug("appList is null");
             //appList标识为静态变量static以后，切换Fragment，Fragment执行OnDestroy，appList不释放，不需要从数据库获取
             //从数据库获取appInformation
             if (MyApplication.dataFromNet) {
@@ -188,12 +194,14 @@ public class AppStoreFragment extends Fragment {
                                 getColumnIndex("appdesc"));
                         String appinstalled = cursor.getString(cursor.
                                 getColumnIndex("appinstalled"));
+                        String applocked = cursor.getString(cursor.
+                                getColumnIndex("applocked"));
                         String appid = cursor.getString(cursor.
                                 getColumnIndex("appid"));
                         String localpicpath = cursor.getString(cursor.
                                 getColumnIndex("localpicpath"));
                         AppInformation appInformation = new AppInformation(appindex,picurl,appname,appsize,apptype,
-                                spname,appdesc,appinstalled,appid,false,-1,localpicpath);
+                                spname,appdesc,appinstalled,appid,false,-1,localpicpath,applocked);
                         appList.add(appInformation);
                     } while (cursor.moveToNext());
                 }
@@ -247,29 +255,41 @@ public class AppStoreFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         //注册receiver
         getActivity().registerReceiver(bussinessUpdateReceiver,makeBussinessUpdateIntentFilter());
-        //创建Thread，发送心跳包
-        MyApplication app = (MyApplication) MyApplication.getContextObject();
-        final BluetoothControl bluetoothControl = BluetoothControl.getInstance(app,app.getBluetoothDevAddr());
+//        //创建Thread，发送心跳包
+//        MyApplication app = (MyApplication) MyApplication.getContextObject();
+//        if (app.getBluetoothDevAddr().isEmpty()){
+//            LogUtil.debug("BLE","onActivityCreated with ble addr empty.");
+//            return;
+//        }
+//        final BluetoothControl bluetoothControl = BluetoothControl.getInstance(app,app.getBluetoothDevAddr());
+//        TSMRequestData requestData = new TSMRequestData();
+//        new HeartBeatThread(bluetoothControl,requestData);
 
-        WebserviceHelper.getSeId(bluetoothControl, new ResultCallback<String>() {
-            @Override
-            public void onPreStart() {
+//        bluetoothControl.setBlePreparedCallbackListener(new BLEPreparedCallbackListener() {
+//            @Override
+//            public void onBLEPrepared() {
+//                WebserviceHelper.getSeId(bluetoothControl, new ResultCallback<String>() {
+//                    @Override
+//                    public void onPreStart() {
+//
+//                    }
+//
+//                    @Override
+//                    public void onSuccess(String response) {
+//                        //成功返回SEID
+//                        TSMRequestData requestData = new TSMRequestData();
+//                        requestData.setSeId(response);
+//                        new HeartBeatThread(bluetoothControl,requestData);
+//                    }
+//
+//                    @Override
+//                    public void onFailed(String error) {
+//
+//                    }
+//                });
+//            }
+//        });
 
-            }
-
-            @Override
-            public void onSuccess(String response) {
-                //成功返回SEID
-                TSMRequestData requestData = new TSMRequestData();
-                requestData.setSeId(response);
-                new HeartBeatThread(bluetoothControl,requestData);
-            }
-
-            @Override
-            public void onFailed(String error) {
-
-            }
-        });
 
     }
 
@@ -351,10 +371,15 @@ public class AppStoreFragment extends Fragment {
                                 mRefreshLayout.setRefreshing(false);
                                 busAdapter = new AppStoreCommonAdapter(context, R.layout.list_item_appstore,
                                         appList);//,listViewAppStore,updatePicHandler);
-                                listViewAppStore.setAdapter(busAdapter);
+                                if (listViewAppStore!=null)
+                                    listViewAppStore.setAdapter(busAdapter);
                             }
                         });
                 //将数据写入数据库
+                if (dbHelper==null){
+                    //创建数据库
+                    dbHelper = new AppDisplayDatabaseHelper(MyApplication.getContextObject(),"info.db",null,1);
+                }
                 SQLiteDatabase dbWrite = dbHelper.getWritableDatabase();
                 new DatabaseHandler().insertDB(dbWrite, appList);
             }

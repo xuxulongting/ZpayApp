@@ -128,7 +128,13 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
         }
         else
         {
-            if(item.getAppinstalled().equals("yes")){
+            //applet已锁定
+            if (item.getApplocked().equals("yes")){
+                btnOperaCard.setText("已锁定");
+                btnOperaCard.setEnabled(false);
+            }
+            //applet已下载
+            else if(item.getAppinstalled().equals("yes")){
                 btnOperaCard.setText("已绑卡");
                 btnOperaCard.setEnabled(false);
             }

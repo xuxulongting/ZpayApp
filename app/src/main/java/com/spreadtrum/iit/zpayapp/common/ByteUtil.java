@@ -95,6 +95,32 @@ public final class ByteUtil {
 	}
 
 	/**
+	 * 将String转换成byte[]数组，例如：String appid="1517" --> byte[] bAppid={15,17};
+	 * @param data
+	 * @return
+	 */
+	public static byte[] StringToByteArray2(String data){
+		if (data == null || data.length() == 0 || (data.length() % 2) != 0) {
+			return null;
+		}
+		int len = data.length() / 2;
+		byte[] result = new byte[len];
+		String tmp;
+		for (int i = 0; i < len; i++) {
+			tmp = data.substring(i * 2, (i + 1) * 2);
+			try {
+				result[i] = (byte) Integer.parseInt(tmp, 10);	//"1517"是十进制
+			} catch (Exception e) {
+
+				result[i] = 0x00;
+//				int tmpInt = Integer.parseInt(tmp, 16);
+//				result[i] = (byte)tmpInt;
+			}
+		}
+		return result;
+	}
+
+	/**
 	 * 将String转换成byte[]数组，例如：String appid="1542" --> byte[] bAppid={15,42};
 	 * @param data
 	 * @return
@@ -109,10 +135,12 @@ public final class ByteUtil {
 		for (int i = 0; i < len; i++) {
 			tmp = data.substring(i * 2, (i + 1) * 2);
 			try {
-				result[i] = (byte) Integer.parseInt(tmp, 10);
+				result[i] = (byte) Integer.parseInt(tmp, 16);//“1542”是十六进制
 			} catch (Exception e) {
 
 				result[i] = 0x00;
+//				int tmpInt = Integer.parseInt(tmp, 16);
+//				result[i] = (byte)tmpInt;
 			}
 		}
 		return result;
@@ -190,7 +218,7 @@ public final class ByteUtil {
 	/**
 	 * 完整截取字节，考虑汉字的情况
 	 * @param b
-	 * @param len
+	 * @param bytelen
 	 * @return
 	 * @throws UnsupportedEncodingException 
 	 */

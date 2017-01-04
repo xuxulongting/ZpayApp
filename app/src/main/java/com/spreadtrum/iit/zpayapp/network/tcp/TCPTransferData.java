@@ -140,6 +140,7 @@ public class TCPTransferData {
                     return;
                 }
                 ///////////////////////////////
+//                LogUtil.debug("TCP",response);
                 int cmdParaLen = 0;
                 cmdParaLen = (response[15] << 8) + response[16];
                 //byte类型是有符号数据，范围-128~127，当大于127时，需要取补

@@ -18,6 +18,8 @@ import com.spreadtrum.iit.zpayapp.common.ByteUtil;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.Thread.currentThread;
+
 
 /**
  * Created by SPREADTRUM\ting.long on 16-8-10.
@@ -80,19 +82,34 @@ public class BluetoothControl {
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            bluetoothService = ((BluetoothService.LocalBinder) iBinder)
-                    .getService();
+            LogUtil.debug("onServiceConnected");
+            bluetoothService = ((BluetoothService.LocalBinder) iBinder).getService();
+            //初始化蓝牙设备，包括检查设备是否支持BLE，获取Bluetooth Adater
             if(bluetoothService.initialize()==false){
-                Toast.makeText(mContext,"initialize failed",Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext,"初始化蓝牙失败",Toast.LENGTH_SHORT).show();
+                //蓝牙初始化失败，将bluetoothControl赋值为null，可以重新bindService();
+                bluetoothControl=null;
+                //解绑BluetoothService服务
+                bluetoothUnbindService();
+                return;
             }
             //注册receiver
             mContext.registerReceiver(gattUpdateReceiver,makeGattUpdateIntentFilter());
+            //connect gattServer
+            if (!bluetoothService.connect(selBluetoothDevAddr))
+            {
+                Toast.makeText(mContext,"连接Gatt Server失败",Toast.LENGTH_SHORT).show();
+                bluetoothControl=null;
+                //解绑BluetoothService服务
+                bluetoothUnbindService();
+                return;
+            }
 
-            bluetoothService.connect(selBluetoothDevAddr);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
+            LogUtil.debug("onServiceDisconnected");
             //关闭连接 gatt can only handle sevral connections at a time (BluetoothGatt documentation)
             if(bluetoothService!=null) {
                 bluetoothService.closeBluetoothGatt();
@@ -117,6 +134,9 @@ public class BluetoothControl {
         this.blePreparedCallbackListener = listener;
     }
 
+    /**
+     * 广播接收器，蓝牙连接GATT Server，发现服务等回调结果（非UI线程）后，发送广播给主线程
+     */
     private BroadcastReceiver gattUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -125,14 +145,15 @@ public class BluetoothControl {
                 case BluetoothService.ACTION_GATT_CONNECTED:
                     break;
                 case BluetoothService.ACTION_GATT_DISCONNECTED:
-                    //当蓝牙断开连接，释放BluetoothControl（单例模式）对象，并unbindService，当重新发起数据请求时，重新创建BluetoothControl实例
+                    //Gatt Server连接失败，释放BluetoothControl（单例模式）对象，并unbindService，当重新发起数据请求时，重新创建BluetoothControl实例
                     bluetoothControl = null;
                     bluetoothUnbindService();
-                    //重新建立连接
-                    //bluetoothService.connect(selBluetoothDevAddr);
+                    //重新连接Gatt Server
+//                    bluetoothService.connect(selBluetoothDevAddr);
                     break;
                 case BluetoothService.ACTION_GATT_SERVICES_DISCOVERED:
-                    LogUtil.debug(TAG,"services discovered");
+                    //运行在主线程中
+                    LogUtil.debug(TAG,"services discovered，thread is:"+currentThread().getId());
                     gattServiceList = bluetoothService.getSupportedGattServices();
                     if(AppConfig.JDBLE){
                         seCommService = getSpecialGattService(gattServiceList,JD_SERVICE);
@@ -244,7 +265,7 @@ public class BluetoothControl {
     {
         mContext.unbindService(serviceConnection);
 
-        bluetoothService = null;
+//        bluetoothService = null;
     }
 
     /**

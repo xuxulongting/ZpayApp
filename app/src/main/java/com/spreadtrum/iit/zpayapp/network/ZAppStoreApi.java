@@ -1,5 +1,6 @@
 package com.spreadtrum.iit.zpayapp.network;
 
+import android.util.Base64;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -22,6 +23,8 @@ import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.SECallbackTSMListener;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.CustomStringRequest;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.RequestQueueUtils;
+import com.spreadtrum.iit.zpayapp.network.webservice.SoapXmlBuilder;
+import com.spreadtrum.iit.zpayapp.network.webservice.TSMPersonalizationWebservice;
 import com.spreadtrum.iit.zpayapp.network.webservice.WebserviceHelper;
 
 import org.json.JSONException;
@@ -30,6 +33,8 @@ import org.json.JSONObject;
 import java.util.List;
 
 import retrofit2.http.PUT;
+
+import static java.lang.Thread.currentThread;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-11-3.
@@ -273,22 +278,42 @@ public class ZAppStoreApi {
         final TSMRequestData requestData = MessageBuilder.getTSMRequestDataFromXml(requestXml);
         final String sessionId = requestData.getSessionId();
         final String taskId = requestData.getTaskId();
-        final String url = NetParameter.TSM_URL;
-//        RequestQueue requestQueue = RequestQueueUtils.getRequestQueue();
+        final String url = NetParameter.WEBSERVICE_RM_PATH;
+        final String requestType = requestData.getType();
+//        TSMPersonalizationWebservice.getRemoteManagementInfoFromWebservice(requestXml);
+        //Base64编码
+        String requestXmlBase64 = Base64.encodeToString(requestXml.getBytes(),Base64.DEFAULT);
+        String soap = SoapXmlBuilder.readSoap("soap11_rm.xml");
+        soap = soap.replace("123",requestXmlBase64);
+        byte[] entity = soap.getBytes();
+        LogUtil.debug("HEARTBEAT","CustomStringRequest ,thread id is:"+currentThread().getId());
         final CustomStringRequest stringRequest = new CustomStringRequest(Request.Method.POST,url,
-                requestXml.getBytes(), new Response.Listener<String>() {
+                entity, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                if (response.isEmpty()){
-//                    callback.onFailed(response);
+                /**
+                 * volley的网络请求响应均返回到了主线程，所以不能在响应线程中做耗时操作
+                 */
+                LogUtil.debug("HEARTBEAT","CustomStringRequest onResponse,thread id is:"+currentThread().getId());
+                LogUtil.debug("HEARTBEAT","response:"+response);
+                String responseXml = SoapXmlBuilder.parseSOAP(response,"TSM_RMWS_InterfaceResult");
+                if (responseXml.isEmpty()){
                     callback.onApduEmpty();
+                    return;
                 }
+                //Base64解码
+                byte[] decodeResponseXml = Base64.decode(responseXml.getBytes(),Base64.DEFAULT);
+                String xmlResponse = new String(decodeResponseXml);
+//                String xmlResponse = SoapXmlBuilder.parseSOAP(response,"TSM_RMWS_InterfaceResult");
+
                 //解析xml，该xml中包含多条APDU指令
-                final TSMResponseData responseData = MessageBuilder.parseBussinessResponseXml(response,sessionId,taskId);
+                final TSMResponseData responseData = MessageBuilder.parseBussinessResponseXml(xmlResponse,sessionId,taskId);
                 String finishFlag = responseData.getFinishFlag();
                 //Tsm响应数据中finishFlag非0,则代表任务结束
-                if (!finishFlag.equals("0"))
+                if (!finishFlag.equals("0")) {
                     callback.onApduEmpty();
+                    return;
+                }
                 List<APDUInfo> apduInfoList = responseData.getApduInfoList();
                 if(apduInfoList==null)
                     return;
@@ -298,12 +323,15 @@ public class ZAppStoreApi {
                 new BussinessTransaction().handleApduList(bluetoothControl,apduInfoList,0, new TransactionCallback() {
                     @Override
                     public void onTransactionSuccess(APDUInfo apduInfo) {
-                        String responseXml = MessageBuilder.message_Response_handle(MyApplication.seId,"","","0",sessionId,taskId,apduInfo,"0");
+                        LogUtil.debug("HEARTBEAT","onTransactionSuccess");
+                        String responseXml = MessageBuilder.message_Response_handle(MyApplication.seId,"","","4",sessionId,taskId,apduInfo,"0");
+                        LogUtil.debug("HEARTBEAT",responseXml);
                         callback.onApduExcutedSuccess(responseXml);
 
                     }
                     @Override
                     public void onTransactionFailed(APDUInfo apduInfo) {
+                        LogUtil.debug("HEARTBEAT","onTransactionFailed");
                         String responseXml = MessageBuilder.message_Response_handle(MyApplication.seId,"","","0",sessionId,taskId,apduInfo,"0");
                         callback.onApduExcutedFailed(responseXml);
                     }
@@ -312,6 +340,7 @@ public class ZAppStoreApi {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                LogUtil.debug("HEARTBEAT","CustomStringRequest onResponse,thread id is:"+currentThread().getId());
                 callback.onNetworkError(error.getMessage());
             }
         });

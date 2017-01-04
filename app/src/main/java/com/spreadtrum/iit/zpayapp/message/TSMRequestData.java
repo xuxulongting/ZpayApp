@@ -50,4 +50,14 @@ public class TSMRequestData {
     public String seId;
     public String imei;
     public String phone;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String type;
 }

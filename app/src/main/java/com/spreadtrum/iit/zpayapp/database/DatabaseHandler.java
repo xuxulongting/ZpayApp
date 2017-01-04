@@ -27,6 +27,7 @@ public class DatabaseHandler {
             contentValues.put("spname",info.getSpname());
             contentValues.put("appdesc",info.getAppdesc());
             contentValues.put("appinstalled",info.getAppinstalled());
+            contentValues.put("applocked",info.getApplocked());
             contentValues.put("appid",info.getAppid());
             //如果更新失败，则插入？影响效率，直接删除，再插入
             //if(db.update(AppDisplayDatabaseHelper.TABLE_APPINFO,contentValues,"appindex=?",new String[]{info.getIndex()})==0)

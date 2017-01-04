@@ -25,9 +25,13 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.spreadtrum.iit.zpayapp.network.bluetooth.SampleGattAttributes.*;
+import static java.lang.Thread.currentThread;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-8-5.
+ * 同一个包内的activity和service，如果service没有设定属性android:process=":remote"的话，
+ * 通过bindService(),service会和activity跑在同一个进程中，由于一个进程只有一个UI线程，所以，service和acitivity就是在同一个线程里面的。
+ * 在service中不能做耗时操作，除非再开启线程。
  */
 public class BluetoothService extends android.app.Service{
 
@@ -86,6 +90,10 @@ public class BluetoothService extends android.app.Service{
         this.openSECallbackListener = listener;
     }
 
+    /**
+     * 蓝牙操作结果回调，包括GATT Server连接结果，服务发现结果，特征(characteristic)读写结果，描述符(descriptor)读写结果等，
+     * 该回调结果均运行在非UI线程中
+     */
     private final BluetoothGattCallback bluetoothGattCallback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -116,10 +124,11 @@ public class BluetoothService extends android.app.Service{
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             //super.onServicesDiscovered(gatt, status);
             if (status == BluetoothGatt.GATT_SUCCESS) {
+                LogUtil.debug("onServicesDiscovered,thread is:"+currentThread().getId());
                 broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
 
             } else {
-                LogUtil.warn(TAG, "onServicesDiscovered received: " + status);
+                LogUtil.warn("onServicesDiscovered received: " + status);
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
@@ -147,14 +156,17 @@ public class BluetoothService extends android.app.Service{
             //super.onCharacteristicRead(gatt, characteristic, status);
             LogUtil.info(TAG,"--------read Characteristic----- status:" + status);
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+//                broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+                handleDataFromSe(ACTION_DATA_AVAILABLE,characteristic);
             }
         }
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             //super.onCharacteristicChanged(gatt, characteristic);
             LogUtil.info(TAG,"--------onCharacteristicChanged-----");
-            broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+//            broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+            //处理从蓝牙收到的数据，通过回调发送给TSM
+            handleDataFromSe(ACTION_DATA_AVAILABLE,characteristic);
 
         }
 
@@ -237,8 +249,9 @@ public class BluetoothService extends android.app.Service{
      * @param action
      * @param characteristic
      */
-    private void broadcastUpdate(final String action,
-                                 final BluetoothGattCharacteristic characteristic) {
+//    private void broadcastUpdate(final String action,
+//                                 final BluetoothGattCharacteristic characteristic) {
+      private void handleDataFromSe(final String action, final BluetoothGattCharacteristic characteristic) {
         final Intent intent = new Intent(action);
         // This is special handling for the Heart Rate Measurement profile. Data parsing is carried out as per profile specifications:
         // http://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.heart_rate_measurement.xml
@@ -256,7 +269,7 @@ public class BluetoothService extends android.app.Service{
             System.out.println("Received heart rate: %d" + heartRate);
             Log.d(TAG, String.format("Received heart rate: %d", heartRate));
             intent.putExtra(EXTRA_DATA, String.valueOf(heartRate));
-        } else {
+        } else if (action.equals(ACTION_DATA_AVAILABLE)){
             //使用金电手环
             if (AppConfig.JDBLE) {
                 final byte[] data = characteristic.getValue();
@@ -303,11 +316,6 @@ public class BluetoothService extends android.app.Service{
                     packageNum=data[0]&0x0F;
                     System.arraycopy(data,1,seResponseData,seDataLength,data.length-1);
                     seDataLength+=(data.length-1);
-                    //当一个APDU指令包接收完毕，发给TSM处理
-//                    if((totalPackage-1)==packageNum){
-//                        //将数据发送给TSM处理
-//                        callbackTSMListener.callbackTSM(seResponseData, seDataLength);
-//                    }
                 }
                 //最后一包
                 if((totalPackage-1)==packageNum){
@@ -379,23 +387,23 @@ public class BluetoothService extends android.app.Service{
      */
     public boolean initialize() {
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            Toast.makeText(this, "设备不支持蓝牙4.0", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, "设备不支持蓝牙4.0", Toast.LENGTH_SHORT).show();
+            LogUtil.debug("设备不支持蓝牙4.0");
             return false;
         }
-        // For API level 18 and above, get a reference to BluetoothAdapter
-        // through
-        // BluetoothManager.
+        // For API level 18 and above, get a reference to BluetoothAdapter through BluetoothManager.
         if (bluetoothManager == null) {
             bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
             if (bluetoothManager == null) {
-                Log.e(TAG, "Unable to initialize BluetoothManager.");
+                LogUtil.debug("Unable to initialize BluetoothManager.");
+//                Toast.makeText(this,"初始化BluetoothManager失败",Toast.LENGTH_SHORT).show();
                 return false;
             }
         }
 
         bluetoothAdapter = bluetoothManager.getAdapter();
         if (bluetoothAdapter == null) {
-            Log.e(TAG, "Unable to obtain a BluetoothAdapter.");
+            LogUtil.debug("Unable to obtain a BluetoothAdapter.");
             return false;
         }
 
@@ -426,18 +434,16 @@ public class BluetoothService extends android.app.Service{
      *         callback.
      */
     public boolean connect(final String address) {
-        if (bluetoothAdapter == null || address == null) {
-            Log.w(TAG,
-                    "BluetoothAdapter not initialized or unspecified address.");
-            return false;
-        }
-        LogUtil.info(TAG,"CONNECTING... BY LONG 2016-8-5");
+//        if (bluetoothAdapter == null || address == null) {
+//            Log.w(TAG, "BluetoothAdapter not initialized or unspecified address.");
+//            return false;
+//        }
+        LogUtil.debug("CONNECTING... BY LONG 2016-8-5");
         // Previously connected device. Try to reconnect. (\CF\C8ǰ\C1\AC\BDӵ\C4\C9豸\A1\A3 \B3\A2\CA\D4\D6\D8\D0\C2\C1\AC\BD\D3)
         if (bluetoothDeviceAddress != null
                 && address.equals(bluetoothDeviceAddress)
                 && bluetoothGatt != null) {
-            Log.d(TAG,
-                    "Trying to use an existing mBluetoothGatt for connection.");
+            LogUtil.debug("Trying to use an existing mBluetoothGatt for connection.");
             if (bluetoothGatt.connect()) {
                 connectionState = STATE_CONNECTING;
                 return true;
@@ -446,17 +452,14 @@ public class BluetoothService extends android.app.Service{
             }
         }
 
-        final BluetoothDevice device = bluetoothAdapter
-                .getRemoteDevice(address);
+        final BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
         if (device == null) {
-            Log.w(TAG, "Device not found.  Unable to connect.");
+            LogUtil.debug("Device not found.  Unable to connect.");
             return false;
         }
-        // We want to directly connect to the device, so we are setting the
-        // autoConnect
-        // parameter to false.
+        // We want to directly connect to the device, so we are setting the autoConnect parameter to false.
         bluetoothGatt = device.connectGatt(this, false, bluetoothGattCallback);
-        Log.d(TAG, "Trying to create a new connection.");
+        LogUtil.debug("Trying to create a new connection.");
         bluetoothDeviceAddress = address;
         connectionState = STATE_CONNECTING;
 

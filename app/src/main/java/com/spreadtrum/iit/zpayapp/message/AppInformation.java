@@ -136,7 +136,7 @@ public class AppInformation implements Serializable{
     }
     public AppInformation(String index, String picurl, String appname, String appsize,
                           String apptype, String spname, String appdesc, String appinstalled,
-                          String appid, boolean appinstalling, int indexForlistview, String localpicpath) {
+                          String appid, boolean appinstalling, int indexForlistview, String localpicpath,String applocked) {
         this.index = index;
         this.picurl = picurl;
         this.appname = appname;
@@ -149,6 +149,7 @@ public class AppInformation implements Serializable{
         this.appinstalling = appinstalling;
         this.indexForlistview = indexForlistview;
         this.localpicpath = localpicpath;
+        this.applocked = applocked;
     }
 
     //    public void setImageUri(Uri imageUri) {
@@ -162,6 +163,16 @@ public class AppInformation implements Serializable{
     private String spname;//应用提供商
     private String appdesc;//应用简介
     private String appinstalled="not";//应用是否已安装 yes/not
+
+    public String getApplocked() {
+        return applocked;
+    }
+
+    public void setApplocked(String applocked) {
+        this.applocked = applocked;
+    }
+
+    private String applocked="not";//应用是否已锁定 yes/not
     private String appid;//应用标识
 //    private int iconviewid;//本地图片资源id
 //    private Bitmap bitmap=null;//下载的图片资源

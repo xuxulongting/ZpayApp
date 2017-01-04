@@ -6,23 +6,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.R;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
-import com.spreadtrum.iit.zpayapp.network.http.HttpCallbackListener;
-import com.spreadtrum.iit.zpayapp.network.http.HttpUtils;
-import com.spreadtrum.iit.zpayapp.network.webservice.StreamTool;
+import com.spreadtrum.iit.zpayapp.network.webservice.SoapXmlBuilder;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 
-import okhttp3.ResponseBody;
 import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -75,7 +66,7 @@ public class TestActivity extends AppCompatActivity {
         InputStream inputStream = null;
         try {
             inputStream = MyApplication.getContextObject().getAssets().open(xmlFile);//("soap12_bdservice.xml");//("soap12.xml");
-            byte[] data = StreamTool.read(inputStream);
+            byte[] data = SoapXmlBuilder.read(inputStream);
             return new String(data);
         } catch (IOException e) {
             e.printStackTrace();

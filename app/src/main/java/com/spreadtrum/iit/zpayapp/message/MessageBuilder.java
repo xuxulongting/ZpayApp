@@ -20,7 +20,9 @@ import com.spreadtrum.iit.zpayapp.common.ByteUtil;
 public class MessageBuilder {
 
 	private static XmlSerializer serializer = null;
+	private static XmlSerializer serializer2 = null;
 	private static StringWriter writer = null;
+	private static StringWriter writer2 = null;
 	private static int taskIndex = 1;
 
 	/**
@@ -33,7 +35,7 @@ public class MessageBuilder {
 		RequestTaskidEntity entity=new RequestTaskidEntity();
 		String appid = appInformation.getAppid();
 		byte[] bAppid = new byte[5];
-		byte[] data = ByteUtil.StringToByteArray(appid);
+		byte[] data = ByteUtil.StringToByteArray2(appid);
 		System.arraycopy(data,0,bAppid,5-data.length,data.length);
 		entity.setTasktype(taskType);
 		String strCmd = taskType+"05"+ByteUtil.bytesToString(bAppid,5);
@@ -201,6 +203,8 @@ public class MessageBuilder {
 						appInformation.setAppdesc(parser.nextText());
 					} else if("appinstalled".equals(nodeName)){
 						appInformation.setAppinstalled(parser.nextText());
+					} else if ("applocked".equals(nodeName)) {
+						appInformation.setApplocked(parser.nextText());
 					} else if ("appid".equals(nodeName)) {
 						appInformation.setAppid(parser.nextText());
 					} else if("taskid".equals(nodeName)){
@@ -271,50 +275,50 @@ public class MessageBuilder {
 	 * @param sessionId
      * @param taskId
      */
-	public static String buildBussinessRequestXml(String seId,String imei,String phone,
-												String sessionId,String taskId){
-		serializer = Xml.newSerializer();
-		writer = new StringWriter();
+	public static String buildBussinessRequestXml(String seId,String imei,String phone,String requestType,
+												String sessionId,String taskId,String mac){
+		serializer2 = Xml.newSerializer();
+		writer2 = new StringWriter();
 		try {
-			serializer.setOutput(writer);
-			serializer.startDocument("UTF-8", true);
-			serializer.startTag(null, "tsm");
-			serializer.attribute(null, "version", "01");
-			serializer.startTag(null,"clientInfo");
-			serializer.attribute(null,"clientType","1");
-			serializer.attribute(null,"clientVer","01");
-			serializer.startTag(null,"terminalInfo");
-			serializer.startTag(null,"seid");
-			serializer.text(seId);
-			serializer.endTag(null,"seid");
-			serializer.startTag(null,"imei");
-			serializer.text(imei);
-			serializer.endTag(null,"imei");
-			serializer.startTag(null,"phone");
-			serializer.text(phone);
-			serializer.endTag(null,"phone");
-			serializer.endTag(null,"terminalInfo");
-			serializer.startTag(null,"request");
-			serializer.attribute(null,"type","0");
-			serializer.attribute(null,"index","0");
-			serializer.startTag(null,"sessionID");
-			serializer.text(sessionId);
-			serializer.endTag(null,"sessionID");
-			serializer.startTag(null,"taskID");
-			serializer.text(taskId);
-			serializer.endTag(null,"taskID");
-			serializer.endTag(null,"request");
-			serializer.startTag(null,"MAC");
-			serializer.endTag(null,"MAC");
-//			serializer.startTag(null,"chksum");
-//			serializer.endTag(null,"chksum");
-			serializer.endTag(null,"tsm");
-
+			serializer2.setOutput(writer2);
+			serializer2.startDocument("UTF-8", null);
+			serializer2.startTag(null, "tsm");
+			serializer2.attribute(null, "version", "01");
+			serializer2.startTag(null,"clientInfo");
+			serializer2.attribute(null,"clientType","1");
+			serializer2.attribute(null,"clientVer","1");
+			serializer2.endTag(null,"clientInfo");
+			serializer2.startTag(null,"terminalInfo");
+			serializer2.startTag(null,"seid");
+			serializer2.text(seId);
+			serializer2.endTag(null,"seid");
+			serializer2.startTag(null,"imei");
+			serializer2.text(imei);
+			serializer2.endTag(null,"imei");
+			serializer2.startTag(null,"phone");
+			serializer2.text(phone);
+			serializer2.endTag(null,"phone");
+			serializer2.endTag(null,"terminalInfo");
+			serializer2.startTag(null,"request");
+			serializer2.attribute(null,"type",requestType);
+//			serializer.attribute(null,"index","0");
+			serializer2.startTag(null,"sessionID");
+			serializer2.text(sessionId);
+			serializer2.endTag(null,"sessionID");
+			serializer2.startTag(null,"taskID");
+			serializer2.text(taskId);
+			serializer2.endTag(null,"taskID");
+			serializer2.endTag(null,"request");
+			serializer2.startTag(null,"MAC");
+			serializer2.text("reserved");
+			serializer2.endTag(null,"MAC");
+			serializer2.endTag(null,"tsm");
+			serializer2.endDocument();
 		} catch (IOException e) {
 //			e.printStackTrace();
 			return null;
 		}
-		return writer.toString().trim();
+		return writer2.toString().trim();
 	}
 
 	/**
@@ -339,24 +343,24 @@ public class MessageBuilder {
 					case  XmlPullParser.START_DOCUMENT:
 						break;
 					case XmlPullParser.START_TAG:
-						if(nodeName.equals("type")){
+						if(nodeName.equals("response")){
 							String operateType = parser.getAttributeValue(0);
 							tsmResponseData.setOperateType(operateType);
 						}
-						if(nodeName.equals("sessionID")){
+						else if(nodeName.equals("sessionID")){
 							String session = parser.nextText();
 							if(!sessionId.equals(session)) {
 								return null;
 							}
 							tsmResponseData.sessionId = session;
 						}
-						else if(nodeName.equals("taskID")){
-							String task = parser.nextText();
-							if(!taskId.equals(task)){
-								return null;
-							}
-							tsmResponseData.taskId = task;
-						}
+//						else if(nodeName.equals("taskID")){
+//							String task = parser.nextText();
+//							if(!taskId.equals(task)){
+//								return null;
+//							}
+//							tsmResponseData.taskId = task;
+//						}
 						else if(nodeName.equals("finishFlag")){
 							String finishFlag = parser.nextText();
 							tsmResponseData.setFinishFlag(finishFlag);
@@ -370,7 +374,7 @@ public class MessageBuilder {
 							tsmResponseData.setDesResponse(desResponse);
 						}
 						else if(nodeName.equals("APDUList")){
-							apduInfoList = new ArrayList<>();
+//							apduInfoList = new ArrayList<>();
 						}
 						else if(nodeName.equals("APDUInfo")){
 							apduInfo = new APDUInfo();
@@ -393,7 +397,7 @@ public class MessageBuilder {
 					default:
 						break;
 				}
-				parser.next();
+				eventType = parser.next();//parser.next();
 			}
 		} catch (XmlPullParserException e) {
 //			e.printStackTrace();
@@ -415,62 +419,64 @@ public class MessageBuilder {
 	 */
 	public static String message_Response_handle(String seId,String imei,String phone,String requestType,
 												String sessionId,String taskId,APDUInfo apdu,String result) {
-		serializer = Xml.newSerializer();
-		writer = new StringWriter();
+		XmlSerializer xmlSerializer = Xml.newSerializer();
+		StringWriter stringWriter = new StringWriter();
 		try {
-			serializer.setOutput(writer);
-			serializer.startDocument("UTF-8", true);
-			serializer.startTag(null, "tsm");
-			serializer.attribute(null, "version", "01");
-			serializer.startTag(null,"clientInfo");
-			serializer.attribute(null,"clientType","1");
-			serializer.attribute(null,"clientVer","01");
-			serializer.startTag(null,"terminalInfo");
-			serializer.startTag(null,"seid");
-			serializer.text(seId);
-			serializer.endTag(null,"seid");
-			serializer.startTag(null,"imei");
-			serializer.text(imei);
-			serializer.endTag(null,"imei");
-			serializer.startTag(null,"phone");
-			serializer.text(phone);
-			serializer.endTag(null,"phone");
-			serializer.endTag(null,"terminalInfo");
-			serializer.startTag(null,"request");
-			serializer.attribute(null,"type",requestType);
-			serializer.startTag(null,"sessionID");
-			serializer.text(sessionId);
-			serializer.endTag(null,"sessionID");
-			serializer.startTag(null,"taskID");
-			serializer.text(taskId);
-			serializer.endTag(null,"taskID");
-			serializer.startTag(null, "result");
-			serializer.text(result);
-			serializer.endTag(null, "Result");
-			serializer.startTag(null,"RAPDUList");
-			serializer.startTag(null,"APDUInfo");
-			serializer.startTag(null,"index");
-			serializer.text(apdu.getIndex());
-			serializer.endTag(null,"index");
-			serializer.startTag(null,"APDU");
-			serializer.text(apdu.getAPDU());
-			serializer.endTag(null,"APDU");
-			serializer.startTag(null,"SW");
-			serializer.text(apdu.getSW());
-			serializer.endTag(null,"SW");
-			serializer.endTag(null,"APDUInfo");
-			serializer.endTag(null,"RAPDUList");
-			serializer.endTag(null,"request");
-			serializer.startTag(null,"MAC");
-			serializer.text("reserved");
-			serializer.endTag(null,"MAC");
-			serializer.endTag(null,"tsm");
+			xmlSerializer.setOutput(stringWriter);
+			xmlSerializer.startDocument("UTF-8", true);
+			xmlSerializer.startTag(null,"tsm");
+			xmlSerializer.attribute(null, "version", "01");
+			xmlSerializer.startTag(null,"clientInfo");
+			xmlSerializer.attribute(null,"clientType","1");
+			xmlSerializer.attribute(null,"clientVer","01");
+			xmlSerializer.endTag(null,"clientInfo");
+			xmlSerializer.startTag(null,"terminalInfo");
+			xmlSerializer.startTag(null,"seid");
+			xmlSerializer.text(seId);
+			xmlSerializer.endTag(null,"seid");
+			xmlSerializer.startTag(null,"imei");
+			xmlSerializer.text(imei);
+			xmlSerializer.endTag(null,"imei");
+			xmlSerializer.startTag(null,"phone");
+			xmlSerializer.text(phone);
+			xmlSerializer.endTag(null,"phone");
+			xmlSerializer.endTag(null,"terminalInfo");
+			xmlSerializer.startTag(null,"request");
+			xmlSerializer.attribute(null,"type",requestType);
+			xmlSerializer.startTag(null,"sessionID");
+			xmlSerializer.text(sessionId);
+			xmlSerializer.endTag(null,"sessionID");
+			xmlSerializer.startTag(null,"taskID");
+			xmlSerializer.text(taskId);
+			xmlSerializer.endTag(null,"taskID");
+			xmlSerializer.startTag(null, "result");
+			xmlSerializer.text(result);
+			xmlSerializer.endTag(null, "result");
+			xmlSerializer.startTag(null,"RAPDUList");
+			xmlSerializer.startTag(null,"APDUInfo");
+			xmlSerializer.startTag(null,"index");
+			xmlSerializer.text(apdu.getIndex());
+			xmlSerializer.endTag(null,"index");
+			xmlSerializer.startTag(null,"APDU");
+			xmlSerializer.text(apdu.getAPDU());
+			xmlSerializer.endTag(null,"APDU");
+			xmlSerializer.startTag(null,"SW");
+			xmlSerializer.text(apdu.getSW());
+			xmlSerializer.endTag(null,"SW");
+			xmlSerializer.endTag(null,"APDUInfo");
+			xmlSerializer.endTag(null,"RAPDUList");
+			xmlSerializer.endTag(null,"request");
+			xmlSerializer.startTag(null,"MAC");
+			xmlSerializer.text("reserved");
+			xmlSerializer.endTag(null,"MAC");
+			xmlSerializer.endTag(null,"tsm");
+			xmlSerializer.endDocument();
 
 		} catch (IOException e) {
 //			e.printStackTrace();
 			return null;
 		}
-		return writer.toString().trim();
+		return stringWriter.toString().trim();
 	}
 
 	/**
@@ -478,6 +484,7 @@ public class MessageBuilder {
 	 * @param requestXml
 	 * @return
      */
+
 	public static TSMRequestData getTSMRequestDataFromXml(String requestXml){
 		TSMRequestData tsmRequestData = new TSMRequestData();
 		try {
@@ -507,12 +514,16 @@ public class MessageBuilder {
 						else if (nodeName.equals("taskID")){
 							tsmRequestData.setTaskId(parser.nextText());
 						}
+						else if (nodeName.equals("type")){
+							tsmRequestData.setType(parser.nextText());
+						}
 						break;
 					case XmlPullParser.END_TAG:
 						break;
 					default:
 						break;
 				}
+				eventType = parser.next();//parser.next();
 			}
 		} catch (XmlPullParserException e) {
 			e.printStackTrace();
