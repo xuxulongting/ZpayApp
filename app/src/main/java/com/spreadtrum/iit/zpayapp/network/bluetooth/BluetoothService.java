@@ -42,6 +42,7 @@ public class BluetoothService extends android.app.Service{
     public static final int STATE_DISCONNECTED = 0;
     public static final int STATE_CONNECTING = 1;
     public static final int STATE_CONNECTED = 2;
+    public static final int STATE_DISCONNECTING = 3;
 
     public static final String TAG = "BLE";
     public static final UUID UUID_HEART_RATE_MEASUREMENT = UUID
@@ -477,6 +478,7 @@ public class BluetoothService extends android.app.Service{
             Log.w(TAG, "BluetoothAdapter not initialized");
             return;
         }
+        connectionState = STATE_DISCONNECTING;
         bluetoothGatt.disconnect();
     }
 
@@ -490,6 +492,25 @@ public class BluetoothService extends android.app.Service{
         }
         bluetoothGatt.close();
         bluetoothGatt = null;
+    }
+
+    /**
+     * 返回BluetoothGatt server连接状态
+     * @return  STATE_CONNECTED，STATE_CONNECTING，STATE_DISCONNECTED
+     */
+    public int getBluetoothGattConnectionState(){
+        return connectionState;
+    }
+
+    /**
+     * 返回bluetoothGatt连接的device
+     * @return
+     */
+    public List<BluetoothDevice> getBluetoothGattConnectedDevices(){
+        if (bluetoothGatt!=null)
+           return bluetoothGatt.getConnectedDevices();
+        else
+           return null;
     }
 
     public void wirteCharacteristic(BluetoothGattCharacteristic characteristic) {

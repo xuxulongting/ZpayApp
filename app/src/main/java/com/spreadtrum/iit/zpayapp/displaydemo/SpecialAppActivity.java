@@ -58,8 +58,10 @@ public class SpecialAppActivity extends BaseActivity {
         if(!(appInfo.getIndex().equals(appInformation.getIndex())))
             return;
         appInformation.setAppinstalling(false);
+
         String bussinessType = intent.getStringExtra("BUSSINESS_TYPE");
         if(intent.getAction().equals(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS)) {
+            MyApplication.isOperated = false;
             if (bussinessType.equals("download")) {
                 appInformation.setAppinstalled("yes");
                 linearLayoutBar.setVisibility(View.INVISIBLE);
@@ -76,6 +78,8 @@ public class SpecialAppActivity extends BaseActivity {
         }
         else
         {
+            if (intent.getAction().equals(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED))
+                MyApplication.isOperated = false;
             linearLayoutBar.setVisibility(View.INVISIBLE);
             btnOpera.setVisibility(View.VISIBLE);
         }
@@ -179,14 +183,6 @@ public class SpecialAppActivity extends BaseActivity {
                             @Override
                             public void onBLEPrepared() {
                                 //获取taskid
-//                                RequestTaskidEntity entity=new RequestTaskidEntity();
-//                                String appid = appInformation.getAppid();
-//                                byte[] bAppid = new byte[5];
-//                                byte[] data = ByteUtil.StringToByteArray(appid);
-//                                System.arraycopy(data,0,bAppid,5-data.length,data.length);
-//                                entity.setTasktype(AppStoreFragment.TASK_TYPE_DOWNLOAD);
-//                                String strCmd = AppStoreFragment.TASK_TYPE_DOWNLOAD+"05"+ByteUtil.bytesToString(bAppid,5);
-//                                entity.setTaskcommand(strCmd);
                                 RequestTaskidEntity entity=MessageBuilder.getRequestTaskidEntity(appInformation,BussinessTransaction.TASK_TYPE_DOWNLOAD);
                                 TSMPersonalizationWebservice.getTSMTaskid(MyApplication.seId, "dbinsert", entity, new TSMAppInformationCallback() {
                                     @Override
@@ -212,6 +208,11 @@ public class SpecialAppActivity extends BaseActivity {
                                             public void onTaskExecutedFailed() {
                                                 transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED,appInformation,"delete");
                                                 MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_FAILED);
+                                            }
+
+                                            @Override
+                                            public void onTaskNotExecuted() {
+                                                transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_NOT_EXECUTED,appInformation,"notexecuted");
                                             }
                                         });
                                     }
@@ -259,14 +260,6 @@ public class SpecialAppActivity extends BaseActivity {
                                             @Override
                                             public void onBLEPrepared() {
                                                 //获取task id
-//                                                String appid = appInformation.getAppid();
-//                                                byte[] bAppid = new byte[5];
-//                                                byte[] data = ByteUtil.StringToByteArray(appid);
-//                                                System.arraycopy(data,0,bAppid,5-data.length,data.length);
-//                                                RequestTaskidEntity entity = new RequestTaskidEntity();
-//                                                entity.setTasktype(AppStoreFragment.TASK_TYPE_DELETE);
-//                                                String strCmd = AppStoreFragment.TASK_TYPE_DELETE+"05"+ ByteUtil.bytesToString(bAppid,5);
-//                                                entity.setTaskcommand(strCmd);
                                                 RequestTaskidEntity entity = MessageBuilder.getRequestTaskidEntity(appInformation,BussinessTransaction.TASK_TYPE_DELETE);
                                                 TSMPersonalizationWebservice.getTSMTaskid(MyApplication.seId, "dbinsert", entity, new TSMAppInformationCallback() {
                                                     @Override
@@ -292,6 +285,12 @@ public class SpecialAppActivity extends BaseActivity {
                                                             public void onTaskExecutedFailed() {
                                                                 transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED,appInformation,"delete");
                                                                 MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_FAILED);
+                                                            }
+
+                                                            @Override
+                                                            public void onTaskNotExecuted() {
+                                                                transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_NOT_EXECUTED,appInformation,"notexecuted");
+
                                                             }
                                                         });
                                                     }
@@ -351,6 +350,7 @@ public class SpecialAppActivity extends BaseActivity {
         IntentFilter bussinessUpdateIntentFilter = new IntentFilter();
         bussinessUpdateIntentFilter.addAction(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS);
         bussinessUpdateIntentFilter.addAction(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED);
+        bussinessUpdateIntentFilter.addAction(BussinessTransaction.ACTION_BUSSINESS_NOT_EXECUTED);
         return bussinessUpdateIntentFilter;
     }
 }

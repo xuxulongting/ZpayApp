@@ -33,15 +33,10 @@ import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.database.AppDisplayDatabaseHelper;
 import com.spreadtrum.iit.zpayapp.database.DatabaseHandler;
 import com.spreadtrum.iit.zpayapp.message.AppInformation;
-import com.spreadtrum.iit.zpayapp.message.TSMRequestData;
-import com.spreadtrum.iit.zpayapp.network.HeartBeatThread;
+import com.spreadtrum.iit.zpayapp.network.heartbeat.HeartBeatThread;
 import com.spreadtrum.iit.zpayapp.network.NetworkUtils;
 import com.spreadtrum.iit.zpayapp.network.ResultCallback;
 import com.spreadtrum.iit.zpayapp.network.ZAppStoreApi;
-import com.spreadtrum.iit.zpayapp.network.bluetooth.BLEPreparedCallbackListener;
-import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
-import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothSettingsActivity;
-import com.spreadtrum.iit.zpayapp.network.webservice.WebserviceHelper;
 import com.spreadtrum.iit.zpayapp.register_login.DigtalpwdLoginActivity;
 import com.zhy.adapter.abslistview.CommonAdapter;
 
@@ -54,8 +49,6 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
-
-import static com.spreadtrum.iit.zpayapp.common.MyApplication.seId;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-9-1.
@@ -95,8 +88,9 @@ public class AppStoreFragment extends Fragment {
 
                 //AppInformation appInformation = (AppInformation) intent.getSerializableExtra("BUSSINESS_UPDATE");
                 appInformation.setAppinstalling(false);
-                if (intent.getAction().equals(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS)) {
 
+                if (intent.getAction().equals(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS)) {
+                    MyApplication.isOperated = false;
                     //String bussinessType = intent.getStringExtra("BUSSINESS_TYPE");
                     String bussinessType = bundle.getString("BUSSINESS_TYPE");
                     if (bussinessType.equals("download")) {
@@ -107,8 +101,9 @@ public class AppStoreFragment extends Fragment {
                     //修改全局变量map中的值
 //                MyApplication.appInstalling.put(appInformation.getIndex(), appInformation.isAppinstalling());
 
-                } else {
+                } else if (intent.getAction().equals(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED)){
                     //不需要更新appinstalled状态
+                    MyApplication.isOperated = false;
                 }
                 //更新applist
                 appList.set(appInformation.getIndexForlistview(), appInformation);
@@ -122,6 +117,7 @@ public class AppStoreFragment extends Fragment {
         IntentFilter bussinessUpdateIntentFilter = new IntentFilter();
         bussinessUpdateIntentFilter.addAction(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS);
         bussinessUpdateIntentFilter.addAction(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED);
+        bussinessUpdateIntentFilter.addAction(BussinessTransaction.ACTION_BUSSINESS_NOT_EXECUTED);
         bussinessUpdateIntentFilter.addAction(HeartBeatThread.ACTION_BUSSINESS_REMOTE_MANAGEMENT);
         return bussinessUpdateIntentFilter;
     }
@@ -255,42 +251,6 @@ public class AppStoreFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         //注册receiver
         getActivity().registerReceiver(bussinessUpdateReceiver,makeBussinessUpdateIntentFilter());
-//        //创建Thread，发送心跳包
-//        MyApplication app = (MyApplication) MyApplication.getContextObject();
-//        if (app.getBluetoothDevAddr().isEmpty()){
-//            LogUtil.debug("BLE","onActivityCreated with ble addr empty.");
-//            return;
-//        }
-//        final BluetoothControl bluetoothControl = BluetoothControl.getInstance(app,app.getBluetoothDevAddr());
-//        TSMRequestData requestData = new TSMRequestData();
-//        new HeartBeatThread(bluetoothControl,requestData);
-
-//        bluetoothControl.setBlePreparedCallbackListener(new BLEPreparedCallbackListener() {
-//            @Override
-//            public void onBLEPrepared() {
-//                WebserviceHelper.getSeId(bluetoothControl, new ResultCallback<String>() {
-//                    @Override
-//                    public void onPreStart() {
-//
-//                    }
-//
-//                    @Override
-//                    public void onSuccess(String response) {
-//                        //成功返回SEID
-//                        TSMRequestData requestData = new TSMRequestData();
-//                        requestData.setSeId(response);
-//                        new HeartBeatThread(bluetoothControl,requestData);
-//                    }
-//
-//                    @Override
-//                    public void onFailed(String error) {
-//
-//                    }
-//                });
-//            }
-//        });
-
-
     }
 
 

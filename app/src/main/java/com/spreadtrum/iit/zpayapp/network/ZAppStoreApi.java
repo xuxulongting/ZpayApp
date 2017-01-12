@@ -1,17 +1,16 @@
 package com.spreadtrum.iit.zpayapp.network;
 
+import android.content.Intent;
 import android.util.Base64;
 import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.bussiness.BussinessTransaction;
 import com.spreadtrum.iit.zpayapp.bussiness.TransactionCallback;
-import com.spreadtrum.iit.zpayapp.common.ByteUtil;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.message.APDUInfo;
 import com.spreadtrum.iit.zpayapp.message.AppInformation;
@@ -20,19 +19,17 @@ import com.spreadtrum.iit.zpayapp.message.TSMRequestData;
 import com.spreadtrum.iit.zpayapp.message.TSMResponseData;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BLEPreparedCallbackListener;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
-import com.spreadtrum.iit.zpayapp.network.bluetooth.SECallbackTSMListener;
+import com.spreadtrum.iit.zpayapp.network.heartbeat.HeartBeatResultCallback;
+import com.spreadtrum.iit.zpayapp.network.heartbeat.HeartBeatThread;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.CustomStringRequest;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.RequestQueueUtils;
 import com.spreadtrum.iit.zpayapp.network.webservice.SoapXmlBuilder;
-import com.spreadtrum.iit.zpayapp.network.webservice.TSMPersonalizationWebservice;
 import com.spreadtrum.iit.zpayapp.network.webservice.WebserviceHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
-
-import retrofit2.http.PUT;
 
 import static java.lang.Thread.currentThread;
 
@@ -311,6 +308,8 @@ public class ZAppStoreApi {
                 String finishFlag = responseData.getFinishFlag();
                 //Tsm响应数据中finishFlag非0,则代表任务结束
                 if (!finishFlag.equals("0")) {
+                    //更新list
+                    HeartBeatThread.broadcastRMUpdate(HeartBeatThread.ACTION_BUSSINESS_REMOTE_MANAGEMENT);
                     callback.onApduEmpty();
                     return;
                 }
@@ -347,10 +346,5 @@ public class ZAppStoreApi {
 //        requestQueue.add(stringRequest);
         RequestQueueUtils.getInstance().addToRequestQueue(stringRequest);
     }
-
-    public static void getTaskId(){
-
-    }
-
 
 }

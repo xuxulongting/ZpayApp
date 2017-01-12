@@ -51,16 +51,9 @@ public class SettingsFragment extends Fragment {
     private Button btnBluetooth;
     private Button btnAboutUs;
     private Button btnQuit;
-//    private BluetoothControl bluetoothControl=null;
-//    private SelectBluetoothDeviceListener listener=null;//=new AppStoreFragment();
-//
     public interface SelectBluetoothDeviceListener{
         void onBluetoothDeviceSelected(String devAddr);
     }
-//
-//    public void setBluetoothDeviceListener(SelectBluetoothDeviceListener listener){
-//        this.listener = listener;
-//    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

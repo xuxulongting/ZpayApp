@@ -4,21 +4,13 @@ import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
-import android.net.Network;
 import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 
 import com.baidu.mapapi.SDKInitializer;
-import com.spreadtrum.iit.zpayapp.Log.LogUtil;
-import com.spreadtrum.iit.zpayapp.network.HeartBeatThread;
-import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
+import com.spreadtrum.iit.zpayapp.network.heartbeat.HeartBeatThread;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,10 +20,12 @@ import java.util.Map;
 public class MyApplication extends Application {
     private static Context context;
     private String bluetoothDevAddr="";
+    public static boolean isOperated = false;
     public static Map<String,Boolean> appInstalling = new HashMap<>();
     public static MyApplication getInstance(){
         return new MyApplication();
     }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -41,6 +35,7 @@ public class MyApplication extends Application {
         //创建Thread，发送心跳包
         new HeartBeatThread().start();
     }
+
     public static Context getContextObject(){
         return context;
     }
@@ -90,6 +85,4 @@ public class MyApplication extends Application {
     public static final int DELETE_FAILED=3;
 
     public static String seId="";//"451000000000000020160328000000010003";
-
-//    public static final String WEBSERVICE_PATH = "http://10.0.64.120:6893/SPRDTSMDbService.asmx";
 }

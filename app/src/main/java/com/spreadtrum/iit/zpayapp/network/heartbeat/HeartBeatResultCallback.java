@@ -1,4 +1,4 @@
-package com.spreadtrum.iit.zpayapp.network;
+package com.spreadtrum.iit.zpayapp.network.heartbeat;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-12-16.

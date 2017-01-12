@@ -24,6 +24,8 @@ import com.spreadtrum.iit.zpayapp.message.RequestTaskidEntity;
 import com.spreadtrum.iit.zpayapp.message.TSMResponseEntity;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BLEPreparedCallbackListener;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
+import com.spreadtrum.iit.zpayapp.network.tcp.NetParameter;
+import com.spreadtrum.iit.zpayapp.network.tcp.TCPSocket;
 import com.spreadtrum.iit.zpayapp.network.tcp.TsmTaskCompleteCallback;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.BitmapCache;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.RequestQueueUtils;
@@ -50,28 +52,6 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
     private LinearLayout linearLayoutBar;
     private ListView listViewAppStore;
     private Handler updatePicHandler=null;
-//    /**
-//     * 当图片下载完成后，更新变量appList,主要是更新localpicpath
-//     */
-//    private Handler updatePicHandler = new Handler(){
-//        public void handleMessage(Message msg){
-//            if(msg.what==0){
-//                AppInformation appInfo = (AppInformation) msg.obj;
-//                for(int i=0;i<appList.size();i++){
-//                    if (appList.get(i).getIndex().equals(appInfo.getIndex())){
-//                        appList.set(i,appInfo);
-//                    }
-//                }
-//            }
-//        }
-//    };
-
-//    public AppStoreCommonAdapter(Context context, int layoutId, List datas) {
-//        super(context, layoutId, datas);
-//        appList = datas;
-//        mContext = context;
-//    }
-
     /** AppStoreFragment的Adapter构造函数
     * @param context   上下文，必须是view上下文，而不是application上下文
     * @param layoutId  item view的资源Id
@@ -174,6 +154,15 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
                 //获取蓝牙句柄
                 //if(bluetoothControl==null){
                 final BluetoothControl bluetoothControl = BluetoothControl.getInstance(MyApplication.getContextObject(),bluetoothDevAddr);
+                if (bluetoothControl==null)
+                {
+                    //修改listview中button视图，修改item的值，就相当于修改了appList变量
+                    item.setAppinstalling(false);
+                    //修改全局变量map中的值
+                    MyApplication.appInstalling.put(item.getIndex(),true);
+                    //刷新Listview
+                    notifyDataSetChanged();
+                }
                 bluetoothControl.setBlePreparedCallbackListener(new BLEPreparedCallbackListener() {
                     @Override
                     public void onBLEPrepared() {
@@ -227,6 +216,12 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
                                         transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED,appInformation,"download");
                                         MyApplication.handler.sendEmptyMessage(MyApplication.DOWNLOAD_FAILED);
                                     }
+
+                                    @Override
+                                    public void onTaskNotExecuted() {
+                                        AppInformation appInformation = item;
+                                        transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_NOT_EXECUTED,appInformation,"notexecuted");
+                                    }
                                 });
                             }
                         });
@@ -237,12 +232,24 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
             }
         });
 
-        //单击，则取消绑定
-        linearLayoutBar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
+        //单击，则取消绑定,TSM不支持取消功能
+//        linearLayoutBar.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                //关闭tsm连接
+//                new Thread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        TCPSocket tcpSocket =  TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
+//                        tcpSocket.closeSocket();
+//                    }
+//                }).start();
+////                //关闭蓝牙连接
+////                MyApplication app = (MyApplication) mContext.getApplicationContext();
+////                BluetoothControl bluetoothControl = BluetoothControl.getInstance(mContext,
+////                        app.getBluetoothDevAddr());
+////                bluetoothControl.disconnectBluetooth();
+//            }
+//        });
     }
 }

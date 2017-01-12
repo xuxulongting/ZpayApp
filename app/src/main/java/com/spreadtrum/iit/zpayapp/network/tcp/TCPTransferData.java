@@ -121,6 +121,10 @@ public class TCPTransferData {
     public void handleTSMData(final TCPSocket tcpSocket, byte []input, final TsmTaskCompleteCallback tsmTaskCompleteCallback){
         //testSeCmdCount++;
         LogUtil.debug("input:"+ByteUtil.bytesToHexString(input,input.length));
+        if (tcpSocket==null) {
+            LogUtil.debug("socket is null");
+            return;
+        }
         new TCPRequest().TCPByteRequest(tcpSocket, input, new TCPResponse.Listener<byte[]>() {
             @Override
             public void onResponse(byte[] response, int responseLen) {

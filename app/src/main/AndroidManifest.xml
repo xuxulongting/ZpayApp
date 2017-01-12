@@ -26,6 +26,7 @@
             <!--其中adjustNothing设置不影响activity重新绘制view布局，stateHidden第一次进来隐藏软键盘-->
             <!--代码动态弹出软键盘-->
             <span style="white-space:pre"></span>
+
         </activity>
         <activity
             android:name=".register_login.DigtalpwdLoginActivity"

@@ -39,6 +39,7 @@ import static java.lang.Integer.parseInt;
 public class BussinessTransaction{
     public static final String ACTION_BUSSINESS_EXECUTED_SUCCESS="com.spreadtrum.iit.zpayapp.bussiness.BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS";
     public static final String ACTION_BUSSINESS_EXECUTED_FAILED="com.spreadtrum.iit.zpayapp.bussiness.BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED";
+    public static final String ACTION_BUSSINESS_NOT_EXECUTED="com.spreadtrum.iit.zpayapp.bussiness.BussinessTransaction.ACTION_BUSSINESS_NOT_EXECUTED";
     private AppDisplayDatabaseHelper dbHelper=null;
 
     /**
@@ -64,6 +65,12 @@ public class BussinessTransaction{
      */
     public void DownloadApplet(BluetoothControl bluetoothControl, byte[] taskId,
                                final AppInformation appInformation, TsmTaskCompleteCallback completeCallback){
+        if (MyApplication.isOperated == false)
+            MyApplication.isOperated = true;
+        else {
+            completeCallback.onTaskNotExecuted();
+            return;
+        }
         //BLE准备好，开始发送数据
         TCPTransferData tcpTransferData = new TCPTransferData();
         tcpTransferData.DownloadApplet(bluetoothControl,taskId,completeCallback);
@@ -79,6 +86,12 @@ public class BussinessTransaction{
      */
     public void DeleteApplet(BluetoothControl bluetoothControl, byte []taskId,
                                     final AppInformation appInformation,TsmTaskCompleteCallback completeCallback){
+        if (MyApplication.isOperated == false)
+            MyApplication.isOperated = true;
+        else {
+            completeCallback.onTaskNotExecuted();
+            return;
+        }
         //BLE准备好，开始发送数据
         TCPTransferData tcpTransferData = new TCPTransferData();
         tcpTransferData.DeleteApplet(bluetoothControl,taskId,completeCallback);
@@ -189,8 +202,6 @@ public class BussinessTransaction{
                 byte[] byteOfsw = new byte[2];
                 System.arraycopy(responseData,responseLen-2,byteOfsw,0,2);
                 String sw = ByteUtil.bytesToHexString(byteOfsw,2);
-//                info.setSW(new String(responseData,responseData.length-2,2));
-//                info.setAPDU(new String(responseData,0,responseData.length-2));
                 info.setAPDU(apdu);
                 info.setSW(sw);
                 if(info.getSW().equals(apduInfo.getSW())){

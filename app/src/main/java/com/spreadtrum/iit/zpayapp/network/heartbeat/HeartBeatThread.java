@@ -1,4 +1,4 @@
-package com.spreadtrum.iit.zpayapp.network;
+package com.spreadtrum.iit.zpayapp.network.heartbeat;
 
 import android.content.Intent;
 
@@ -7,6 +7,7 @@ import com.spreadtrum.iit.zpayapp.common.ByteUtil;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.message.MessageBuilder;
 import com.spreadtrum.iit.zpayapp.message.TSMRequestData;
+import com.spreadtrum.iit.zpayapp.network.ZAppStoreApi;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
 
 import java.util.Random;
@@ -81,14 +82,14 @@ public class HeartBeatThread extends Thread implements Runnable {
 
                     @Override
                     public void onApduEmpty() {
-                        broadcastRMUpdate(HeartBeatThread.ACTION_BUSSINESS_REMOTE_MANAGEMENT);
+//                        broadcastRMUpdate(HeartBeatThread.ACTION_BUSSINESS_REMOTE_MANAGEMENT);
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
                                 LogUtil.debug("HEARTBEAT","onApduEmpty,thread id is:"+currentThread().getId());
                                 try {
-                                    //等待3s,发送下一次心跳包
-                                    Thread.sleep(30000);
+                                    //等待300s,发送下一次心跳包
+                                    Thread.sleep(300000);
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
@@ -110,12 +111,12 @@ public class HeartBeatThread extends Thread implements Runnable {
         }
     }
 
-    private void broadcastRMUpdate(String action){
+    public static void broadcastRMUpdate(String action){
         Intent intent = new Intent();
         intent.setAction(action);
         MyApplication.getContextObject().sendBroadcast(intent);
     }
 
     public static final String ACTION_BUSSINESS_REMOTE_MANAGEMENT=
-            "com.spreadtrum.iit.zpayapp.network.HeartBeatThread.ACTION_BUSSINESS_EXECUTED_SUCCESS";
+            "com.spreadtrum.iit.zpayapp.network.heartbeat.HeartBeatThread.ACTION_BUSSINESS_EXECUTED_SUCCESS";
 }

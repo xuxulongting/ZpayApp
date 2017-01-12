@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.common.AppConfig;
 import com.spreadtrum.iit.zpayapp.common.ByteUtil;
+import com.spreadtrum.iit.zpayapp.common.MyApplication;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,7 +105,6 @@ public class BluetoothControl {
                 bluetoothUnbindService();
                 return;
             }
-
         }
 
         @Override
@@ -112,6 +112,8 @@ public class BluetoothControl {
             LogUtil.debug("onServiceDisconnected");
             //关闭连接 gatt can only handle sevral connections at a time (BluetoothGatt documentation)
             if(bluetoothService!=null) {
+                //FIXME
+                LogUtil.debug("release blueGatt resources.");
                 bluetoothService.closeBluetoothGatt();
                 bluetoothService = null;
             }
@@ -119,6 +121,13 @@ public class BluetoothControl {
         }
     };
 
+    public void disconnectBluetooth(){
+        //disconnect from gattserver,release ble resources
+        if (bluetoothService!=null){
+            bluetoothService.disconnect();
+//            bluetoothService.closeBluetoothGatt();
+        }
+    }
 
     public void setSeCallbackTSMListener(SECallbackTSMListener listener){
         if(bluetoothService!=null){
@@ -146,7 +155,6 @@ public class BluetoothControl {
                     break;
                 case BluetoothService.ACTION_GATT_DISCONNECTED:
                     //Gatt Server连接失败，释放BluetoothControl（单例模式）对象，并unbindService，当重新发起数据请求时，重新创建BluetoothControl实例
-                    bluetoothControl = null;
                     bluetoothUnbindService();
                     //重新连接Gatt Server
 //                    bluetoothService.connect(selBluetoothDevAddr);
@@ -229,6 +237,9 @@ public class BluetoothControl {
         if(bluetoothControl==null){
             bluetoothControl = new BluetoothControl(context,selBleDevAddr);
         }else{
+            if (bluetoothControl.bluetoothService.getBluetoothGattConnectionState()==
+                    bluetoothControl.bluetoothService.STATE_DISCONNECTING)
+                return null;
             //如果BluetoothControl实例已经创建，则延时，先返回bluetoothControl对象，再回调onBLEPrepared()
             createNewThread();
         }
@@ -245,9 +256,21 @@ public class BluetoothControl {
             public void run() {
                 try {
                     Thread.sleep(1000);
-                    bluetoothControl.blePreparedCallbackListener.onBLEPrepared();
+                    if (bluetoothControl!=null && bluetoothControl.bluetoothService!=null) {
+                        if (bluetoothControl.bluetoothService.getBluetoothGattConnectionState()
+                                == bluetoothControl.bluetoothService.STATE_CONNECTED) {
+                            LogUtil.debug("getBluetoothGattConnectionState:STATE_CONNECTED");
+                            bluetoothControl.blePreparedCallbackListener.onBLEPrepared();
+                        } else if (bluetoothControl.bluetoothService.getBluetoothGattConnectionState()
+                                == bluetoothControl.bluetoothService.STATE_DISCONNECTED) {
+                            MyApplication app = (MyApplication) MyApplication.getContextObject();
+                            bluetoothControl.bluetoothService.connect(app.getBluetoothDevAddr());
+                            LogUtil.debug("getBluetoothGattConnectionState:STATE_DISCONNECTED");
+                        }
+                    }
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    LogUtil.debug(e.getMessage());
+//                    e.printStackTrace();
                 }
             }
         }).start();
@@ -263,9 +286,12 @@ public class BluetoothControl {
      */
     public void bluetoothUnbindService()
     {
+        LogUtil.debug("ubindService");
+//        bluetoothService.closeBluetoothGatt();
         mContext.unbindService(serviceConnection);
-
 //        bluetoothService = null;
+        //当再次获取BluetoothControl实例时，重新bindService()
+        bluetoothControl = null;
     }
 
     /**

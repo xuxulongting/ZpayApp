@@ -95,6 +95,7 @@ public final class ByteUtil {
 	}
 
 	/**
+	 * 将10进制String转换成byte[]数组
 	 * 将String转换成byte[]数组，例如：String appid="1517" --> byte[] bAppid={15,17};
 	 * @param data
 	 * @return
@@ -121,7 +122,8 @@ public final class ByteUtil {
 	}
 
 	/**
-	 * 将String转换成byte[]数组，例如：String appid="1542" --> byte[] bAppid={15,42};
+	 * 将16进制String转换成byte[]数组
+	 * 将String转换成byte[]数组，例如：String appid="1542" --> byte[] bAppid={0x15,0x42};
 	 * @param data
 	 * @return
      */

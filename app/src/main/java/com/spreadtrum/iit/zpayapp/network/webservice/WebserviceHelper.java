@@ -119,10 +119,9 @@ public class WebserviceHelper {
                 bluetoothControl.setSeCallbackTSMListener(new SECallbackTSMListener() {
                     @Override
                     public void callbackTSM(byte[] responseData, int responseLen) {
-
-//                        MyApplication.seId = new String(responseData,0,responseData.length-2);
                         //69168380826800042200000300000001255255
                         //45105350524400041600000300000001FFFF
+//                        bluetoothControl.disconnectBluetooth();
                         MyApplication.seId = ByteUtil.bytesToHexString(responseData,responseLen-2);
                         getListDataWithSeid(MyApplication.seId,callback);
                         LogUtil.debug("SeId:"+MyApplication.seId);

@@ -6,5 +6,6 @@ package com.spreadtrum.iit.zpayapp.network.tcp;
 public interface TsmTaskCompleteCallback {
     void onTaskExecutedSuccess();
     void onTaskExecutedFailed();
+    void onTaskNotExecuted();
 }
 
