@@ -16,6 +16,7 @@ import com.spreadtrum.iit.zpayapp.message.MessageBuilder;
 import com.spreadtrum.iit.zpayapp.message.TSMResponseEntity;
 import com.spreadtrum.iit.zpayapp.network.NetworkUtils;
 import com.spreadtrum.iit.zpayapp.network.ResultCallback;
+import com.spreadtrum.iit.zpayapp.network.bluetooth.BLEPreparedCallbackListener;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.SECallbackTSMListener;
 import com.spreadtrum.iit.zpayapp.register_login.DigtalpwdLoginActivity;
@@ -91,16 +92,21 @@ public class WebserviceHelper {
     }
     /**
      * 获取seid
-     * @param bluetoothControl
+     * @param
      */
-    private static void getListDataWithoutSeid(final BluetoothControl bluetoothControl, final ResultCallback callback){
-        //获取SeId 00A4040007A0000001510000
-        byte[] command1 = {0x00,(byte)0xA4,0x04,0x00,0x07,(byte)0xA0,0x00,0x00,0x01,0x51,0x00,0x00};
-
-        bluetoothControl.communicateWithJDSe(command1,command1.length);
-        bluetoothControl.setSeCallbackTSMListener(new SECallbackTSMListener() {
-            @Override
-            public void callbackTSM(byte[] responseData, int responseLen) {
+    private static void getListDataWithoutSeid(String bleDevAddr,final ResultCallback callback){
+        //与蓝牙建立连接
+        final BluetoothControl bluetoothControl = BluetoothControl.getInstance(MyApplication.getContextObject(),bleDevAddr);
+        if (bluetoothControl!=null){
+            bluetoothControl.setBlePreparedCallbackListener(new BLEPreparedCallbackListener() {
+                @Override
+                public void onBLEPrepared() {
+                    //获取SeId 00A4040007A0000001510000
+                    byte[] command1 = {0x00,(byte)0xA4,0x04,0x00,0x07,(byte)0xA0,0x00,0x00,0x01,0x51,0x00,0x00};
+                    bluetoothControl.communicateWithJDSe(command1,command1.length);
+                    bluetoothControl.setSeCallbackTSMListener(new SECallbackTSMListener() {
+                        @Override
+                        public void callbackTSM(byte[] responseData, int responseLen) {
 //                //RxJava转换线程测试用
 //                String message = "test";
 //                if(responseLen!=0)
@@ -114,31 +120,43 @@ public class WebserviceHelper {
 //                                Toast.makeText(MyApplication.getContextObject(),"result:"+s,Toast.LENGTH_LONG).show();
 //                            }
 //                        });
-                byte[] command2 = {(byte)0x80,(byte)0xCA,0x00,0x45,0x00};
-                bluetoothControl.communicateWithJDSe(command2,command2.length);
-                bluetoothControl.setSeCallbackTSMListener(new SECallbackTSMListener() {
-                    @Override
-                    public void callbackTSM(byte[] responseData, int responseLen) {
-                        //69168380826800042200000300000001255255
-                        //45105350524400041600000300000001FFFF
-//                        bluetoothControl.disconnectBluetooth();
-                        MyApplication.seId = ByteUtil.bytesToHexString(responseData,responseLen-2);
-                        getListDataWithSeid(MyApplication.seId,callback);
-                        LogUtil.debug("SeId:"+MyApplication.seId);
-                    }
+                            byte[] command2 = {(byte)0x80,(byte)0xCA,0x00,0x45,0x00};
+                            bluetoothControl.communicateWithJDSe(command2,command2.length);
+                            bluetoothControl.setSeCallbackTSMListener(new SECallbackTSMListener() {
+                                @Override
+                                public void callbackTSM(byte[] responseData, int responseLen) {
+                                    //69168380826800042200000300000001255255
+                                    //45105350524400041600000300000001FFFF
+                                    //断开蓝牙连接
+                                    bluetoothControl.disconnectBluetooth();
+                                    MyApplication.seId = ByteUtil.bytesToHexString(responseData,responseLen-2);
+                                    getListDataWithSeid(MyApplication.seId,callback);
+                                    LogUtil.debug("SeId:"+MyApplication.seId);
+                                }
 
-                    @Override
-                    public void errorCallback() {
+                                @Override
+                                public void errorCallback() {
 
-                    }
-                });
-            }
+                                }
+                            });
+                        }
 
-            @Override
-            public void errorCallback() {
+                        @Override
+                        public void errorCallback() {
 
-            }
-        });
+                        }
+                    });
+                }
+
+                @Override
+                public void onBLEPrepareFailed() {
+
+                }
+
+
+            });
+        }
+
     }
 
     private static void getListDataWithSeid(String seId, final ResultCallback callback){
@@ -187,9 +205,11 @@ public class WebserviceHelper {
      * 根据seid获取到了应用列表
      * @param seId
      */
-    public static void getListDataFromWebService(BluetoothControl bluetoothControl,String seId,ResultCallback callback){
-        if(seId.isEmpty())
-            getListDataWithoutSeid(bluetoothControl,callback);
+    public static void getListDataFromWebService(String bleDevAddr,String seId,ResultCallback callback){
+        if(seId.isEmpty()) {
+            LogUtil.debug("seid is empty.");
+            getListDataWithoutSeid(bleDevAddr, callback);
+        }
         else
             getListDataWithSeid(seId,callback);
     }

@@ -236,6 +236,7 @@ public class TCPTransferData {
                 public void errorCallback() {
 //                    tsmTaskCompleteListener.onTaskExecutedFailed();
                     tsmTaskCompleteCallback.onTaskExecutedFailed();
+                    LogUtil.debug("tsmTaskCompleteCallback.onTaskExecutedFailed();");
                 }
             });
         }

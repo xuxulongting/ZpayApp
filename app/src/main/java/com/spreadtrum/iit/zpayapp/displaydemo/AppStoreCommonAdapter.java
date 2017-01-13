@@ -159,9 +159,10 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
                     //修改listview中button视图，修改item的值，就相当于修改了appList变量
                     item.setAppinstalling(false);
                     //修改全局变量map中的值
-                    MyApplication.appInstalling.put(item.getIndex(),true);
+                    MyApplication.appInstalling.put(item.getIndex(),false);
                     //刷新Listview
                     notifyDataSetChanged();
+                    return;
                 }
                 bluetoothControl.setBlePreparedCallbackListener(new BLEPreparedCallbackListener() {
                     @Override
@@ -207,14 +208,20 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
                                                 });
                                          //（2)使用消息方式发送消息到主线程进行操作
 //                                        MyApplication.handler.sendEmptyMessage(MyApplication.DOWNLOAD_SUCCESS);
+                                        //下载成功，断开蓝牙连接
+                                        bluetoothControl.disconnectBluetooth();
                                     }
 
                                     @Override
                                     public void onTaskExecutedFailed() {
+                                        if (MyApplication.isOperated==false)
+                                            return;
                                         AppInformation appInformation = item;
                                         LogUtil.debug("internal item index:"+appInformation.getIndex());
                                         transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED,appInformation,"download");
                                         MyApplication.handler.sendEmptyMessage(MyApplication.DOWNLOAD_FAILED);
+                                        //下载失败，断开蓝牙连接
+                                        bluetoothControl.disconnectBluetooth();
                                     }
 
                                     @Override
@@ -227,29 +234,35 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
                         });
 
                     }
+
+                    @Override
+                    public void onBLEPrepareFailed() {
+
+                    }
+
                 });
                 //}
             }
         });
 
         //单击，则取消绑定,TSM不支持取消功能
-//        linearLayoutBar.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                //关闭tsm连接
-//                new Thread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        TCPSocket tcpSocket =  TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
-//                        tcpSocket.closeSocket();
-//                    }
-//                }).start();
-////                //关闭蓝牙连接
-////                MyApplication app = (MyApplication) mContext.getApplicationContext();
-////                BluetoothControl bluetoothControl = BluetoothControl.getInstance(mContext,
-////                        app.getBluetoothDevAddr());
-////                bluetoothControl.disconnectBluetooth();
-//            }
-//        });
+        linearLayoutBar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //关闭tsm连接
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        TCPSocket tcpSocket =  TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
+                        tcpSocket.closeSocket();
+                    }
+                }).start();
+//                //关闭蓝牙连接
+//                MyApplication app = (MyApplication) mContext.getApplicationContext();
+//                BluetoothControl bluetoothControl = BluetoothControl.getInstance(mContext,
+//                        app.getBluetoothDevAddr());
+//                bluetoothControl.disconnectBluetooth();
+            }
+        });
     }
 }

@@ -51,6 +51,7 @@ public class SettingsFragment extends Fragment {
     private Button btnBluetooth;
     private Button btnAboutUs;
     private Button btnQuit;
+    private Button btnCloseBLE;
     public interface SelectBluetoothDeviceListener{
         void onBluetoothDeviceSelected(String devAddr);
     }
@@ -91,6 +92,19 @@ public class SettingsFragment extends Fragment {
                 startActivity(intent);
             }
         });
+        //关闭蓝牙
+        btnCloseBLE = (Button) view.findViewById(R.id.id_btn_close_ble);
+//        btnCloseBLE.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                MyApplication app = (MyApplication) MyApplication.getContextObject();
+//                BluetoothControl bluetoothControl = BluetoothControl.getInstance(MyApplication.getContextObject(),
+//                        app.getBluetoothDevAddr());
+//                if (bluetoothControl!=null)
+//                    bluetoothControl.disconnectBluetooth();
+////                    bluetoothControl.bluetoothUnbindService();
+//            }
+//        });
         //退出登录
         btnQuit = (Button) view.findViewById(R.id.id_btn_quit);
         btnQuit.setOnClickListener(new View.OnClickListener() {

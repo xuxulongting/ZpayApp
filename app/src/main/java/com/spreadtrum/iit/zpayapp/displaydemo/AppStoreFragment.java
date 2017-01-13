@@ -378,7 +378,7 @@ public class AppStoreFragment extends Fragment {
             @Override
             public void onRefresh() {
 //                LogUtil.debug("onRefresh:"+String.valueOf(Thread.currentThread().getId()));
-                textView.setText("正在获取数据");
+                textView.setText("正在刷新...");
                 imgDone.setVisibility(View.GONE);
                 imageView.setVisibility(View.INVISIBLE);
                 progressBar.setVisibility(View.VISIBLE);

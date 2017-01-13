@@ -86,8 +86,8 @@ public class DeviceControlActivity extends Activity {
 			}
 			// Automatically connects to the device upon successful start-up
 			// initialization.
-			LogUtil.debug(TAG,"START CONNECTING... -BY LONG");
-			mBluetoothService.connect(mDeviceAddress);
+//			LogUtil.debug(TAG,"START CONNECTING... -BY LONG");
+//			mBluetoothService.connect(mDeviceAddress);
 		}
 
 		@Override

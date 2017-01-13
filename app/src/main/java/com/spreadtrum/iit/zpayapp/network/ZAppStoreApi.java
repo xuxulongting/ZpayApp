@@ -182,20 +182,18 @@ public class ZAppStoreApi {
     public static void getListDataFromTSM(String bleDevAddr, final ResultCallback<List<AppInformation>> callback) {
         if (callback == null)
             return;
-        //打开蓝牙
-        final BluetoothControl bluetoothControl = BluetoothControl.getInstance(MyApplication.getContextObject(),
-                bleDevAddr);
-
-        bluetoothControl.setBlePreparedCallbackListener(new BLEPreparedCallbackListener() {
-            @Override
-            public void onBLEPrepared() {
-                WebserviceHelper.getListDataFromWebService(bluetoothControl, MyApplication.seId, callback);
-            }
-
-        });
-
-//        WebserviceHelper.getListDataFromWebService(bluetoothControl, MyApplication.seId, callback);
-
+        WebserviceHelper.getListDataFromWebService(bleDevAddr, MyApplication.seId, callback);
+//        //打开蓝牙
+//        final BluetoothControl bluetoothControl = BluetoothControl.getInstance(MyApplication.getContextObject(),
+//                bleDevAddr);
+//
+//        bluetoothControl.setBlePreparedCallbackListener(new BLEPreparedCallbackListener() {
+//            @Override
+//            public void onBLEPrepared() {
+//                WebserviceHelper.getListDataFromWebService(bluetoothControl, MyApplication.seId, callback);
+//            }
+//
+//        });
     }
 
     public static void stopTransactWithTSM(String requestTag){
@@ -266,11 +264,10 @@ public class ZAppStoreApi {
     /**
      * 该函数的实现流程：与TSM和SE进行交互，交易流程：客户端向TSM发起请求（requestXml)->TSM给出响应（APDU指令集）->交给SE循环处理->SE返回最后结果->交给ResultCallback
      * 与TSM交易流程：上述返回结果->
-     * @param bluetoothControl
      * @param requestXml
      * @param callback
      */
-    public static void transactWithTSMAndSE(final BluetoothControl bluetoothControl, String requestXml,
+    public static void transactWithTSMAndSE(String requestXml,
                                             final HeartBeatResultCallback<String> callback){
         final TSMRequestData requestData = MessageBuilder.getTSMRequestDataFromXml(requestXml);
         final String sessionId = requestData.getSessionId();
@@ -313,28 +310,48 @@ public class ZAppStoreApi {
                     callback.onApduEmpty();
                     return;
                 }
-                List<APDUInfo> apduInfoList = responseData.getApduInfoList();
-                if(apduInfoList==null)
+                final List<APDUInfo> apduInfoList = responseData.getApduInfoList();
+                if(apduInfoList==null) {
+                    callback.onApduEmpty();
                     return;
-                if(bluetoothControl==null)
+                }
+//                if(bluetoothControl==null)
+//                    return;
+                MyApplication app = (MyApplication) MyApplication.getContextObject();
+                final BluetoothControl bluetoothControl = BluetoothControl.getInstance(MyApplication.getContextObject(),
+                        app.getBluetoothDevAddr());
+                if (bluetoothControl==null){
+                    callback.onApduEmpty();
                     return;
-                //交给SE处理APDU指令，返回最后一条APDU指令处理结果
-                new BussinessTransaction().handleApduList(bluetoothControl,apduInfoList,0, new TransactionCallback() {
+                }
+                bluetoothControl.setBlePreparedCallbackListener(new BLEPreparedCallbackListener() {
                     @Override
-                    public void onTransactionSuccess(APDUInfo apduInfo) {
-                        LogUtil.debug("HEARTBEAT","onTransactionSuccess");
-                        String responseXml = MessageBuilder.message_Response_handle(MyApplication.seId,"","","4",sessionId,taskId,apduInfo,"0");
-                        LogUtil.debug("HEARTBEAT",responseXml);
-                        callback.onApduExcutedSuccess(responseXml);
+                    public void onBLEPrepared() {
+                        //交给SE处理APDU指令，返回最后一条APDU指令处理结果
+                        new BussinessTransaction().handleApduList(bluetoothControl,apduInfoList,0, new TransactionCallback() {
+                            @Override
+                            public void onTransactionSuccess(APDUInfo apduInfo) {
+                                LogUtil.debug("HEARTBEAT","onTransactionSuccess");
+                                String responseXml = MessageBuilder.message_Response_handle(MyApplication.seId,"","","4",sessionId,taskId,apduInfo,"0");
+                                LogUtil.debug("HEARTBEAT",responseXml);
+                                callback.onApduExcutedSuccess(responseXml);
+
+                            }
+                            @Override
+                            public void onTransactionFailed(APDUInfo apduInfo) {
+                                LogUtil.debug("HEARTBEAT","onTransactionFailed");
+                                String responseXml = MessageBuilder.message_Response_handle(MyApplication.seId,"","","0",sessionId,taskId,apduInfo,"0");
+                                callback.onApduExcutedFailed(responseXml);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onBLEPrepareFailed() {
 
                     }
-                    @Override
-                    public void onTransactionFailed(APDUInfo apduInfo) {
-                        LogUtil.debug("HEARTBEAT","onTransactionFailed");
-                        String responseXml = MessageBuilder.message_Response_handle(MyApplication.seId,"","","0",sessionId,taskId,apduInfo,"0");
-                        callback.onApduExcutedFailed(responseXml);
-                    }
                 });
+
             }
         }, new Response.ErrorListener() {
             @Override

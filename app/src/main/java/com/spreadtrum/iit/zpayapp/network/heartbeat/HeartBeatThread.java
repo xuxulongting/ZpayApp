@@ -42,8 +42,8 @@ public class HeartBeatThread extends Thread implements Runnable {
         while (true) {
             if (MyApplication.seId.isEmpty())
                 continue;
-            MyApplication app = (MyApplication) MyApplication.getContextObject();
-            bluetoothControl = BluetoothControl.getInstance(app, app.getBluetoothDevAddr());
+//            MyApplication app = (MyApplication) MyApplication.getContextObject();
+//            bluetoothControl = BluetoothControl.getInstance(app, app.getBluetoothDevAddr());
             requestData = new TSMRequestData();
             requestData.setSeId(MyApplication.seId);
             requestData.imei="";
@@ -65,7 +65,7 @@ public class HeartBeatThread extends Thread implements Runnable {
                 }
                 bEnded = true;
                 LogUtil.debug("HEARTBEAT","HeartBeatThread,thread id is:"+currentThread().getId());
-                ZAppStoreApi.transactWithTSMAndSE(bluetoothControl, requestXml, new HeartBeatResultCallback<String>() {
+                ZAppStoreApi.transactWithTSMAndSE(requestXml, new HeartBeatResultCallback<String>() {
                     @Override
                     public void onApduExcutedSuccess(String responseXml) {
                         requestXml = responseXml;

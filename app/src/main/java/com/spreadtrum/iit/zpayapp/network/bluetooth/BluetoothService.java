@@ -104,17 +104,18 @@ public class BluetoothService extends android.app.Service{
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 intentAction = ACTION_GATT_CONNECTED;
                 connectionState = STATE_CONNECTED;
-                //broadcastUpdate(intentAction);
                 LogUtil.info(TAG, "Connected to GATT server.");
-                // Attempts to discover services after successful connection.
-                boolean bDiscoveryService = bluetoothGatt.discoverServices();
-                LogUtil.info(TAG, "Attempting to start service discovery:" + bDiscoveryService);//bluetoothGatt.discoverServices());
+                broadcastUpdate(intentAction);
+//                // Attempts to discover services after successful connection.
+//                boolean bDiscoveryService = bluetoothGatt.discoverServices();
+//                LogUtil.info(TAG, "Attempting to start service discovery:" + bDiscoveryService);//bluetoothGatt.discoverServices());
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 intentAction = ACTION_GATT_DISCONNECTED;
                 connectionState = STATE_DISCONNECTED;
                 LogUtil.info(TAG, "Disconnected from GATT server.");
                 if(callbackTSMListener!=null){
+                    LogUtil.info(TAG, "errorCallback.");
                     callbackTSMListener.errorCallback();
                 }
                 broadcastUpdate(intentAction);
@@ -411,18 +412,6 @@ public class BluetoothService extends android.app.Service{
         return true;
     }
 
-
-
-//    public void scanBLEDevice(){
-//        Intent scanDevice = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-//        startActivityForResult(scanDevice);
-//    }
-
-    public void stopBLEDevice(){
-
-    }
-
-
     /**
      * Connects to the GATT server hosted on the Bluetooth LE device.
      *
@@ -445,6 +434,11 @@ public class BluetoothService extends android.app.Service{
                 && address.equals(bluetoothDeviceAddress)
                 && bluetoothGatt != null) {
             LogUtil.debug("Trying to use an existing mBluetoothGatt for connection.");
+            if (bluetoothGatt.getDevice()==null)
+            {
+                bluetoothGatt = null;
+                return false;
+            }
             if (bluetoothGatt.connect()) {
                 connectionState = STATE_CONNECTING;
                 return true;
@@ -467,6 +461,13 @@ public class BluetoothService extends android.app.Service{
         return true;
     }
 
+    public boolean discoverServices(){
+        if (bluetoothGatt!=null){
+            return bluetoothGatt.discoverServices();
+        }
+        return false;
+    }
+
     /**
      * Disconnects an existing connection or cancel a pending connection. The
      * disconnection result is reported asynchronously through the
@@ -478,8 +479,11 @@ public class BluetoothService extends android.app.Service{
             Log.w(TAG, "BluetoothAdapter not initialized");
             return;
         }
-        connectionState = STATE_DISCONNECTING;
-        bluetoothGatt.disconnect();
+        //只有当前状态在STATE_CONNECTED or STATE_CONNECTING,才能执行disconnected，否则执行disconnect后，会一直处于STATE_DISCONNECTING状态
+        if (connectionState==STATE_CONNECTED || connectionState==STATE_CONNECTING) {
+            connectionState = STATE_DISCONNECTING;
+            bluetoothGatt.disconnect();
+        }
     }
 
     /**

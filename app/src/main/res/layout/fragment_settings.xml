@@ -67,6 +67,23 @@
             android:textSize="80px"
             android:background="#00000000" />
     </com.zhy.autolayout.AutoFrameLayout>
+    <!--<com.zhy.autolayout.AutoFrameLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content">-->
+        <!--<ImageView-->
+            <!--android:layout_width="100px"-->
+            <!--android:layout_height="180px"-->
+            <!--android:layout_gravity="right"-->
+            <!--android:src="@drawable/arrow"/>-->
+        <!--<Button-->
+            <!--android:id="@+id/id_btn_close_ble"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="180px"-->
+            <!--android:text="  关闭蓝牙"-->
+            <!--android:gravity="start|center"-->
+            <!--android:textSize="80px"-->
+            <!--android:background="#00000000" />-->
+    <!--</com.zhy.autolayout.AutoFrameLayout>-->
     <Button
         android:id="@+id/id_btn_quit"
         android:layout_width="match_parent"

@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -68,6 +69,7 @@ public class BussinessTransaction{
         if (MyApplication.isOperated == false)
             MyApplication.isOperated = true;
         else {
+            Toast.makeText(MyApplication.getContextObject(),"已有任务",Toast.LENGTH_LONG).show();
             completeCallback.onTaskNotExecuted();
             return;
         }
@@ -89,6 +91,7 @@ public class BussinessTransaction{
         if (MyApplication.isOperated == false)
             MyApplication.isOperated = true;
         else {
+            Toast.makeText(MyApplication.getContextObject(),"已有任务",Toast.LENGTH_LONG).show();
             completeCallback.onTaskNotExecuted();
             return;
         }

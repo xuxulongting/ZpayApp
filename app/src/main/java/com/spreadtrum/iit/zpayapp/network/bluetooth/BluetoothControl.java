@@ -12,9 +12,11 @@ import android.os.IBinder;
 import android.widget.Toast;
 
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
+import com.spreadtrum.iit.zpayapp.bussiness.BussinessTransaction;
 import com.spreadtrum.iit.zpayapp.common.AppConfig;
 import com.spreadtrum.iit.zpayapp.common.ByteUtil;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
+import com.spreadtrum.iit.zpayapp.message.AppInformation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -125,7 +127,6 @@ public class BluetoothControl {
         //disconnect from gattserver,release ble resources
         if (bluetoothService!=null){
             bluetoothService.disconnect();
-//            bluetoothService.closeBluetoothGatt();
         }
     }
 
@@ -152,10 +153,13 @@ public class BluetoothControl {
             final String action = intent.getAction();
             switch (action){
                 case BluetoothService.ACTION_GATT_CONNECTED:
+                    // Attempts to discover services after successful connection.
+                    boolean bDiscoveryService = bluetoothService.discoverServices();
+                    LogUtil.info(TAG, "Attempting to start service discovery:" + bDiscoveryService);//bluetoothGatt.discoverServices());
                     break;
                 case BluetoothService.ACTION_GATT_DISCONNECTED:
                     //Gatt Server连接失败，释放BluetoothControl（单例模式）对象，并unbindService，当重新发起数据请求时，重新创建BluetoothControl实例
-                    bluetoothUnbindService();
+//                    bluetoothUnbindService();
                     //重新连接Gatt Server
 //                    bluetoothService.connect(selBluetoothDevAddr);
                     break;
@@ -163,7 +167,7 @@ public class BluetoothControl {
                     //运行在主线程中
                     LogUtil.debug(TAG,"services discovered，thread is:"+currentThread().getId());
                     gattServiceList = bluetoothService.getSupportedGattServices();
-                    if(AppConfig.JDBLE){
+                    if(true){//AppConfig.JDBLE){
                         seCommService = getSpecialGattService(gattServiceList,JD_SERVICE);
                         notifyCharacteristic = getSpecialCharacteristic(seCommService,JD_NOTIFY_CHARACTERISTIC);
                         writeCharacteristic = getSpecialCharacteristic(seCommService,JD_WRITE_CHARACTERISTIC);
@@ -237,11 +241,31 @@ public class BluetoothControl {
         if(bluetoothControl==null){
             bluetoothControl = new BluetoothControl(context,selBleDevAddr);
         }else{
-            if (bluetoothControl.bluetoothService.getBluetoothGattConnectionState()==
-                    bluetoothControl.bluetoothService.STATE_DISCONNECTING)
-                return null;
-            //如果BluetoothControl实例已经创建，则延时，先返回bluetoothControl对象，再回调onBLEPrepared()
-            createNewThread();
+//            if (bluetoothControl.bluetoothService.getBluetoothGattConnectionState()==
+//                    bluetoothControl.bluetoothService.STATE_DISCONNECTING)
+//                return null;
+//            //如果BluetoothControl实例已经创建，则延时，先返回bluetoothControl对象，再回调onBLEPrepared()
+//            createNewThread();
+            if (bluetoothControl!=null && bluetoothControl.bluetoothService!=null) {
+                if (bluetoothControl.bluetoothService.getBluetoothGattConnectionState()
+                        == bluetoothControl.bluetoothService.STATE_DISCONNECTED) {
+                    MyApplication app = (MyApplication) MyApplication.getContextObject();
+                    bluetoothControl.bluetoothService.connect(app.getBluetoothDevAddr());
+                    LogUtil.debug("getBluetoothGattConnectionState:STATE_DISCONNECTED");
+                } else if (bluetoothControl.bluetoothService.getBluetoothGattConnectionState()
+                        == bluetoothControl.bluetoothService.STATE_CONNECTING ||
+                        bluetoothControl.bluetoothService.getBluetoothGattConnectionState() ==
+                                bluetoothControl.bluetoothService.STATE_DISCONNECTING) {
+                    LogUtil.debug("getBluetoothGattConnectionState:STATE_CONNECTING OR STATE_DISCONNECTING");
+                    return null;
+                }
+                else {
+                    LogUtil.debug("getBluetoothGattConnectionState:STATE_CONNECTED");
+//                    new BussinessTransaction().broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_NOT_EXECUTED,new AppInformation(),"notexecuted");
+                    return null;
+                }
+            }
+
         }
         return bluetoothControl;
     }
@@ -287,7 +311,8 @@ public class BluetoothControl {
     public void bluetoothUnbindService()
     {
         LogUtil.debug("ubindService");
-//        bluetoothService.closeBluetoothGatt();
+        if (bluetoothService!=null)
+            bluetoothService.closeBluetoothGatt();
         mContext.unbindService(serviceConnection);
 //        bluetoothService = null;
         //当再次获取BluetoothControl实例时，重新bindService()
