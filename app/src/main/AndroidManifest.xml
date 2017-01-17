@@ -59,7 +59,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".network.bluetooth.BluetoothSettingsActivity"></activity>
-        <activity android:name=".network.webservice.WebserviceActivity">
+        <activity android:name=".network.WebserviceActivity">
 
         </activity>
         <activity android:name=".network.volley_okhttp.VolleyTestDemo">
@@ -73,10 +73,10 @@
 
         </activity>
 
-        <activity android:name=".network.bluetooth.BluetoothTestActivity">
+        <activity android:name=".network.bluetooth_test.BluetoothTestActivity">
 
         </activity>
-        <activity android:name=".network.bluetooth.DeviceControlActivity"></activity>
+        <activity android:name=".network.bluetooth_test.DeviceControlActivity"></activity>
         <activity android:name=".network.TestNetworkActivity">
 
         </activity>

@@ -1,26 +1,16 @@
 package com.spreadtrum.iit.zpayapp.network.webservice;
 
 import android.util.Base64;
-import android.util.Xml;
 
+import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
-import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.message.MessageBuilder;
-import com.spreadtrum.iit.zpayapp.message.RequestTaskidEntity;
-import com.spreadtrum.iit.zpayapp.network.http.HttpCallbackListener;
 import com.spreadtrum.iit.zpayapp.network.http.HttpUtils;
-import com.spreadtrum.iit.zpayapp.network.NetParameter;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.net.HttpURLConnection;
+import com.spreadtrum.iit.zpayapp.network.volley_okhttp.CustomStringRequest;
+import com.spreadtrum.iit.zpayapp.network.volley_okhttp.NetParameter;
+import com.spreadtrum.iit.zpayapp.network.volley_okhttp.RequestQueueUtils;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-9-7.
@@ -28,9 +18,6 @@ import java.net.HttpURLConnection;
 
 
 public class TSMPersonalizationWebservice {
-//    public static final String WEBSERVICE_PATH = "http://10.0.64.120:6893/SPRDTSMDbService.asmx";
-
-//    public static final String WEBSERVICE_PATH = "http://192.168.1.150:6893/SPRDTSMDbService.asmx";
     /**
      * 获取展示的应用信息
      * @param seId  SE的索引信息
@@ -49,22 +36,7 @@ public class TSMPersonalizationWebservice {
         getTSMAppInformation(requestXmlBase64,callback);
     }
 
-    /**
-     * 获取业务（下载，删除，同步）的任务id
-     * @param seId  SE的索引信息
-     * @param requestType   请求的类型（数据查询/数据写入）
-     * @param entity    请求的数据内容
-     * @param callback  网络请求结果回调
-     */
-    public static void getTSMTaskid(String seId, String requestType, RequestTaskidEntity entity,
-                                    TSMAppInformationCallback callback){
-        //创建请求xml
-        String requestXml = MessageBuilder.doBussinessRequest(seId,requestType,entity);
-        //base64加密
-        String requestXmlBase64 = Base64.encodeToString(requestXml.getBytes(),Base64.DEFAULT);
-        //发送soap请求，并获取xml结果
-        getTSMAppInformation(requestXmlBase64,callback);
-    }
+
 
     /**
      * 通过webservice获取远程管理信息
@@ -115,12 +87,13 @@ public class TSMPersonalizationWebservice {
      * @param xml 请求xml
      * @return
      */
-    private static void getTSMAppInformation(String xml, final TSMAppInformationCallback callback){
+    public static void getTSMAppInformation(String xml, final TSMAppInformationCallback callback){
         String soap = SoapXmlBuilder.readSoap("soap11.xml");
         soap = soap.replace("123",xml);
         byte[] entity = soap.getBytes();
         final String[] tsmXmlArrays = new String[1];
-        HttpUtils.sendHttpRequestforWebservice(NetParameter.WEBSERVICE_APPLIST_PATH, entity, new Response.Listener<String>() {
+        //使用volley+okhttp发起网络请求，请求webservice服务
+        CustomStringRequest request = new CustomStringRequest(Request.Method.POST, NetParameter.WEBSERVICE_APPLIST_PATH, entity, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 LogUtil.debug(response);
@@ -145,6 +118,33 @@ public class TSMPersonalizationWebservice {
                 }
             }
         });
+        RequestQueueUtils.getInstance().addToRequestQueue(request);
+
+//        HttpUtils.sendHttpRequestforWebservice(NetParameter.WEBSERVICE_APPLIST_PATH, entity, new Response.Listener<String>() {
+//            @Override
+//            public void onResponse(String response) {
+//                LogUtil.debug(response);
+//                String xmlResultEncode = SoapXmlBuilder.parseSOAP(response,"TSMBDServiceResult");//"XMLReturnResult");//"TSMBDServiceResponse"
+//                if(callback!=null){
+//                    String xmlResult = new String(Base64.decode(xmlResultEncode.getBytes(),Base64.DEFAULT));
+//                    callback.getAppInfo(xmlResult);
+//                }
+//            }
+//        }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                if(error.networkResponse==null){
+//                    callback.getAppInfo("");
+//                }
+//                else {
+//                    int errCode = error.networkResponse.statusCode;
+//                    LogUtil.debug("webservice error:" + String.valueOf(errCode));
+//                    if (errCode == 808) {
+//                        callback.getAppInfo(String.valueOf(808));
+//                    }
+//                }
+//            }
+//        });
     }
 
 

@@ -2,21 +2,13 @@ package com.spreadtrum.iit.zpayapp.network.volley_okhttp;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.util.LruCache;
 
 import com.android.volley.toolbox.ImageLoader;
-import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.libcore.io.DiskLruCache;
 
 import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -41,74 +33,19 @@ public class BitmapCache implements ImageLoader.ImageCache {
                 return bitmap.getByteCount()/1024;
             }
         };
-
-
-//        File cacheDir = getFileCache(MyApplication.getContextObject(), "image");
-//        if (!cacheDir.exists()) {
-//            cacheDir.mkdirs();
-//        }
-//        try {
-//            mDiskCaches = DiskLruCache.open(cacheDir, 1, 1, maxSize);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
     }
     @Override
     public Bitmap getBitmap(String url) {
         Bitmap bitmap = null;
         //从内存缓存获取图片
         bitmap = cache.get(url);
-//        if(bitmap!=null){
         return bitmap;
-//        }
-//        else{
-//            //从硬盘获取图片
-//            String key = toMD5String(url);
-//            try {
-//                DiskLruCache.Snapshot snapshot = mDiskCaches.get(key);
-//                if(snapshot==null)
-//                    bitmap=null;
-//                else
-//                {
-//                    FileInputStream fileInputStream = (FileInputStream) snapshot.getInputStream(0);
-//                    FileDescriptor fileDescriptor = fileInputStream.getFD();
-//                    if(fileDescriptor!=null){
-//                        bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor);
-//                    }
-//                }
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//
-//            return bitmap;
-//        }
-
     }
 
     @Override
     public void putBitmap(String url, Bitmap bitmap) {
         //通过LruCache存入内存缓存
         cache.put(url,bitmap);
-//        //通过DiskLruCache存入SD卡中
-//        String key = toMD5String(url);
-//        try {
-//            DiskLruCache.Editor editor = mDiskCaches.edit(key);
-//            if(editor!=null){
-//                OutputStream outputStream = editor.newOutputStream(0);
-//                String picType = url.substring(url.lastIndexOf(".") + 1);
-//                Bitmap.CompressFormat format;
-//                if (picType.equals("png")) {
-//                    format = Bitmap.CompressFormat.PNG;
-//                } else {
-//                    format = Bitmap.CompressFormat.JPEG;
-//                }
-//                bitmap.compress(format, 100, outputStream);
-//                editor.commit();
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
     }
 
     private File getFileCache(Context context, String cacheFileName) {

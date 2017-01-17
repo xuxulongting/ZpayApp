@@ -20,11 +20,12 @@ import android.widget.Toast;
 
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.common.AppConfig;
+import com.spreadtrum.iit.zpayapp.common.MyApplication;
 
 import java.util.List;
 import java.util.UUID;
 
-import static com.spreadtrum.iit.zpayapp.network.bluetooth.SampleGattAttributes.*;
+import static com.spreadtrum.iit.zpayapp.network.bluetooth_test.SampleGattAttributes.*;
 import static java.lang.Thread.currentThread;
 
 /**
@@ -228,7 +229,7 @@ public class BluetoothService extends android.app.Service{
 
 
     public class LocalBinder extends Binder {
-        BluetoothService getService(){
+        public BluetoothService getService(){
             return BluetoothService.this;
         }
     }
@@ -424,15 +425,20 @@ public class BluetoothService extends android.app.Service{
      *         callback.
      */
     public boolean connect(final String address) {
-//        if (bluetoothAdapter == null || address == null) {
-//            Log.w(TAG, "BluetoothAdapter not initialized or unspecified address.");
-//            return false;
-//        }
         LogUtil.debug("CONNECTING... BY LONG 2016-8-5");
-        // Previously connected device. Try to reconnect. (\CF\C8ǰ\C1\AC\BDӵ\C4\C9豸\A1\A3 \B3\A2\CA\D4\D6\D8\D0\C2\C1\AC\BD\D3)
+        if(!bluetoothAdapter.isEnabled()){
+//            Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+//            startActivityForResult(turnOn, 0);
+            Toast.makeText(MyApplication.getContextObject(),"请重新选择蓝牙设备",Toast.LENGTH_LONG).show();
+            bluetoothGatt = null;
+            connectionState = STATE_DISCONNECTED;
+            return false;
+        }
+        // Previously connected device. Try to reconnect.
         if (bluetoothDeviceAddress != null
                 && address.equals(bluetoothDeviceAddress)
                 && bluetoothGatt != null) {
+
             LogUtil.debug("Trying to use an existing mBluetoothGatt for connection.");
             if (bluetoothGatt.getDevice()==null)
             {
@@ -466,6 +472,13 @@ public class BluetoothService extends android.app.Service{
             return bluetoothGatt.discoverServices();
         }
         return false;
+    }
+
+    public boolean isBlluetoothEnabled(){
+        if (bluetoothAdapter!=null && bluetoothAdapter.isEnabled())
+            return true;
+        else
+            return false;
     }
 
     /**
@@ -504,6 +517,10 @@ public class BluetoothService extends android.app.Service{
      */
     public int getBluetoothGattConnectionState(){
         return connectionState;
+    }
+
+    public void setBluetoothGattConnectionState(int state){
+        this.connectionState = state;
     }
 
     /**
@@ -561,10 +578,9 @@ public class BluetoothService extends android.app.Service{
         }
         bluetoothGatt.setCharacteristicNotification(characteristic, enabled);
         BluetoothGattDescriptor descriptor = characteristic.getDescriptor(UUID
-                .fromString(SampleGattAttributes.CLIENT_CHARACTERISTIC_CONFIG));
+                .fromString(BluetoothControl.CLIENT_CHARACTERISTIC_CONFIG));
         if (descriptor != null) {
-            System.out.println("write descriptor");
-
+            LogUtil.debug("write descriptor");
             descriptor
                     .setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
             bluetoothGatt.writeDescriptor(descriptor);

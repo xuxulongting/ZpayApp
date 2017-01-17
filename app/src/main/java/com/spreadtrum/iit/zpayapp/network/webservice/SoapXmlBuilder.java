@@ -17,22 +17,6 @@ import java.io.StringReader;
  * Created by SPREADTRUM\ting.long on 16-9-7.
  */
 public class SoapXmlBuilder {
-//    public static byte[] read(InputStream inStream){
-//        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-//        byte[] buf = new byte[1024];
-//        int len = 0;
-//        try {
-//            while ((len=inStream.read(buf))!=-1){
-////                LogUtil.debug("InputStream read len is:"+len);
-//                outStream.write(buf,0,len);
-//            }
-//            inStream.close();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return outStream.toByteArray();
-//    }
-
     /**
      * 从webservice响应中提取TSM返回结果（xml格式）
      * @param soapXml   soap xml

@@ -2,7 +2,6 @@ package com.spreadtrum.iit.zpayapp.register_login;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -17,19 +16,13 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.R;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.common.MySharedPreference;
 import com.spreadtrum.iit.zpayapp.displaydemo.MainDisplayActivity;
-import com.spreadtrum.iit.zpayapp.network.ResultCallback;
-import com.spreadtrum.iit.zpayapp.network.ZAppStoreApi;
-import com.spreadtrum.iit.zpayapp.network.volley_okhttp.RequestQueueUtils;
+import com.spreadtrum.iit.zpayapp.bussiness.ResultCallback;
+import com.spreadtrum.iit.zpayapp.bussiness.ZAppStoreApi;
 
 import org.json.JSONException;
 import org.json.JSONObject;

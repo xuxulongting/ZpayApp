@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
@@ -18,21 +17,24 @@ import com.spreadtrum.iit.zpayapp.database.AppDisplayDatabaseHelper;
 import com.spreadtrum.iit.zpayapp.message.APDUInfo;
 import com.spreadtrum.iit.zpayapp.message.AppInformation;
 import com.spreadtrum.iit.zpayapp.message.MessageBuilder;
+import com.spreadtrum.iit.zpayapp.message.RequestTaskidEntity;
 import com.spreadtrum.iit.zpayapp.message.TSMResponseData;
+import com.spreadtrum.iit.zpayapp.message.TSMResponseEntity;
+import com.spreadtrum.iit.zpayapp.network.volley_okhttp.NetParameter;
+import com.spreadtrum.iit.zpayapp.network.bluetooth.BLEPreparedCallbackListener;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.SECallbackTSMListener;
+import com.spreadtrum.iit.zpayapp.network.heartbeat.TransactionCallback;
 import com.spreadtrum.iit.zpayapp.network.http.HttpResponseCallback;
 import com.spreadtrum.iit.zpayapp.network.http.HttpUtils;
-import com.spreadtrum.iit.zpayapp.network.NetParameter;
 import com.spreadtrum.iit.zpayapp.network.tcp.TCPTransferData;
-import com.spreadtrum.iit.zpayapp.network.tcp.TsmTaskCompleteCallback;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.CustomStringRequest;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.RequestQueueUtils;
+import com.spreadtrum.iit.zpayapp.network.webservice.TSMAppInformationCallback;
+import com.spreadtrum.iit.zpayapp.network.webservice.TSMPersonalizationWebservice;
+import com.spreadtrum.iit.zpayapp.network.webservice.WebserviceHelper;
 
 import java.util.List;
-import java.util.Random;
-
-import static java.lang.Integer.parseInt;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-9-19.
@@ -42,6 +44,60 @@ public class BussinessTransaction{
     public static final String ACTION_BUSSINESS_EXECUTED_FAILED="com.spreadtrum.iit.zpayapp.bussiness.BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED";
     public static final String ACTION_BUSSINESS_NOT_EXECUTED="com.spreadtrum.iit.zpayapp.bussiness.BussinessTransaction.ACTION_BUSSINESS_NOT_EXECUTED";
     private AppDisplayDatabaseHelper dbHelper=null;
+
+    /**
+     *执行下载/删除/同步/个人化等与applet相关的任务
+     * @param item  applet信息
+     * @param taskType  任务类型
+     * @param completeCallback 执行结果回调
+     */
+    public void transactBussiness(final AppInformation item, String taskType,
+                                  final TsmTaskCompleteCallback completeCallback){
+        //判断当前是否有任务
+        if (MyApplication.isOperated == false)
+            MyApplication.isOperated = true;
+        else {
+            Toast.makeText(MyApplication.getContextObject(),"已有任务",Toast.LENGTH_LONG).show();
+            completeCallback.onTaskNotExecuted();
+            return;
+        }
+        //获取task id
+        RequestTaskidEntity entity=MessageBuilder.getRequestTaskidEntity(item, taskType);
+        WebserviceHelper.getTSMTaskid(MyApplication.seId, "dbinsert", entity, new TSMAppInformationCallback() {
+            @Override
+            public void getAppInfo(String xml) {
+                //解析xml
+                TSMResponseEntity entity = MessageBuilder.parseDownLoadXml(xml);
+                String taskId = entity.getTaskId();
+                int dectask = ByteUtil.parseInt(taskId,10,0);
+                byte[] data = ByteUtil.int2Bytes(dectask);
+                final byte[] bTaskId = new byte[20];
+                System.arraycopy(data,0,bTaskId,20-data.length,data.length);
+//                item.setIndexForlistview(position);//标识在listview中的位置
+                //开始任务
+                MyApplication app = (MyApplication) MyApplication.getContextObject();
+                final BluetoothControl bluetoothControl = BluetoothControl.getInstance(MyApplication.getContextObject(),
+                        app.getBluetoothDevAddr());
+                if (bluetoothControl==null){
+                    completeCallback.onTaskNotExecuted();
+                    return;
+                }
+                bluetoothControl.setBlePreparedCallbackListener(new BLEPreparedCallbackListener() {
+                    @Override
+                    public void onBLEPrepared() {
+                        TCPTransferData tcpTransferData = new TCPTransferData();
+                        tcpTransferData.handleTaskOfApplet(bluetoothControl, bTaskId, completeCallback);
+                    }
+
+                    @Override
+                    public void onBLEPrepareFailed() {
+
+                    }
+                });
+
+            }
+        });
+    }
 
     /**
      *
@@ -181,19 +237,12 @@ public class BussinessTransaction{
      * @param callback
      */
     public void handleApduList(final BluetoothControl bluetoothControl, final List<APDUInfo> apduInfoList,
-                                       final int i, final TransactionCallback callback){
+                               final int i, final TransactionCallback callback){
+        LogUtil.debug("handleApduList");
         final APDUInfo apduInfo = apduInfoList.get(i);
-//        final byte []sw = apduInfo.getSW().getBytes();
         final int index = ByteUtil.parseInt(apduInfo.getIndex(),10,0);
-//        LogUtil.debug("handleApduList",apduInfo.getAPDU());
         String apduStr = apduInfo.getAPDU();
         byte []apdu = ByteUtil.StringToByteArray(apduStr);
-//        byte []apdu = apduInfo.getAPDU().getBytes();
-        //停止传输APDU
-        if (bluetoothControl.isbStopTransferApdu()) {
-            callback.onTransactionFailed(apduInfo);
-            return;
-        }
         bluetoothControl.communicateWithJDSe(apdu,apdu.length);
         bluetoothControl.setSeCallbackTSMListener(new SECallbackTSMListener() {
             @Override
@@ -226,8 +275,6 @@ public class BussinessTransaction{
         });
     }
 
-
-
     /**
      * 应用下载/删除完成后，发送广播
      * @param action
@@ -256,15 +303,11 @@ public class BussinessTransaction{
             SQLiteDatabase dbWrite = dbHelper.getWritableDatabase();
             dbWrite.update(AppDisplayDatabaseHelper.TABLE_APPINFO,contentValues,"appname=?",new String[]{appInformation.getAppname()});
         }
-//        dbHelper.getWritableDatabase();
-//                SQLiteDatabase dbWrite = dbHelper.getWritableDatabase();
-//                ContentValues contentValues = new ContentValues();
-//                contentValues.put("appinstalled", "yes");
-//                dbWrite.update(AppDisplayDatabaseHelper.TABLE_APPINFO, contentValues, "appname=?", new String[]{appInformation.getAppname()});
     }
 
     public static final String TASK_TYPE_DOWNLOAD="D1";
     public static final String TASK_TYPE_DELETE="D2";
+    public static final String TASK_TYPE_PERSONALIZE="D4";
     public static final String TASK_TYPE_SYNC="DA";
 
 

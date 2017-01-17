@@ -1,6 +1,5 @@
-package com.spreadtrum.iit.zpayapp.network;
+package com.spreadtrum.iit.zpayapp.bussiness;
 
-import android.content.Intent;
 import android.util.Base64;
 import android.widget.Toast;
 
@@ -9,8 +8,12 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
-import com.spreadtrum.iit.zpayapp.bussiness.BussinessTransaction;
-import com.spreadtrum.iit.zpayapp.bussiness.TransactionCallback;
+import com.spreadtrum.iit.zpayapp.common.ByteUtil;
+import com.spreadtrum.iit.zpayapp.message.RequestTaskidEntity;
+import com.spreadtrum.iit.zpayapp.message.TSMResponseEntity;
+import com.spreadtrum.iit.zpayapp.network.tcp.TCPTransferData;
+import com.spreadtrum.iit.zpayapp.network.volley_okhttp.NetParameter;
+import com.spreadtrum.iit.zpayapp.network.heartbeat.TransactionCallback;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.message.APDUInfo;
 import com.spreadtrum.iit.zpayapp.message.AppInformation;
@@ -24,6 +27,7 @@ import com.spreadtrum.iit.zpayapp.network.heartbeat.HeartBeatThread;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.CustomStringRequest;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.RequestQueueUtils;
 import com.spreadtrum.iit.zpayapp.network.webservice.SoapXmlBuilder;
+import com.spreadtrum.iit.zpayapp.network.webservice.TSMAppInformationCallback;
 import com.spreadtrum.iit.zpayapp.network.webservice.WebserviceHelper;
 
 import org.json.JSONException;
@@ -182,18 +186,13 @@ public class ZAppStoreApi {
     public static void getListDataFromTSM(String bleDevAddr, final ResultCallback<List<AppInformation>> callback) {
         if (callback == null)
             return;
-        WebserviceHelper.getListDataFromWebService(bleDevAddr, MyApplication.seId, callback);
-//        //打开蓝牙
-//        final BluetoothControl bluetoothControl = BluetoothControl.getInstance(MyApplication.getContextObject(),
-//                bleDevAddr);
-//
-//        bluetoothControl.setBlePreparedCallbackListener(new BLEPreparedCallbackListener() {
-//            @Override
-//            public void onBLEPrepared() {
-//                WebserviceHelper.getListDataFromWebService(bluetoothControl, MyApplication.seId, callback);
-//            }
-//
-//        });
+        if(MyApplication.seId.isEmpty()) {
+            LogUtil.debug("seid is empty.");
+            WebserviceHelper.getListDataWithoutSeid(bleDevAddr, callback);
+        }
+        else
+            WebserviceHelper.getListDataWithSeid(MyApplication.seId,callback);
+//        WebserviceHelper.getListDataFromWebService(bleDevAddr, MyApplication.seId, callback);
     }
 
     public static void stopTransactWithTSM(String requestTag){
@@ -262,6 +261,8 @@ public class ZAppStoreApi {
 //    }
 
     /**
+     * 执行心跳线程的任务，锁定/解锁
+     * TSM和SE交互，执行applet相关任务
      * 该函数的实现流程：与TSM和SE进行交互，交易流程：客户端向TSM发起请求（requestXml)->TSM给出响应（APDU指令集）->交给SE循环处理->SE返回最后结果->交给ResultCallback
      * 与TSM交易流程：上述返回结果->
      * @param requestXml
@@ -298,8 +299,6 @@ public class ZAppStoreApi {
                 //Base64解码
                 byte[] decodeResponseXml = Base64.decode(responseXml.getBytes(),Base64.DEFAULT);
                 String xmlResponse = new String(decodeResponseXml);
-//                String xmlResponse = SoapXmlBuilder.parseSOAP(response,"TSM_RMWS_InterfaceResult");
-
                 //解析xml，该xml中包含多条APDU指令
                 final TSMResponseData responseData = MessageBuilder.parseBussinessResponseXml(xmlResponse,sessionId,taskId);
                 String finishFlag = responseData.getFinishFlag();
@@ -315,8 +314,6 @@ public class ZAppStoreApi {
                     callback.onApduEmpty();
                     return;
                 }
-//                if(bluetoothControl==null)
-//                    return;
                 MyApplication app = (MyApplication) MyApplication.getContextObject();
                 final BluetoothControl bluetoothControl = BluetoothControl.getInstance(MyApplication.getContextObject(),
                         app.getBluetoothDevAddr());
@@ -335,6 +332,8 @@ public class ZAppStoreApi {
                                 String responseXml = MessageBuilder.message_Response_handle(MyApplication.seId,"","","4",sessionId,taskId,apduInfo,"0");
                                 LogUtil.debug("HEARTBEAT",responseXml);
                                 callback.onApduExcutedSuccess(responseXml);
+                                //关闭蓝牙
+                                bluetoothControl.disconnectBluetooth();
 
                             }
                             @Override
@@ -342,6 +341,9 @@ public class ZAppStoreApi {
                                 LogUtil.debug("HEARTBEAT","onTransactionFailed");
                                 String responseXml = MessageBuilder.message_Response_handle(MyApplication.seId,"","","0",sessionId,taskId,apduInfo,"0");
                                 callback.onApduExcutedFailed(responseXml);
+                                //关闭蓝牙
+                                if (bluetoothControl!=null)
+                                    bluetoothControl.disconnectBluetooth();
                             }
                         });
                     }
@@ -360,8 +362,66 @@ public class ZAppStoreApi {
                 callback.onNetworkError(error.getMessage());
             }
         });
-//        requestQueue.add(stringRequest);
         RequestQueueUtils.getInstance().addToRequestQueue(stringRequest);
     }
+
+    /**
+     *执行下载/删除/同步/个人化等与applet相关的任务
+     * @param item  applet信息
+     * @param taskType  任务类型
+     * @param completeCallback 执行结果回调
+     */
+    public static void transactBussiness(final AppInformation item, String taskType,
+                                  final TsmTaskCompleteCallback completeCallback){
+        //判断当前是否有任务
+        if (MyApplication.isOperated == false)
+            MyApplication.isOperated = true;
+        else {
+            Toast.makeText(MyApplication.getContextObject(),"已有任务",Toast.LENGTH_LONG).show();
+            completeCallback.onTaskNotExecuted();
+            return;
+        }
+        //获取task id
+        RequestTaskidEntity entity=MessageBuilder.getRequestTaskidEntity(item, taskType);
+        WebserviceHelper.getTSMTaskid(MyApplication.seId, "dbinsert", entity, new TSMAppInformationCallback() {
+            @Override
+            public void getAppInfo(String xml) {
+                //解析xml
+                TSMResponseEntity entity = MessageBuilder.parseDownLoadXml(xml);
+                String taskId = entity.getTaskId();
+                int dectask = ByteUtil.parseInt(taskId,10,0);
+                byte[] data = ByteUtil.int2Bytes(dectask);
+                final byte[] bTaskId = new byte[20];
+                System.arraycopy(data,0,bTaskId,20-data.length,data.length);
+//                item.setIndexForlistview(position);//标识在listview中的位置
+                //开始任务
+                MyApplication app = (MyApplication) MyApplication.getContextObject();
+                final BluetoothControl bluetoothControl = BluetoothControl.getInstance(MyApplication.getContextObject(),
+                        app.getBluetoothDevAddr());
+                if (bluetoothControl==null){
+                    completeCallback.onTaskNotExecuted();
+                    return;
+                }
+                bluetoothControl.setBlePreparedCallbackListener(new BLEPreparedCallbackListener() {
+                    @Override
+                    public void onBLEPrepared() {
+                        TCPTransferData tcpTransferData = new TCPTransferData();
+                        tcpTransferData.handleTaskOfApplet(bluetoothControl, bTaskId, completeCallback);
+                    }
+
+                    @Override
+                    public void onBLEPrepareFailed() {
+
+                    }
+                });
+
+            }
+        });
+    }
+
+    public static final String TASK_TYPE_DOWNLOAD="D1";
+    public static final String TASK_TYPE_DELETE="D2";
+    public static final String TASK_TYPE_PERSONALIZE="D4";
+    public static final String TASK_TYPE_SYNC="DA";
 
 }

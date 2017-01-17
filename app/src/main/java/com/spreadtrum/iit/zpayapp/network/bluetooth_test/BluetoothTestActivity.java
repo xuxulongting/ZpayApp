@@ -1,4 +1,4 @@
-package com.spreadtrum.iit.zpayapp.network.bluetooth;
+package com.spreadtrum.iit.zpayapp.network.bluetooth_test;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;

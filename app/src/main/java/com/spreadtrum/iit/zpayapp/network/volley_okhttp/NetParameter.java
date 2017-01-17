@@ -1,4 +1,4 @@
-package com.spreadtrum.iit.zpayapp.network;
+package com.spreadtrum.iit.zpayapp.network.volley_okhttp;
 
 import retrofit2.http.PUT;
 
@@ -18,5 +18,4 @@ public class NetParameter {
     public static final String WEBSERVICE_APPLIST_PATH = "http://192.168.1.150:6893/SPRDTSMDbService.asmx";
 
     public static final String WEBSERVICE_RM_PATH = "http://192.168.1.150:6894/SPRD_TSM_RMService.asmx";
-
 }

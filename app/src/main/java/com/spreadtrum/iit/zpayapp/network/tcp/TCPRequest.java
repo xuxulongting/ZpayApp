@@ -25,7 +25,7 @@ public class TCPRequest {
             public void run() {
 //                TCPSocket tcpSocket = null;
                 try {
-//                    tcpSocket = TCPSocket.getInstance(NetParameter.IPAddress,NetParameter.Port);
+//                    tcpSocket = TCPSocket.getInstance(TCPNetParameter.IPAddress,TCPNetParameter.Port);
                     if(tcpSocket.tcpSocketWrite(bRequest)){
                         byte []readBuf = new byte[300];
                         int readCount = tcpSocket.tcpSocketReadByte(readBuf);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.spreadtrum.iit.zpayapp.network.bluetooth;
+package com.spreadtrum.iit.zpayapp.network.bluetooth_test;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -39,6 +39,7 @@ import android.widget.Toast;
 
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.R;
+import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothService;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -5,6 +5,7 @@ import java.util.List;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-9-6.
+ * 获取应用列表和task id的返回结果参数
  */
 public class TSMResponseEntity {
     public String getVersion() {

@@ -2,6 +2,7 @@ package com.spreadtrum.iit.zpayapp.message;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-10-12.
+ * TSM返回的APDU指令，用于以xml格式返回的APDU指令
  */
 
 public class APDUInfo {

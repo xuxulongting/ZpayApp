@@ -1,4 +1,4 @@
-package com.spreadtrum.iit.zpayapp.network.bluetooth;
+package com.spreadtrum.iit.zpayapp.network;
 
 import android.app.AlertDialog;
 import android.app.Dialog;

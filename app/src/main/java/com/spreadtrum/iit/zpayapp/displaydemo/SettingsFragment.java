@@ -1,12 +1,10 @@
 package com.spreadtrum.iit.zpayapp.displaydemo;
 
-import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,23 +12,14 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.google.gson.JsonObject;
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.R;
 import com.spreadtrum.iit.zpayapp.common.ActivityManager;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.common.MySharedPreference;
-import com.spreadtrum.iit.zpayapp.network.NetParameter;
-import com.spreadtrum.iit.zpayapp.network.ResultCallback;
-import com.spreadtrum.iit.zpayapp.network.ZAppStoreApi;
-import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
+import com.spreadtrum.iit.zpayapp.bussiness.ResultCallback;
+import com.spreadtrum.iit.zpayapp.bussiness.ZAppStoreApi;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothSettingsActivity;
-import com.spreadtrum.iit.zpayapp.network.volley_okhttp.RequestQueueUtils;
 import com.spreadtrum.iit.zpayapp.register_login.DigtalpwdLoginActivity;
 import com.spreadtrum.iit.zpayapp.register_login.UserInfo;
 
@@ -92,8 +81,8 @@ public class SettingsFragment extends Fragment {
                 startActivity(intent);
             }
         });
-        //关闭蓝牙
-        btnCloseBLE = (Button) view.findViewById(R.id.id_btn_close_ble);
+//        //关闭蓝牙
+//        btnCloseBLE = (Button) view.findViewById(R.id.id_btn_close_ble);
 //        btnCloseBLE.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View v) {
@@ -102,7 +91,7 @@ public class SettingsFragment extends Fragment {
 //                        app.getBluetoothDevAddr());
 //                if (bluetoothControl!=null)
 //                    bluetoothControl.disconnectBluetooth();
-////                    bluetoothControl.bluetoothUnbindService();
+//                    bluetoothControl.bluetoothUnbindService();
 //            }
 //        });
         //退出登录

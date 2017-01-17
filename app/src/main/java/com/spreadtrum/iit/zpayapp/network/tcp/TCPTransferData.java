@@ -1,12 +1,13 @@
 package com.spreadtrum.iit.zpayapp.network.tcp;
 
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
+import com.spreadtrum.iit.zpayapp.bussiness.TsmTaskCompleteCallback;
 import com.spreadtrum.iit.zpayapp.common.ByteUtil;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.SECallbackTSMListener;
 
-import java.io.IOException;
+import java.util.Random;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-9-5.
@@ -14,11 +15,46 @@ import java.io.IOException;
 public class TCPTransferData {
     private BluetoothControl bluetoothControl = null;
     private TCPSocket mTcpSocket = null;
-//    private TSMTaskCompleteCallback tsmTaskCompleteCallback=null;
-//    private TsmTaskCompleteListener tsmTaskCompleteListener=null;
-//    public void setTsmTaskCompleteListener(TsmTaskCompleteListener listener){
-//        tsmTaskCompleteListener = listener;
-//    }
+
+    /**
+     * 处理下载/删除/个人化/同步任务，各任务通过taskId来区分
+     * @param bluetoothControl 与蓝牙通信实例
+     * @param taskId    TSM定义的Taskid
+     * @param callback 执行结果回调
+     */
+    public void handleTaskOfApplet(final BluetoothControl bluetoothControl, final byte[] taskId,
+                                   final TsmTaskCompleteCallback callback){
+        if(bluetoothControl==null) {
+            LogUtil.debug("bluetoothControl is null");
+            callback.onTaskNotExecuted();
+            return;
+        }
+        this.bluetoothControl=bluetoothControl;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                byte []bSeNO = MyApplication.seId.getBytes();
+//                byte[] id = {0x2F, 0x7A};
+//                byte[] taskId = new byte[20];
+//                System.arraycopy(id,0,taskId,18,2);
+                byte[] randomNum = generateRandom(12);
+                byte[] input = genAppRequestByte(randomNum,bSeNO,taskId);
+                if (mTcpSocket == null) {
+                    mTcpSocket = TCPSocket.getInstance(TCPNetParameter.IPAddress, TCPNetParameter.Port);
+                    if(mTcpSocket==null){
+                        if(callback!=null){
+                            callback.onTaskExecutedFailed();
+                            //关闭蓝牙连接
+                            bluetoothControl.disconnectBluetooth();
+                        }
+                    }
+                    else
+                        appRequest(mTcpSocket,input,randomNum,callback);
+                }
+
+            }
+        }).start();
+    }
 
     public void SyncApplet(BluetoothControl bluetoothControl, final byte[] taskId, final TsmTaskCompleteCallback tsmTaskCompleteCallback){//,TCPSocket tcpSocket, byte[] request, int length){
         if(bluetoothControl==null) {
@@ -35,15 +71,16 @@ public class TCPTransferData {
 //                byte[] id = {0x2E, 0x6E};
 //                byte[] taskId = new byte[20];
 //                System.arraycopy(id,0,taskId,18,2);
+                byte[] randomNum = generateRandom(12);
                 byte[] input = genAppRequestByte(randomNum,bSeNO,taskId);
                 if (mTcpSocket == null) {
-                    mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
+                    mTcpSocket = TCPSocket.getInstance(TCPNetParameter.IPAddress, TCPNetParameter.Port);
                     if(mTcpSocket==null){
                         if(tsmTaskCompleteCallback!=null)
                             tsmTaskCompleteCallback.onTaskExecutedFailed();
                     }
                     else
-                        appRequest(mTcpSocket,input,tsmTaskCompleteCallback);
+                        appRequest(mTcpSocket,input,randomNum,tsmTaskCompleteCallback);
                 }
 
             }
@@ -51,15 +88,14 @@ public class TCPTransferData {
 
     }
 
-    public void DownloadApplet(BluetoothControl bluetoothControl, final byte[] taskId, final TsmTaskCompleteCallback callback){//},TCPSocket tcpSocket, byte[] request, int length){
+    public void DownloadApplet(BluetoothControl bluetoothControl, final byte[] taskId,
+                               final TsmTaskCompleteCallback callback){//},TCPSocket tcpSocket, byte[] request, int length){
         if(bluetoothControl==null) {
-//            bluetoothControl = new BluetoothControl(context, bluetoothDev);
             LogUtil.debug("bluetoothControl is null");
             return;
         }
 
         this.bluetoothControl=bluetoothControl;
-//        this.tsmTaskCompleteCallback = callback;
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -67,21 +103,17 @@ public class TCPTransferData {
 //                byte[] id = {0x2F, 0x7A};
 //                byte[] taskId = new byte[20];
 //                System.arraycopy(id,0,taskId,18,2);
+                byte[] randomNum = generateRandom(12);
                 byte[] input = genAppRequestByte(randomNum,bSeNO,taskId);
                 if (mTcpSocket == null) {
-                    //                        if(true){
-//                            throw new IOException();
-//                        }
-                    mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
+                    mTcpSocket = TCPSocket.getInstance(TCPNetParameter.IPAddress, TCPNetParameter.Port);
                     if(mTcpSocket==null){
-//                        if(tsmTaskCompleteListener!=null)
-//                            tsmTaskCompleteListener.onTaskExecutedFailed();
                         if(callback!=null){
                             callback.onTaskExecutedFailed();
                         }
                     }
                     else
-                        appRequest(mTcpSocket,input,callback);
+                        appRequest(mTcpSocket,input,randomNum,callback);
                 }
 
             }
@@ -94,35 +126,39 @@ public class TCPTransferData {
             return;
         }
         this.bluetoothControl=bluetoothControl;
-//        this.tsmTaskCompleteCallback=callback;
         new Thread(new Runnable() {
             @Override
             public void run() {
                 byte []bSeNO = MyApplication.seId.getBytes();
+                byte[] randomNum = generateRandom(12);
                 byte[] input = genAppRequestByte(randomNum,bSeNO,taskId);
                 if(mTcpSocket==null){
-                    mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress,NetParameter.Port);
+                    mTcpSocket = TCPSocket.getInstance(TCPNetParameter.IPAddress,TCPNetParameter.Port);
                     if(mTcpSocket==null){
                         if(tsmTaskCompleteCallback!=null)
                             tsmTaskCompleteCallback.onTaskExecutedFailed();
                     }
                     else
-                        appRequest(mTcpSocket,input,tsmTaskCompleteCallback);
+                        appRequest(mTcpSocket,input,randomNum,tsmTaskCompleteCallback);
 
                 }
             }
         }).start();
     }
 
-    public void InstallApplet(){
-
-    }
-
+    /**
+     * 给TSM发送请求，获取响应结果；分析响应结果
+     * @param tcpSocket tcpSocket实例
+     * @param input 业务请求数据
+     * @param tsmTaskCompleteCallback 业务执行结果回调
+     */
     public void handleTSMData(final TCPSocket tcpSocket, byte []input, final TsmTaskCompleteCallback tsmTaskCompleteCallback){
-        //testSeCmdCount++;
         LogUtil.debug("input:"+ByteUtil.bytesToHexString(input,input.length));
         if (tcpSocket==null) {
             LogUtil.debug("socket is null");
+            tsmTaskCompleteCallback.onTaskExecutedFailed();
+            //关闭蓝牙连接
+            bluetoothControl.disconnectBluetooth();
             return;
         }
         new TCPRequest().TCPByteRequest(tcpSocket, input, new TCPResponse.Listener<byte[]>() {
@@ -141,6 +177,8 @@ public class TCPTransferData {
                     mTcpSocket = null;
 //                    tsmTaskCompleteListener.onTaskExecutedSuccess();
                     tsmTaskCompleteCallback.onTaskExecutedSuccess();
+                    //关闭蓝牙连接
+                    bluetoothControl.disconnectBluetooth();
                     return;
                 }
                 ///////////////////////////////
@@ -157,6 +195,8 @@ public class TCPTransferData {
                     LogUtil.warn( "TCP response error");
 //                    tsmTaskCompleteListener.onTaskExecutedFailed();
                     tsmTaskCompleteCallback.onTaskExecutedFailed();
+                    //关闭蓝牙连接
+                    bluetoothControl.disconnectBluetooth();
                     return;
                 }
                 if(response[14]==CMD_SERVER_APDU){
@@ -178,6 +218,8 @@ public class TCPTransferData {
                         mTcpSocket = null;
 //                        tsmTaskCompleteListener.onTaskExecutedSuccess();
                         tsmTaskCompleteCallback.onTaskExecutedSuccess();
+                        //关闭蓝牙连接
+                        bluetoothControl.disconnectBluetooth();
                     }
                     else {
                         tcpSocket.closeSocket();
@@ -186,6 +228,8 @@ public class TCPTransferData {
                         LogUtil.debug( "failed");
 //                        tsmTaskCompleteListener.onTaskExecutedFailed();
                         tsmTaskCompleteCallback.onTaskExecutedFailed();
+                        //关闭蓝牙连接
+                        bluetoothControl.disconnectBluetooth();
                     }
                     return;
 
@@ -201,6 +245,8 @@ public class TCPTransferData {
                     mTcpSocket=null;
 //                    tsmTaskCompleteListener.onTaskExecutedFailed();
                     tsmTaskCompleteCallback.onTaskExecutedFailed();
+                    //关闭蓝牙连接
+                    bluetoothControl.disconnectBluetooth();
                 }
                 //LogUtil.debug(TAG,bytesToHexString(response,responseLen));
             }
@@ -210,11 +256,20 @@ public class TCPTransferData {
                 LogUtil.debug((String)response);
 //                tsmTaskCompleteListener.onTaskExecutedFailed();
                 tsmTaskCompleteCallback.onTaskExecutedFailed();
+                //关闭蓝牙连接
+                bluetoothControl.disconnectBluetooth();
             }
         });
     }
 
-    public void appRequest(TCPSocket tcpSocket, byte[] input, final TsmTaskCompleteCallback tsmTaskCompleteCallback){
+    /**
+     * 有关applet的业务请求（
+     * @param tcpSocket tcpSocket实例
+     * @param input 发送个给TSM的业务请求数据,根据不同的input，执行不同的任务
+     * @param randomNum 随机数
+     * @param tsmTaskCompleteCallback 业务执行结果回调
+     */
+    public void appRequest(TCPSocket tcpSocket, byte[] input, final byte[] randomNum, final TsmTaskCompleteCallback tsmTaskCompleteCallback){
         handleTSMData(tcpSocket,input,tsmTaskCompleteCallback);
         if(bluetoothControl!=null){
             bluetoothControl.setSeCallbackTSMListener(new SECallbackTSMListener() {
@@ -236,13 +291,22 @@ public class TCPTransferData {
                 public void errorCallback() {
 //                    tsmTaskCompleteListener.onTaskExecutedFailed();
                     tsmTaskCompleteCallback.onTaskExecutedFailed();
+                    //关闭蓝牙连接
+                    bluetoothControl.disconnectBluetooth();
                     LogUtil.debug("tsmTaskCompleteCallback.onTaskExecutedFailed();");
                 }
             });
         }
     }
 
-    public byte[] genAppRequestByte(byte[] random,byte[] bSeId,byte[] taskId){
+    /**
+     * 根据《华虹电信卡管理平台(HCMP)_POS化发行详细实现方案.pdf》的通信协议生成请求数据
+     * @param randomNum
+     * @param bSeId
+     * @param taskId
+     * @return
+     */
+    public byte[] genAppRequestByte(byte[] randomNum,byte[] bSeId,byte[] taskId){
         byte[] input = new byte[38+bSeId.length];
         byte[] cmd = {0x01, 0x00, 0x39, 0x24};
         byte[] bSeNO = MyApplication.seId.getBytes();
@@ -259,15 +323,23 @@ public class TCPTransferData {
 
     }
 
+    private byte[] generateRandom(int byteOfLen){
+        byte[] byteOfRandom = new byte[byteOfLen];
+        Random ra =new Random();
+        for(int i=0;i<byteOfLen;i++){
+            byteOfRandom[i] = (byte) ra.nextInt(255);
+        }
+        return byteOfRandom;
+    }
+
     public static byte CMD_APP_REQUEST = 0x01;
     public static byte CMD_SERVER_APDU = 0x02;
     public static byte CMD_SE_RESPONSE = 0x03;
     public static byte CMD_SERVER_END = 0x04;
     public static byte CMD_SERVER_RESET = 0x05;
-    public byte[] randomNum = {0x01, 0x02, 0x03, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0xb, 0xc};
-//    String strSeId = "451000000000000020160328000000010005";
     byte[] maskId = {0x12, (byte) 0xab};
-    private void generateRandomData() {
-        randomNum = new byte[12];
-    }
+//    public byte[] randomNum = {0x01, 0x02, 0x03, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0xb, 0xc};
+//    private void generateRandomData() {
+//        randomNum = new byte[12];
+//    }
 }

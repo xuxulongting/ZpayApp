@@ -34,9 +34,9 @@ import com.spreadtrum.iit.zpayapp.database.AppDisplayDatabaseHelper;
 import com.spreadtrum.iit.zpayapp.database.DatabaseHandler;
 import com.spreadtrum.iit.zpayapp.message.AppInformation;
 import com.spreadtrum.iit.zpayapp.network.heartbeat.HeartBeatThread;
-import com.spreadtrum.iit.zpayapp.network.NetworkUtils;
-import com.spreadtrum.iit.zpayapp.network.ResultCallback;
-import com.spreadtrum.iit.zpayapp.network.ZAppStoreApi;
+import com.spreadtrum.iit.zpayapp.common.NetworkUtils;
+import com.spreadtrum.iit.zpayapp.bussiness.ResultCallback;
+import com.spreadtrum.iit.zpayapp.bussiness.ZAppStoreApi;
 import com.spreadtrum.iit.zpayapp.register_login.DigtalpwdLoginActivity;
 import com.zhy.adapter.abslistview.CommonAdapter;
 
@@ -91,24 +91,33 @@ public class AppStoreFragment extends Fragment {
 
                 if (intent.getAction().equals(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS)) {
                     MyApplication.isOperated = false;
-                    //String bussinessType = intent.getStringExtra("BUSSINESS_TYPE");
                     String bussinessType = bundle.getString("BUSSINESS_TYPE");
                     if (bussinessType.equals("download")) {
                         appInformation.setAppinstalled("yes");
                     } else {
                         appInformation.setAppinstalled("no");
                     }
-                    //修改全局变量map中的值
-//                MyApplication.appInstalling.put(appInformation.getIndex(), appInformation.isAppinstalling());
-
+                    //更新applist
+                    appList.set(appInformation.getIndexForlistview(), appInformation);
+                    //刷新Listview
+                    busAdapter.notifyDataSetChanged();
                 } else if (intent.getAction().equals(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED)){
                     //不需要更新appinstalled状态
                     MyApplication.isOperated = false;
+                    //从后台获取列表
+                    getListDataFromTSM(MyApplication.getContextObject());
                 }
-                //更新applist
-                appList.set(appInformation.getIndexForlistview(), appInformation);
-                //刷新Listview
-                busAdapter.notifyDataSetChanged();
+                else {
+                    MyApplication.isOperated = false;
+//                    //更新applist
+//                    appList.set(appInformation.getIndexForlistview(), appInformation);
+                    //刷新Listview
+                    busAdapter.notifyDataSetChanged();
+                }
+//                //更新applist
+//                appList.set(appInformation.getIndexForlistview(), appInformation);
+//                //刷新Listview
+//                busAdapter.notifyDataSetChanged();
             }
         }
     };

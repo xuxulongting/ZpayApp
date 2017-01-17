@@ -1,4 +1,7 @@
-package com.spreadtrum.iit.zpayapp.network.tcp;
+package com.spreadtrum.iit.zpayapp.network;
+
+import com.spreadtrum.iit.zpayapp.network.tcp.TCPResponse;
+import com.spreadtrum.iit.zpayapp.network.tcp.TCPSocket;
 
 import java.io.IOException;
 import java.io.OutputStream;

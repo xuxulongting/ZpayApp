@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.spreadtrum.iit.zpayapp.R;
@@ -35,12 +36,14 @@ public class BluetoothSettingsActivity extends AppCompatActivity {
     private CommonAdapter commonAdapter;
     private BluetoothReceiver bluetoothReceiver = null;
 
+    private TextView textViewRefresh = null;
 
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth_settings);
+        textViewRefresh = (TextView) findViewById(R.id.id_tv_click_refresh);
         btAdapter = BluetoothAdapter.getDefaultAdapter();
         IntentFilter intentFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         bluetoothReceiver = new BluetoothReceiver();
@@ -75,6 +78,14 @@ public class BluetoothSettingsActivity extends AppCompatActivity {
             }
         };
         listView.setAdapter(commonAdapter);
+
+        textViewRefresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //启动发现蓝牙设备
+                bluetoothGetVisible();
+            }
+        });
     }
 
     private class BluetoothReceiver extends BroadcastReceiver{

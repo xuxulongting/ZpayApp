@@ -1,4 +1,4 @@
-package com.spreadtrum.iit.zpayapp.network;
+package com.spreadtrum.iit.zpayapp.common;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

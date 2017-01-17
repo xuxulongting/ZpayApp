@@ -2,6 +2,7 @@ package com.spreadtrum.iit.zpayapp.message;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-11-4.
+ * 用于心跳线程中发送的心跳请求包中的参数
  */
 
 public class TSMRequestData {
@@ -45,11 +46,7 @@ public class TSMRequestData {
         this.phone = phone;
     }
 
-    public String taskId;
-    public String sessionId;
-    public String seId;
-    public String imei;
-    public String phone;
+
 
     public String getType() {
         return type;
@@ -58,6 +55,10 @@ public class TSMRequestData {
     public void setType(String type) {
         this.type = type;
     }
-
+    public String taskId;
+    public String sessionId;
+    public String seId;
+    public String imei;
+    public String phone;
     public String type;
 }

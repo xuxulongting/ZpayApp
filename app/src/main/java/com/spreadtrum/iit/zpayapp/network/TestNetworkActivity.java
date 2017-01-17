@@ -10,10 +10,8 @@ import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.R;
 import com.spreadtrum.iit.zpayapp.common.ByteUtil;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
-import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothDialogFragment;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.SECallbackTSMListener;
-import com.spreadtrum.iit.zpayapp.network.tcp.NetParameter;
-import com.spreadtrum.iit.zpayapp.network.tcp.TCPByteRequest;
+import com.spreadtrum.iit.zpayapp.network.tcp.TCPNetParameter;
 import com.spreadtrum.iit.zpayapp.network.tcp.TCPResponse;
 import com.spreadtrum.iit.zpayapp.network.tcp.TCPSocket;
 
@@ -61,7 +59,7 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
                         System.arraycopy(id,0,taskId,18,2);
                         byte[] input = genAppRequestByte(randomNum,bSeNO,taskId);
                         if (mTcpSocket == null) {
-                            mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
+                            mTcpSocket = TCPSocket.getInstance(TCPNetParameter.IPAddress, TCPNetParameter.Port);
                         }
                         appRequest(mTcpSocket,input);
                     }
@@ -82,7 +80,7 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
                         System.arraycopy(id,0,taskId,18,2);
                         byte[] input = genAppRequestByte(randomNum,bSeNO,taskId);
                         if (mTcpSocket == null) {
-                            mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
+                            mTcpSocket = TCPSocket.getInstance(TCPNetParameter.IPAddress, TCPNetParameter.Port);
                         }
                         appRequest(mTcpSocket,input);
                     }
@@ -106,7 +104,7 @@ public class TestNetworkActivity extends AppCompatActivity implements BluetoothD
                     @Override
                     public void run() {
                         if (mTcpSocket == null) {
-                            mTcpSocket = TCPSocket.getInstance(NetParameter.IPAddress, NetParameter.Port);
+                            mTcpSocket = TCPSocket.getInstance(TCPNetParameter.IPAddress, TCPNetParameter.Port);
                         }
                         //准备发给TSM的数据
                         String strSeId = "451000000000000020160328000000010005";

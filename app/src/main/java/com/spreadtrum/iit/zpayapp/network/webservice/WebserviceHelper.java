@@ -1,42 +1,30 @@
 package com.spreadtrum.iit.zpayapp.network.webservice;
 
-import android.content.Context;
-import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
-import android.widget.Toast;
+import android.util.Base64;
 
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
-import com.spreadtrum.iit.zpayapp.R;
 import com.spreadtrum.iit.zpayapp.common.ByteUtil;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
-import com.spreadtrum.iit.zpayapp.database.DatabaseHandler;
-import com.spreadtrum.iit.zpayapp.displaydemo.AppStoreCommonAdapter;
 import com.spreadtrum.iit.zpayapp.message.AppInformation;
 import com.spreadtrum.iit.zpayapp.message.MessageBuilder;
+import com.spreadtrum.iit.zpayapp.message.RequestTaskidEntity;
 import com.spreadtrum.iit.zpayapp.message.TSMResponseEntity;
-import com.spreadtrum.iit.zpayapp.network.NetworkUtils;
-import com.spreadtrum.iit.zpayapp.network.ResultCallback;
+import com.spreadtrum.iit.zpayapp.bussiness.ResultCallback;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BLEPreparedCallbackListener;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.SECallbackTSMListener;
-import com.spreadtrum.iit.zpayapp.register_login.DigtalpwdLoginActivity;
 
 import java.util.List;
 import java.util.Map;
-
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 import static java.lang.Thread.currentThread;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-11-3.
+ * 获取应用列表和task id
  */
 
 public class WebserviceHelper {
-
     /**
      * 获取SEID
      * @param bluetoothControl 蓝牙句柄
@@ -90,11 +78,13 @@ public class WebserviceHelper {
             }
         });
     }
+
     /**
-     * 获取seid
-     * @param
+     * 获取applet列表信息
+     * @param bleDevAddr 蓝牙地址
+     * @param callback  获取列表信息结果回调
      */
-    private static void getListDataWithoutSeid(String bleDevAddr,final ResultCallback callback){
+    public static void getListDataWithoutSeid(String bleDevAddr,final ResultCallback callback){
         //与蓝牙建立连接
         final BluetoothControl bluetoothControl = BluetoothControl.getInstance(MyApplication.getContextObject(),bleDevAddr);
         if (bluetoothControl!=null){
@@ -159,7 +149,12 @@ public class WebserviceHelper {
 
     }
 
-    private static void getListDataWithSeid(String seId, final ResultCallback callback){
+    /**
+     * 获取applet列表信息
+     * @param seId
+     * @param callback
+     */
+    public static void getListDataWithSeid(String seId, final ResultCallback callback){
         //从网络获取appInformation
         final String requestType = "dbquery";
         final String requestData = "applistquery";
@@ -202,15 +197,32 @@ public class WebserviceHelper {
     }
 
     /**
-     * 根据seid获取到了应用列表
-     * @param seId
+     * 获取业务（下载，删除，同步）的任务id
+     * @param seId  SE的索引信息
+     * @param requestType   请求的类型（数据查询/数据写入）
+     * @param entity    请求的数据内容
+     * @param callback  网络请求结果回调
      */
-    public static void getListDataFromWebService(String bleDevAddr,String seId,ResultCallback callback){
-        if(seId.isEmpty()) {
-            LogUtil.debug("seid is empty.");
-            getListDataWithoutSeid(bleDevAddr, callback);
-        }
-        else
-            getListDataWithSeid(seId,callback);
+    public static void getTSMTaskid(String seId, String requestType, RequestTaskidEntity entity,
+                                    TSMAppInformationCallback callback){
+        //创建请求xml
+        String requestXml = MessageBuilder.doBussinessRequest(seId,requestType,entity);
+        //base64加密
+        String requestXmlBase64 = Base64.encodeToString(requestXml.getBytes(),Base64.DEFAULT);
+        //发送soap请求，并获取xml结果
+        TSMPersonalizationWebservice.getTSMAppInformation(requestXmlBase64,callback);
     }
+
+//    /**
+//     * 根据seid获取到了应用列表
+//     * @param seId
+//     */
+//    public static void getListDataFromWebService(String bleDevAddr,String seId,ResultCallback callback){
+//        if(seId.isEmpty()) {
+//            LogUtil.debug("seid is empty.");
+//            getListDataWithoutSeid(bleDevAddr, callback);
+//        }
+//        else
+//            getListDataWithSeid(seId,callback);
+//    }
 }

@@ -7,6 +7,7 @@ import retrofit2.http.PUT;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-11-4.
+ * 用于心跳线程中发送的心跳请求返回结果的参数
  */
 
 public class TSMResponseData {

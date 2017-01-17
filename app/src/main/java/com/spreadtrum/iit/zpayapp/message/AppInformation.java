@@ -1,15 +1,11 @@
 package com.spreadtrum.iit.zpayapp.message;
-
-import android.graphics.Bitmap;
-import android.net.Uri;
-
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
-
 import java.io.Serializable;
 import java.util.Map;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-9-6.
+ * TSM返回的应用列表中Applet信息
  */
 public class AppInformation implements Serializable{
     public String getIndex() {
@@ -82,13 +78,6 @@ public class AppInformation implements Serializable{
     public void setAppid(String appid) {
         this.appid = appid;
     }
-//    public int getIconviewid() {
-//        return iconviewid;
-//    }
-
-//    public void setIconviewid(int iconViewId) {
-//        this.iconviewid = iconViewId;
-//    }
 
     public boolean isAppinstalling(String appindex) {
        //获取全局变量map中的值给appList
@@ -100,7 +89,6 @@ public class AppInformation implements Serializable{
             }
         }
         return false;
-//        return appinstalling;
     }
 
     public void setAppinstalling(boolean appinstalling) {
@@ -113,16 +101,6 @@ public class AppInformation implements Serializable{
     public void setIndexForlistview(int indexForlistview) {
         this.indexForlistview = indexForlistview;
     }
-//    public Bitmap getBitmap() {
-//        return bitmap;
-//    }
-//
-//    public void setBitmap(Bitmap bitmap) {
-//        this.bitmap = bitmap;
-//    }
-//    public Uri getImageUri() {
-//        return imageUri;
-//    }
     public String getLocalpicpath() {
         return localpicpath;
     }
@@ -151,10 +129,20 @@ public class AppInformation implements Serializable{
         this.localpicpath = localpicpath;
         this.applocked = applocked;
     }
+    public String getApplocked() {
+        return applocked;
+    }
 
-    //    public void setImageUri(Uri imageUri) {
-//        this.imageUri = imageUri;
-//    }
+    public void setApplocked(String applocked) {
+        this.applocked = applocked;
+    }
+    public boolean isPicdownloading() {
+        return picdownloading;
+    }
+
+    public void setPicdownloading(boolean picdownloading) {
+        this.picdownloading = picdownloading;
+    }
     private String index;//索引
     private String picurl;//图片下载url
     private String appname;//应用名称
@@ -163,31 +151,13 @@ public class AppInformation implements Serializable{
     private String spname;//应用提供商
     private String appdesc;//应用简介
     private String appinstalled="not";//应用是否已安装 yes/not
-
-    public String getApplocked() {
-        return applocked;
-    }
-
-    public void setApplocked(String applocked) {
-        this.applocked = applocked;
-    }
-
     private String applocked="not";//应用是否已锁定 yes/not
     private String appid;//应用标识
-//    private int iconviewid;//本地图片资源id
-//    private Bitmap bitmap=null;//下载的图片资源
-//    private Uri imageUri = null;//本地缓存的图片资源
     private boolean appinstalling=false;//应用是否正在安装 true/false
     private int indexForlistview;   //在listview中的位置，与TSM数据库无关
     private String localpicpath;
-
-    public boolean isPicdownloading() {
-        return picdownloading;
-    }
-
-    public void setPicdownloading(boolean picdownloading) {
-        this.picdownloading = picdownloading;
-    }
-
     private boolean picdownloading=false;
+
+
+
 }

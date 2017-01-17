@@ -12,11 +12,8 @@ import android.os.IBinder;
 import android.widget.Toast;
 
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
-import com.spreadtrum.iit.zpayapp.bussiness.BussinessTransaction;
-import com.spreadtrum.iit.zpayapp.common.AppConfig;
 import com.spreadtrum.iit.zpayapp.common.ByteUtil;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
-import com.spreadtrum.iit.zpayapp.message.AppInformation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +59,7 @@ public class BluetoothControl {
     public static String JD_SERVICE = "1470ff10-620a-3973-7c78-9cfff0876abd";
     public static String JD_WRITE_CHARACTERISTIC = "1470ff11-620a-3973-7c78-9cfff0876abd";
     public static String JD_NOTIFY_CHARACTERISTIC = "1470ff12-620a-3973-7c78-9cfff0876abd";
+    public static String CLIENT_CHARACTERISTIC_CONFIG = "00002902-0000-1000-8000-00805f9b34fb";
     public static final byte APDU_SEND = 0x02;
     public static final byte APDU_RECV = 0x12;
     public static final byte SETPARA_SEND = 0x01;
@@ -249,19 +247,29 @@ public class BluetoothControl {
             if (bluetoothControl!=null && bluetoothControl.bluetoothService!=null) {
                 if (bluetoothControl.bluetoothService.getBluetoothGattConnectionState()
                         == bluetoothControl.bluetoothService.STATE_DISCONNECTED) {
-                    MyApplication app = (MyApplication) MyApplication.getContextObject();
-                    bluetoothControl.bluetoothService.connect(app.getBluetoothDevAddr());
                     LogUtil.debug("getBluetoothGattConnectionState:STATE_DISCONNECTED");
+                    MyApplication app = (MyApplication) MyApplication.getContextObject();
+                    if (!bluetoothControl.bluetoothService.connect(app.getBluetoothDevAddr()))
+                        return null;
                 } else if (bluetoothControl.bluetoothService.getBluetoothGattConnectionState()
                         == bluetoothControl.bluetoothService.STATE_CONNECTING ||
                         bluetoothControl.bluetoothService.getBluetoothGattConnectionState() ==
                                 bluetoothControl.bluetoothService.STATE_DISCONNECTING) {
                     LogUtil.debug("getBluetoothGattConnectionState:STATE_CONNECTING OR STATE_DISCONNECTING");
+                    if (!bluetoothControl.bluetoothService.isBlluetoothEnabled()){
+                        bluetoothControl.bluetoothService.setBluetoothGattConnectionState(
+                                bluetoothControl.bluetoothService.STATE_DISCONNECTED);
+                    }
                     return null;
                 }
                 else {
                     LogUtil.debug("getBluetoothGattConnectionState:STATE_CONNECTED");
+//                    return bluetoothControl;
 //                    new BussinessTransaction().broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_NOT_EXECUTED,new AppInformation(),"notexecuted");
+                    if (!bluetoothControl.bluetoothService.isBlluetoothEnabled()){
+                        bluetoothControl.bluetoothService.setBluetoothGattConnectionState(
+                                bluetoothControl.bluetoothService.STATE_DISCONNECTED);
+                    }
                     return null;
                 }
             }

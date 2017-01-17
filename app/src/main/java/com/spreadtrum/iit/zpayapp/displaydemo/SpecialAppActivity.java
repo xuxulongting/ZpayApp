@@ -5,11 +5,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -21,22 +19,12 @@ import com.android.volley.toolbox.ImageLoader;
 import com.spreadtrum.iit.zpayapp.Log.LogUtil;
 import com.spreadtrum.iit.zpayapp.R;
 import com.spreadtrum.iit.zpayapp.bussiness.BussinessTransaction;
-import com.spreadtrum.iit.zpayapp.common.ByteUtil;
+import com.spreadtrum.iit.zpayapp.bussiness.ZAppStoreApi;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.message.AppInformation;
-import com.spreadtrum.iit.zpayapp.message.MessageBuilder;
-import com.spreadtrum.iit.zpayapp.message.RequestTaskidEntity;
-import com.spreadtrum.iit.zpayapp.message.TSMResponseEntity;
-import com.spreadtrum.iit.zpayapp.network.bluetooth.BLEPreparedCallbackListener;
-import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
-import com.spreadtrum.iit.zpayapp.network.tcp.TsmTaskCompleteCallback;
+import com.spreadtrum.iit.zpayapp.bussiness.TsmTaskCompleteCallback;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.BitmapCache;
-import com.spreadtrum.iit.zpayapp.network.volley_okhttp.ImageLoaderUtil;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.RequestQueueUtils;
-import com.spreadtrum.iit.zpayapp.network.webservice.TSMPersonalizationWebservice;
-import com.spreadtrum.iit.zpayapp.network.webservice.TSMAppInformationCallback;
-
-import java.io.File;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-9-2.
@@ -100,6 +88,7 @@ public class SpecialAppActivity extends BaseActivity {
         String picUrl = appInformation.getPicurl();
 //        String localPicpath = appInformation.getLocalpicpath();
         final String appInstalled = appInformation.getAppinstalled();
+        String appLocked = appInformation.getApplocked();
         boolean isInstalling = appInformation.isAppinstalling(appIndex);
 
         textViewAppName = (TextView) findViewById(R.id.id_tv_appname);
@@ -117,13 +106,6 @@ public class SpecialAppActivity extends BaseActivity {
         textViewAppSize.setText(appSize);
         textViewSpName.setText(spName);
         textViewAppDesc.setText("\t\t"+appDesc);
-        //加载图片
-//        if(localPicpath==null){
-//            File file = new File(ImageFileCache.getAppDir(),picUrl.substring(picUrl.lastIndexOf("/")+1));
-//            localPicpath = file.getAbsolutePath();
-//        }
-//        Bitmap bitmap = ImageLoaderUtil.getLoacalBitmap(localPicpath);
-//        imageViewIcon.setImageBitmap(bitmap);
         //使用volley下载图片，并使用LruCache进行缓存
         RequestQueue requestQueue = RequestQueueUtils.getInstance().getRequestQueue();
         ImageLoader imageLoader = new ImageLoader(requestQueue,new BitmapCache());
@@ -139,7 +121,10 @@ public class SpecialAppActivity extends BaseActivity {
         }
         else
         {
-            if(appInstalled.equals("yes")) {
+            if (appLocked.equals("yes")){
+                btnOpera.setText("已锁定");
+            }
+            else if(appInstalled.equals("yes")) {
                 btnOpera.setText("解绑");
             }
             btnOpera.setVisibility(View.VISIBLE);
@@ -153,7 +138,6 @@ public class SpecialAppActivity extends BaseActivity {
             public void onClick(View view) {
                 //该点击事件完成绑卡或取消绑卡
                 if(btnOpera.getText().equals("绑卡")){
-
                     //连接BLE
                     MyApplication app = (MyApplication) getApplication();
                     final String bluetoothDevAddr = app.getBluetoothDevAddr();
@@ -169,11 +153,6 @@ public class SpecialAppActivity extends BaseActivity {
                                 }).show();
                         return;
                     }
-
-                    //获取蓝牙读写句柄
-                    final BluetoothControl bluetoothControl = BluetoothControl.getInstance(MyApplication.getContextObject(),bluetoothDevAddr);
-                    if (bluetoothControl==null)
-                        return;
                     //修改UI
                     //修改button
                     appInformation.setAppinstalling(true);  //为了与AppStoreFragment的button同步
@@ -181,64 +160,98 @@ public class SpecialAppActivity extends BaseActivity {
                     MyApplication.appInstalling.put(appInformation.getIndex(),true);
                     btnOpera.setVisibility(View.INVISIBLE);
                     linearLayoutBar.setVisibility(View.VISIBLE);
-                    //监听蓝牙准备好消息
-                    bluetoothControl.setBlePreparedCallbackListener(new BLEPreparedCallbackListener() {
-                        @Override
-                        public void onBLEPrepared() {
-                            //获取taskid
-                            RequestTaskidEntity entity=MessageBuilder.getRequestTaskidEntity(appInformation,BussinessTransaction.TASK_TYPE_DOWNLOAD);
-                            TSMPersonalizationWebservice.getTSMTaskid(MyApplication.seId, "dbinsert", entity, new TSMAppInformationCallback() {
+                    final BussinessTransaction transaction = new BussinessTransaction();
+                    ZAppStoreApi.transactBussiness(appInformation, BussinessTransaction.TASK_TYPE_DOWNLOAD,
+                            new TsmTaskCompleteCallback() {
                                 @Override
-                                public void getAppInfo(String xml) {
-                                    //解析xml
-                                    TSMResponseEntity entity = MessageBuilder.parseDownLoadXml(xml);
-                                    String taskId = entity.getTaskId();
-                                    int dectask = ByteUtil.parseInt(taskId,10,0);
-                                    byte[] data = ByteUtil.int2Bytes(dectask);
-                                    byte[] bTaskId = new byte[20];
-                                    System.arraycopy(data,0,bTaskId,20-data.length,data.length);
-                                    //下载应用
-//                                        new BussinessTransaction().DownloadApplet(bluetoothControl,bTaskId,appInformation);;
-                                    final BussinessTransaction transaction = new BussinessTransaction();
-                                    transaction.DownloadApplet(bluetoothControl, bTaskId, appInformation, new TsmTaskCompleteCallback() {
-                                        @Override
-                                        public void onTaskExecutedSuccess() {
-                                            transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS,appInformation,"delete");
-                                            MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_SUCCESS);
-                                            //关闭蓝牙连接
-                                            bluetoothControl.disconnectBluetooth();
-                                        }
+                                public void onTaskExecutedSuccess() {
+                                    MyApplication.isOperated = false;
+                                    new BussinessBroadcast().broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS,appInformation,"download");
+                                    MyApplication.handler.sendEmptyMessage(MyApplication.DOWNLOAD_SUCCESS);
+                                }
 
-                                        @Override
-                                        public void onTaskExecutedFailed() {
-                                            //如果当前没有下载/删除动作，则该广播无效，主要是蓝牙主动断开连接（下载完成）或意外断开连接
-                                            if (MyApplication.isOperated==false)
-                                                return;
-                                            transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED,appInformation,"delete");
-                                            MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_FAILED);
-                                            //关闭蓝牙连接
-                                            bluetoothControl.disconnectBluetooth();
-                                        }
+                                @Override
+                                public void onTaskExecutedFailed() {
+                                    //如果当前没有下载/删除动作，则该广播无效，主要是蓝牙主动断开连接（下载完成）或意外断开连接
+                                    if (MyApplication.isOperated==false)
+                                        return;
+                                    MyApplication.isOperated = false;
+                                    new BussinessBroadcast().broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED,appInformation,"download");
+                                    MyApplication.handler.sendEmptyMessage(MyApplication.DOWNLOAD_FAILED);
+                                }
 
-                                        @Override
-                                        public void onTaskNotExecuted() {
-                                            transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_NOT_EXECUTED,appInformation,"notexecuted");
-                                        }
-                                    });
+                                @Override
+                                public void onTaskNotExecuted() {
+                                    MyApplication.isOperated = false;
+                                    new BussinessBroadcast().broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_NOT_EXECUTED,appInformation,"notexecuted");
                                 }
                             });
-                        }
 
-                        @Override
-                        public void onBLEPrepareFailed() {
-
-                        }
-
-
-                    });
-                    //}
-
-
+//                    //获取蓝牙读写句柄
+//                    final BluetoothControl bluetoothControl = BluetoothControl.getInstance(MyApplication.getContextObject(),bluetoothDevAddr);
+//                    if (bluetoothControl==null)
+//                        return;
+//                    //修改UI
+//                    //修改button
+//                    appInformation.setAppinstalling(true);  //为了与AppStoreFragment的button同步
+//                    //修改全局变量map中的值
+//                    MyApplication.appInstalling.put(appInformation.getIndex(),true);
+//                    btnOpera.setVisibility(View.INVISIBLE);
+//                    linearLayoutBar.setVisibility(View.VISIBLE);
+//                    //监听蓝牙准备好消息
+//                    bluetoothControl.setBlePreparedCallbackListener(new BLEPreparedCallbackListener() {
+//                        @Override
+//                        public void onBLEPrepared() {
+//                            //获取taskid
+//                            RequestTaskidEntity entity=MessageBuilder.getRequestTaskidEntity(appInformation,BussinessTransaction.TASK_TYPE_DOWNLOAD);
+//                            TSMPersonalizationWebservice.getTSMTaskid(MyApplication.seId, "dbinsert", entity, new TSMAppInformationCallback() {
+//                                @Override
+//                                public void getAppInfo(String xml) {
+//                                    //解析xml
+//                                    TSMResponseEntity entity = MessageBuilder.parseDownLoadXml(xml);
+//                                    String taskId = entity.getTaskId();
+//                                    int dectask = ByteUtil.parseInt(taskId,10,0);
+//                                    byte[] data = ByteUtil.int2Bytes(dectask);
+//                                    byte[] bTaskId = new byte[20];
+//                                    System.arraycopy(data,0,bTaskId,20-data.length,data.length);
+//                                    //下载应用
+//                                    final BussinessTransaction transaction = new BussinessTransaction();
+//                                    transaction.DownloadApplet(bluetoothControl, bTaskId, appInformation, new TsmTaskCompleteCallback() {
+//                                        @Override
+//                                        public void onTaskExecutedSuccess() {
+//                                            transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS,appInformation,"delete");
+//                                            MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_SUCCESS);
+//                                            //关闭蓝牙连接
+//                                            bluetoothControl.disconnectBluetooth();
+//                                        }
+//
+//                                        @Override
+//                                        public void onTaskExecutedFailed() {
+//                                            //如果当前没有下载/删除动作，则该广播无效，主要是蓝牙主动断开连接（下载完成）或意外断开连接
+//                                            if (MyApplication.isOperated==false)
+//                                                return;
+//                                            transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED,appInformation,"delete");
+//                                            MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_FAILED);
+//                                            //关闭蓝牙连接
+//                                            bluetoothControl.disconnectBluetooth();
+//                                        }
+//
+//                                        @Override
+//                                        public void onTaskNotExecuted() {
+//                                            transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_NOT_EXECUTED,appInformation,"notexecuted");
+//                                        }
+//                                    });
+//                                }
+//                            });
+//                        }
+//
+//                        @Override
+//                        public void onBLEPrepareFailed() {
+//
+//                        }
+//
+//
+//                    });
                 }else if (btnOpera.getText().equals("解绑")){
                     new AlertDialog.Builder(SpecialAppActivity.this)
                             .setTitle("提示")
@@ -262,11 +275,6 @@ public class SpecialAppActivity extends BaseActivity {
                                                 }).show();
                                         return;
                                     }
-
-                                    //获取蓝牙读写句柄
-                                    final BluetoothControl bluetoothControl = BluetoothControl.getInstance(MyApplication.getContextObject(),bluetoothDevAddr);
-                                    if (bluetoothControl==null)
-                                        return;
                                     //修改UI
                                     //修改button
                                     appInformation.setAppinstalling(true);
@@ -274,62 +282,103 @@ public class SpecialAppActivity extends BaseActivity {
 //                                    MyApplication.appInstalling.put(appInformation.getIndex(),appInformation.isAppinstalling());
                                     MyApplication.appInstalling.put(appInformation.getIndex(),true);
                                     btnOpera.setVisibility(View.INVISIBLE);
-//                                    progressBar.setVisibility(View.VISIBLE);
                                     linearLayoutBar.setVisibility(View.VISIBLE);
-                                    //监听蓝牙准备好消息
-                                    bluetoothControl.setBlePreparedCallbackListener(new BLEPreparedCallbackListener() {
-                                        @Override
-                                        public void onBLEPrepared() {
-                                            //获取task id
-                                            RequestTaskidEntity entity = MessageBuilder.getRequestTaskidEntity(appInformation,BussinessTransaction.TASK_TYPE_DELETE);
-                                            TSMPersonalizationWebservice.getTSMTaskid(MyApplication.seId, "dbinsert", entity, new TSMAppInformationCallback() {
+                                    //开始任务
+                                    final BussinessTransaction transaction = new BussinessTransaction();
+                                    ZAppStoreApi.transactBussiness(appInformation, BussinessTransaction.TASK_TYPE_DELETE,
+                                            new TsmTaskCompleteCallback() {
                                                 @Override
-                                                public void getAppInfo(String xml) {
-                                                    //解析xml
-                                                    TSMResponseEntity entity = MessageBuilder.parseDownLoadXml(xml);
-                                                    String taskId = entity.getTaskId();
-                                                    int dectask = ByteUtil.parseInt(taskId,10,0);
-                                                    byte[] data = ByteUtil.int2Bytes(dectask);
-                                                    byte[] bTaskId = new byte[20];
-                                                    System.arraycopy(data,0,bTaskId,20-data.length,data.length);
-                                                    //删除应用
-//                                                        new BussinessTransaction().DeleteApplet(bluetoothControl,bTaskId,appInformation);
-                                                    final BussinessTransaction transaction = new BussinessTransaction();
-                                                    transaction.DeleteApplet(bluetoothControl, bTaskId, appInformation, new TsmTaskCompleteCallback() {
-                                                        @Override
-                                                        public void onTaskExecutedSuccess() {
-                                                            transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS,appInformation,"delete");
-                                                            MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_SUCCESS);
-                                                            //关闭蓝牙连接
-                                                            bluetoothControl.disconnectBluetooth();
-                                                        }
+                                                public void onTaskExecutedSuccess() {
+                                                    MyApplication.isOperated=false;
+                                                    new BussinessBroadcast().broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS,appInformation,"delete");
+                                                    MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_SUCCESS);
+                                                }
 
-                                                        @Override
-                                                        public void onTaskExecutedFailed() {
-                                                            if (MyApplication.isOperated==false)
-                                                                return;
-                                                            transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED,appInformation,"delete");
-                                                            MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_FAILED);
-                                                            //关闭蓝牙连接
-                                                            bluetoothControl.disconnectBluetooth();
-                                                        }
+                                                @Override
+                                                public void onTaskExecutedFailed() {
+                                                    if (MyApplication.isOperated==false)
+                                                        return;
+                                                    MyApplication.isOperated=false;
+                                                    new BussinessBroadcast().broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED,appInformation,"delete");
+                                                    MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_FAILED);
 
-                                                        @Override
-                                                        public void onTaskNotExecuted() {
-                                                            transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_NOT_EXECUTED,appInformation,"notexecuted");
+                                                }
 
-                                                        }
-                                                    });
+                                                @Override
+                                                public void onTaskNotExecuted() {
+                                                    MyApplication.isOperated=false;
+                                                    new BussinessBroadcast().broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_NOT_EXECUTED,appInformation,"notexecuted");
+
                                                 }
                                             });
 
-                                        }
-
-                                        @Override
-                                        public void onBLEPrepareFailed() {
-
-                                        }
-                                    });
+//                                    //获取蓝牙读写句柄
+//                                    final BluetoothControl bluetoothControl = BluetoothControl.getInstance(MyApplication.getContextObject(),bluetoothDevAddr);
+//                                    if (bluetoothControl==null)
+//                                        return;
+//                                    //修改UI
+//                                    //修改button
+//                                    appInformation.setAppinstalling(true);
+//                                    //修改全局变量map中的值
+////                                    MyApplication.appInstalling.put(appInformation.getIndex(),appInformation.isAppinstalling());
+//                                    MyApplication.appInstalling.put(appInformation.getIndex(),true);
+//                                    btnOpera.setVisibility(View.INVISIBLE);
+////                                    progressBar.setVisibility(View.VISIBLE);
+//                                    linearLayoutBar.setVisibility(View.VISIBLE);
+//                                    //监听蓝牙准备好消息
+//                                    bluetoothControl.setBlePreparedCallbackListener(new BLEPreparedCallbackListener() {
+//                                        @Override
+//                                        public void onBLEPrepared() {
+//                                            //获取task id
+//                                            RequestTaskidEntity entity = MessageBuilder.getRequestTaskidEntity(appInformation,BussinessTransaction.TASK_TYPE_DELETE);
+//                                            TSMPersonalizationWebservice.getTSMTaskid(MyApplication.seId, "dbinsert", entity, new TSMAppInformationCallback() {
+//                                                @Override
+//                                                public void getAppInfo(String xml) {
+//                                                    //解析xml
+//                                                    TSMResponseEntity entity = MessageBuilder.parseDownLoadXml(xml);
+//                                                    String taskId = entity.getTaskId();
+//                                                    int dectask = ByteUtil.parseInt(taskId,10,0);
+//                                                    byte[] data = ByteUtil.int2Bytes(dectask);
+//                                                    byte[] bTaskId = new byte[20];
+//                                                    System.arraycopy(data,0,bTaskId,20-data.length,data.length);
+//                                                    //删除应用
+////                                                        new BussinessTransaction().DeleteApplet(bluetoothControl,bTaskId,appInformation);
+//                                                    final BussinessTransaction transaction = new BussinessTransaction();
+//                                                    transaction.DeleteApplet(bluetoothControl, bTaskId, appInformation, new TsmTaskCompleteCallback() {
+//                                                        @Override
+//                                                        public void onTaskExecutedSuccess() {
+//                                                            transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS,appInformation,"delete");
+//                                                            MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_SUCCESS);
+//                                                            //关闭蓝牙连接
+//                                                            bluetoothControl.disconnectBluetooth();
+//                                                        }
+//
+//                                                        @Override
+//                                                        public void onTaskExecutedFailed() {
+//                                                            if (MyApplication.isOperated==false)
+//                                                                return;
+//                                                            transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED,appInformation,"delete");
+//                                                            MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_FAILED);
+//                                                            //关闭蓝牙连接
+//                                                            bluetoothControl.disconnectBluetooth();
+//                                                        }
+//
+//                                                        @Override
+//                                                        public void onTaskNotExecuted() {
+//                                                            transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_NOT_EXECUTED,appInformation,"notexecuted");
+//
+//                                                        }
+//                                                    });
+//                                                }
+//                                            });
+//
+//                                        }
+//
+//                                        @Override
+//                                        public void onBLEPrepareFailed() {
+//
+//                                        }
+//                                    });
 
                                 }
                             })

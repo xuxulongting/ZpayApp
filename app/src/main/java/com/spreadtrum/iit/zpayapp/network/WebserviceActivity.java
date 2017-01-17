@@ -1,4 +1,4 @@
-package com.spreadtrum.iit.zpayapp.network.webservice;
+package com.spreadtrum.iit.zpayapp.network;
 
 import android.content.ContentValues;
 import android.content.Context;

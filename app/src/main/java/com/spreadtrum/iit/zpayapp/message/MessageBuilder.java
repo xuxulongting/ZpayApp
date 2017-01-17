@@ -1,21 +1,18 @@
 package com.spreadtrum.iit.zpayapp.message;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
+import android.util.Xml;
+
+import com.spreadtrum.iit.zpayapp.common.ByteUtil;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 import org.xmlpull.v1.XmlSerializer;
 
-import android.util.Xml;
-
-import com.spreadtrum.iit.zpayapp.common.ByteUtil;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.List;
 
 public class MessageBuilder {
 

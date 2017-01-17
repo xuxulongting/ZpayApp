@@ -2,6 +2,7 @@ package com.spreadtrum.iit.zpayapp.message;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-9-7.
+ * 获取task id的请求参数
  */
 public class RequestTaskidEntity {
     public String getTasktype() {
