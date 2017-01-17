@@ -1,24 +1,16 @@
 package com.spreadtrum.iit.zpayapp.displaydemo;
 
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Switch;
 
-import com.spreadtrum.iit.zpayapp.Log.LogUtil;
-import com.spreadtrum.iit.zpayapp.PullToRefreshLayoutTellH.PullToRefreshLayout;
+import com.spreadtrum.iit.zpayapp.utils.LogUtil;
 import com.spreadtrum.iit.zpayapp.R;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
-import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
-import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothSettingsActivity;
-
 
 
 /**

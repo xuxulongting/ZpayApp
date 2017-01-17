@@ -32,7 +32,7 @@ public class TCPRequest {
                         listener.onResponse(readBuf,readCount);
                     }
                     else
-                        errorListener.onErrorResponse("TCPByteRequest error");
+                        errorListener.onErrorResponse(" error");
                 } catch (IOException e) {
 //                    e.printStackTrace();
                     errorListener.onErrorResponse(e.getMessage());

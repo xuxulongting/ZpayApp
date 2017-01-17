@@ -1,8 +1,8 @@
 package com.spreadtrum.iit.zpayapp.network.tcp;
 
-import com.spreadtrum.iit.zpayapp.Log.LogUtil;
+import com.spreadtrum.iit.zpayapp.utils.LogUtil;
 import com.spreadtrum.iit.zpayapp.bussiness.TsmTaskCompleteCallback;
-import com.spreadtrum.iit.zpayapp.common.ByteUtil;
+import com.spreadtrum.iit.zpayapp.utils.ByteUtil;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.SECallbackTSMListener;

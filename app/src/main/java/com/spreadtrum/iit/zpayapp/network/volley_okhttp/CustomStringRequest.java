@@ -1,15 +1,8 @@
 package com.spreadtrum.iit.zpayapp.network.volley_okhttp;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-
 import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.toolbox.StringRequest;
-import com.spreadtrum.iit.zpayapp.Log.LogUtil;
-import com.spreadtrum.iit.zpayapp.common.MyApplication;
-import com.spreadtrum.iit.zpayapp.common.MySharedPreference;
-import com.spreadtrum.iit.zpayapp.register_login.UserInfo;
 
 import java.util.HashMap;
 import java.util.Map;

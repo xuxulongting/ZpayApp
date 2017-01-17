@@ -14,7 +14,6 @@ import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
-import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
@@ -22,7 +21,7 @@ import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.map.Polyline;
 import com.baidu.mapapi.model.LatLng;
-import com.spreadtrum.iit.zpayapp.Log.LogUtil;
+import com.spreadtrum.iit.zpayapp.utils.LogUtil;
 import com.spreadtrum.iit.zpayapp.R;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 

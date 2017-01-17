@@ -3,11 +3,6 @@ package com.spreadtrum.iit.zpayapp.database;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.widget.Toast;
-
-import com.spreadtrum.iit.zpayapp.Log.LogUtil;
-
-import java.security.PublicKey;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-8-24.

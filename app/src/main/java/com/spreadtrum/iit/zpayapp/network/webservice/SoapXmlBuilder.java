@@ -2,7 +2,7 @@ package com.spreadtrum.iit.zpayapp.network.webservice;
 
 import android.util.Xml;
 
-import com.spreadtrum.iit.zpayapp.Log.LogUtil;
+import com.spreadtrum.iit.zpayapp.utils.LogUtil;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 
 import org.xmlpull.v1.XmlPullParser;

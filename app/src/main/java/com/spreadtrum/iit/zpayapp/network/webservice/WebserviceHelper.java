@@ -2,8 +2,8 @@ package com.spreadtrum.iit.zpayapp.network.webservice;
 
 import android.util.Base64;
 
-import com.spreadtrum.iit.zpayapp.Log.LogUtil;
-import com.spreadtrum.iit.zpayapp.common.ByteUtil;
+import com.spreadtrum.iit.zpayapp.utils.LogUtil;
+import com.spreadtrum.iit.zpayapp.utils.ByteUtil;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.message.AppInformation;
 import com.spreadtrum.iit.zpayapp.message.MessageBuilder;
@@ -150,79 +150,75 @@ public class WebserviceHelper {
     }
 
     /**
-     * 获取applet列表信息
+     * 获取展示的应用信息
      * @param seId
      * @param callback
      */
     public static void getListDataWithSeid(String seId, final ResultCallback callback){
-        //从网络获取appInformation
+        //请求类型
         final String requestType = "dbquery";
+        //请求数据
         final String requestData = "applistquery";
         LogUtil.debug("THREAD","getListDataWithSeid: "+String.valueOf(currentThread().getId()));
-        //(2)从网络获取数据，使用消息的方式，因为网络获取数据是异步的
-        TSMPersonalizationWebservice.getAppinfoFromWebservice(seId, requestType, requestData,
-                new TSMAppInformationCallback() {
-                    @Override
-                    public void getAppInfo(String xml) {
-                        LogUtil.debug("THREAD","getAppInfo: "+String.valueOf(currentThread().getId()));
-                        if(xml.isEmpty()) {
-                            callback.onFailed("网络异常");
-                            return;
+        //创建request xml
+        String requestXml = MessageBuilder.doBussinessRequest(seId,requestType,requestData);
+        //base64加密
+        String requestXmlBase64 = Base64.encodeToString(requestXml.getBytes(),Base64.DEFAULT);
+        LogUtil.debug(requestXmlBase64);
+        //发送soap请求，并获取xml结果,从网络获取数据，使用消息的方式，因为网络获取数据是异步的
+        TSMPersonalizationWebservice.getTSMInformation(requestXmlBase64, new TSMInformationCallback() {
+            @Override
+            public void getAppInfo(String xml) {
+                LogUtil.debug("THREAD","getAppInfo: "+String.valueOf(currentThread().getId()));
+                if(xml.isEmpty()) {
+                    callback.onFailed("网络异常");
+                    return;
+                }
+                if(xml.equals("808")){
+                    callback.onFailed("808");
+                    return;
+                }
+                List<AppInformation> appList;
+                //解析xml
+                TSMResponseEntity entity = MessageBuilder.parseDownLoadXml(xml);
+                //获取List<AppInformation>
+                LogUtil.debug("get applist");
+                appList = entity.getAppInformationList();
+                //appInfoPrepared=true;
+                //获取全局变量map中的值给appList
+                for (Map.Entry<String, Boolean> entry : MyApplication.appInstalling.entrySet()) {
+                    String index = entry.getKey();
+                    Boolean installing = entry.getValue();
+                    for (int i = 0; i < appList.size(); i++) {
+                        AppInformation appInfo = appList.get(i);
+                        if (appInfo.getIndex().equals(index)) {
+                            appInfo.setAppinstalling(installing);
                         }
-                        if(xml.equals("808")){
-                            callback.onFailed("808");
-                            return;
-                        }
-                        List<AppInformation> appList;
-                        //解析xml
-                        TSMResponseEntity entity = MessageBuilder.parseDownLoadXml(xml);
-                        //获取List<AppInformation>
-                        LogUtil.debug("get applist");
-                        appList = entity.getAppInformationList();
-                        //appInfoPrepared=true;
-                        //获取全局变量map中的值给appList
-                        for (Map.Entry<String, Boolean> entry : MyApplication.appInstalling.entrySet()) {
-                            String index = entry.getKey();
-                            Boolean installing = entry.getValue();
-                            for (int i = 0; i < appList.size(); i++) {
-                                AppInformation appInfo = appList.get(i);
-                                if (appInfo.getIndex().equals(index)) {
-                                    appInfo.setAppinstalling(installing);
-                                }
-                            }
-                        }
-                        callback.onSuccess(appList);
                     }
-                });
+                }
+                callback.onSuccess(appList);
+            }
+        });
     }
 
     /**
      * 获取业务（下载，删除，同步）的任务id
      * @param seId  SE的索引信息
-     * @param requestType   请求的类型（数据查询/数据写入）
-     * @param entity    请求的数据内容
+     * @param item   执行任务的相关applet信息
+     * @param taskType    请求的任务类型
      * @param callback  网络请求结果回调
      */
-    public static void getTSMTaskid(String seId, String requestType, RequestTaskidEntity entity,
-                                    TSMAppInformationCallback callback){
+    public static void getTSMTaskid(String seId, AppInformation item,String taskType,
+                                    TSMInformationCallback callback){
+        //请求类型
+        String requestType = "dbinsert";
+        //请求数据
+        RequestTaskidEntity entity=MessageBuilder.getRequestTaskidEntity(item, taskType);
         //创建请求xml
         String requestXml = MessageBuilder.doBussinessRequest(seId,requestType,entity);
         //base64加密
         String requestXmlBase64 = Base64.encodeToString(requestXml.getBytes(),Base64.DEFAULT);
         //发送soap请求，并获取xml结果
-        TSMPersonalizationWebservice.getTSMAppInformation(requestXmlBase64,callback);
+        TSMPersonalizationWebservice.getTSMInformation(requestXmlBase64,callback);
     }
-
-//    /**
-//     * 根据seid获取到了应用列表
-//     * @param seId
-//     */
-//    public static void getListDataFromWebService(String bleDevAddr,String seId,ResultCallback callback){
-//        if(seId.isEmpty()) {
-//            LogUtil.debug("seid is empty.");
-//            getListDataWithoutSeid(bleDevAddr, callback);
-//        }
-//        else
-//            getListDataWithSeid(seId,callback);
-//    }
 }

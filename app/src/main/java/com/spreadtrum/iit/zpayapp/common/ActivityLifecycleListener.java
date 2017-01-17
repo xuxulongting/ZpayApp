@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
 
-import com.spreadtrum.iit.zpayapp.Log.LogUtil;
+import com.spreadtrum.iit.zpayapp.utils.LogUtil;
 
 /**
  * 判断app是否运行在后台,每启动或关闭一个activity，都会执行一次onActivityCreated和onActivityStopped，

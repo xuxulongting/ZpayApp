@@ -13,11 +13,10 @@ import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
-import com.spreadtrum.iit.zpayapp.Log.LogUtil;
+import com.spreadtrum.iit.zpayapp.utils.LogUtil;
 import com.spreadtrum.iit.zpayapp.R;
 import com.spreadtrum.iit.zpayapp.bussiness.BussinessTransaction;
 import com.spreadtrum.iit.zpayapp.bussiness.TsmTaskCompleteCallback;
-import com.spreadtrum.iit.zpayapp.bussiness.ZAppStoreApi;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.message.AppInformation;
 import com.spreadtrum.iit.zpayapp.network.tcp.TCPNetParameter;
@@ -123,6 +122,7 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
             linearLayoutBar.setVisibility(View.INVISIBLE);
         }
         item.setIndexForlistview(position);
+        //下载Applet
         btnOperaCard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -153,7 +153,7 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
                     taskType=BussinessTransaction.TASK_TYPE_PERSONALIZE;
                 }
                 final BussinessTransaction transaction = new BussinessTransaction();
-                ZAppStoreApi.transactBussiness(item, taskType, new TsmTaskCompleteCallback() {
+                transaction.transactBussiness(item, taskType, new TsmTaskCompleteCallback() {
                     @Override
                     public void onTaskExecutedSuccess() {
 
@@ -168,11 +168,11 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
                                 .subscribe(new Action1<Integer>() {
                                     @Override
                                     public void call(Integer integer) {
-                                        Toast.makeText(MyApplication.getContextObject(),"绑卡成功",Toast.LENGTH_LONG);
+                                        Toast.makeText(MyApplication.getContextObject(),"绑卡成功",Toast.LENGTH_LONG).show();
                                     }
                                 });
                         //（2)使用消息方式发送消息到主线程进行操作
-//                                        MyApplication.handler.sendEmptyMessage(MyApplication.DOWNLOAD_SUCCESS);
+//                       MyApplication.handler.sendEmptyMessage(MyApplication.DOWNLOAD_SUCCESS);
                         //下载成功，断开蓝牙连接
                         MyApplication.isOperated = false;
                     }
@@ -204,129 +204,7 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
                 });
             }
         });
-//        btnOperaCard.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                //连接BLE
-//                MyApplication app = (MyApplication) mContext.getApplicationContext();//(MyApplication) getActivity().getApplication();
-//                final String bluetoothDevAddr = app.getBluetoothDevAddr();
-//                if(bluetoothDevAddr.isEmpty()){
-//                    new AlertDialog.Builder(mContext)
-//                            .setTitle("提示")
-//                            .setMessage("没有选择蓝牙设备，请到“设置”页面选择")
-//                            .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-//                                @Override
-//                                public void onClick(DialogInterface dialogInterface, int i) {
-//
-//                                }
-//                            }).show();
-//                    return;
-//                }
-//                //修改listview中button视图，修改item的值，就相当于修改了appList变量
-//                item.setAppinstalling(true);
-//                //修改全局变量map中的值
-//                MyApplication.appInstalling.put(item.getIndex(),true);
-//                //刷新Listview
-//                notifyDataSetChanged();
-//                //获取蓝牙句柄
-//                //if(bluetoothControl==null){
-//                final BluetoothControl bluetoothControl = BluetoothControl.getInstance(MyApplication.getContextObject(),bluetoothDevAddr);
-//                if (bluetoothControl==null)
-//                {
-//                    //修改listview中button视图，修改item的值，就相当于修改了appList变量
-//                    item.setAppinstalling(false);
-//                    //修改全局变量map中的值
-//                    MyApplication.appInstalling.put(item.getIndex(),false);
-//                    //刷新Listview
-//                    notifyDataSetChanged();
-//                    return;
-//                }
-//                bluetoothControl.setBlePreparedCallbackListener(new BLEPreparedCallbackListener() {
-//                    @Override
-//                    public void onBLEPrepared() {
-//                        //BLE已连接上，且SE通道已打开
-//                        //获取task id
-//                        RequestTaskidEntity entity=null;
-//                        if (item.getAppinstalled().equals("not_personalized")){
-//                            entity = MessageBuilder.getRequestTaskidEntity(item,BussinessTransaction.TASK_TYPE_PERSONALIZE);
-//                        }
-//                        else {
-//                            entity = MessageBuilder.getRequestTaskidEntity(item, BussinessTransaction.TASK_TYPE_DOWNLOAD);
-//                        }
-//                        TSMPersonalizationWebservice.getTSMTaskid(MyApplication.seId, "dbinsert", entity,
-//                                new TSMAppInformationCallback() {
-//                            @Override
-//                            public void getAppInfo(String xml) {
-//
-//                                //解析xml
-//                                TSMResponseEntity entity = MessageBuilder.parseDownLoadXml(xml);
-//                                String taskId = entity.getTaskId();
-//                                int dectask = ByteUtil.parseInt(taskId,10,0);
-//                                byte[] data = ByteUtil.int2Bytes(dectask);
-//                                byte[] bTaskId = new byte[20];
-//                                System.arraycopy(data,0,bTaskId,20-data.length,data.length);
-//                                item.setIndexForlistview(position);//标识在listview中的位置
-//                                //下载应用
-//                                final BussinessTransaction transaction = new BussinessTransaction();
-//                                LogUtil.debug("item index:"+item.getIndex());
-//                                transaction.DownloadApplet(bluetoothControl, bTaskId, item, new TsmTaskCompleteCallback() {
-////                                    AppInformation appInformation = item;
-//                                    @Override
-//                                    public void onTaskExecutedSuccess() {
-//                                        AppInformation appInformation = item;
-//                                        LogUtil.debug("internal item index:"+appInformation.getIndex());
-//                                        transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS,
-//                                                appInformation,"download");
-//
-//                                        //（1)使用RxJava实现从当前线程跳转到主线程
-//                                        Observable.just(MyApplication.DOWNLOAD_SUCCESS)
-//                                                .observeOn(AndroidSchedulers.mainThread())
-//                                                .subscribe(new Action1<Integer>() {
-//                                                    @Override
-//                                                    public void call(Integer integer) {
-//                                                        Toast.makeText(MyApplication.getContextObject(),"帮卡成功",Toast.LENGTH_LONG);
-//                                                    }
-//                                                });
-//                                         //（2)使用消息方式发送消息到主线程进行操作
-////                                        MyApplication.handler.sendEmptyMessage(MyApplication.DOWNLOAD_SUCCESS);
-//                                        //下载成功，断开蓝牙连接
-//                                        bluetoothControl.disconnectBluetooth();
-//                                    }
-//
-//                                    @Override
-//                                    public void onTaskExecutedFailed() {
-//                                        if (MyApplication.isOperated==false)
-//                                            return;
-//                                        AppInformation appInformation = item;
-//                                        LogUtil.debug("internal item index:"+appInformation.getIndex());
-//                                        transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED,appInformation,"download");
-//                                        MyApplication.handler.sendEmptyMessage(MyApplication.DOWNLOAD_FAILED);
-//                                        //下载失败，断开蓝牙连接
-//                                        bluetoothControl.disconnectBluetooth();
-//                                    }
-//
-//                                    @Override
-//                                    public void onTaskNotExecuted() {
-//                                        AppInformation appInformation = item;
-//                                        transaction.broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_NOT_EXECUTED,appInformation,"notexecuted");
-//                                    }
-//                                });
-//                            }
-//                        });
-//
-//                    }
-//
-//                    @Override
-//                    public void onBLEPrepareFailed() {
-//
-//                    }
-//
-//                });
-//                //}
-//            }
-//        });
-
-        //单击，则取消绑定,TSM不支持取消功能
+        //取消业务
         linearLayoutBar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

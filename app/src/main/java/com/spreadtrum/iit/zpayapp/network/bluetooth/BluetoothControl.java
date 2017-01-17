@@ -11,8 +11,8 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.widget.Toast;
 
-import com.spreadtrum.iit.zpayapp.Log.LogUtil;
-import com.spreadtrum.iit.zpayapp.common.ByteUtil;
+import com.spreadtrum.iit.zpayapp.utils.LogUtil;
+import com.spreadtrum.iit.zpayapp.utils.ByteUtil;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 
 import java.util.ArrayList;

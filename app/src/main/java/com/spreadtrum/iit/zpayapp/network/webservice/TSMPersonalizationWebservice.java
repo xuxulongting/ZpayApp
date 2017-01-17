@@ -5,7 +5,7 @@ import android.util.Base64;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.spreadtrum.iit.zpayapp.Log.LogUtil;
+import com.spreadtrum.iit.zpayapp.utils.LogUtil;
 import com.spreadtrum.iit.zpayapp.message.MessageBuilder;
 import com.spreadtrum.iit.zpayapp.network.http.HttpUtils;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.CustomStringRequest;
@@ -18,27 +18,7 @@ import com.spreadtrum.iit.zpayapp.network.volley_okhttp.RequestQueueUtils;
 
 
 public class TSMPersonalizationWebservice {
-    /**
-     * 获取展示的应用信息
-     * @param seId  SE的索引信息
-     * @param requestType 请求的类型（数据查询/数据写入）
-     * @param requestData 请求的数据内容
-     * @param callback     网络请求结果回调
-     */
-    public static void getAppinfoFromWebservice(String seId,String requestType,String requestData,
-                                                TSMAppInformationCallback callback){
-        //创建request xml
-        String requestXml = MessageBuilder.doBussinessRequest(seId,requestType,requestData);
-        //base64加密
-        String requestXmlBase64 = Base64.encodeToString(requestXml.getBytes(),Base64.DEFAULT);
-        LogUtil.debug(requestXmlBase64);
-        //发送soap请求，并获取xml结果
-        getTSMAppInformation(requestXmlBase64,callback);
-    }
-
-
-
-    /**
+     /**
      * 通过webservice获取远程管理信息
      * @param xml 客户端业务发起数据
      *            具体说明文档在《TSM后台服务与客户端之间通信协议修改说明20161216.docx》
@@ -83,11 +63,11 @@ public class TSMPersonalizationWebservice {
 //        });
     }
     /**
-     * 通过web service接口，获取相关信息
-     * @param xml 请求xml
+     * 通过web service接口，获取applet列表信息或task id
+     * @param xml 请求xml,根据不同的请求，获取applet列表或者task id
      * @return
      */
-    public static void getTSMAppInformation(String xml, final TSMAppInformationCallback callback){
+    public static void getTSMInformation(String xml, final TSMInformationCallback callback){
         String soap = SoapXmlBuilder.readSoap("soap11.xml");
         soap = soap.replace("123",xml);
         byte[] entity = soap.getBytes();
@@ -119,38 +99,6 @@ public class TSMPersonalizationWebservice {
             }
         });
         RequestQueueUtils.getInstance().addToRequestQueue(request);
-
-//        HttpUtils.sendHttpRequestforWebservice(NetParameter.WEBSERVICE_APPLIST_PATH, entity, new Response.Listener<String>() {
-//            @Override
-//            public void onResponse(String response) {
-//                LogUtil.debug(response);
-//                String xmlResultEncode = SoapXmlBuilder.parseSOAP(response,"TSMBDServiceResult");//"XMLReturnResult");//"TSMBDServiceResponse"
-//                if(callback!=null){
-//                    String xmlResult = new String(Base64.decode(xmlResultEncode.getBytes(),Base64.DEFAULT));
-//                    callback.getAppInfo(xmlResult);
-//                }
-//            }
-//        }, new Response.ErrorListener() {
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-//                if(error.networkResponse==null){
-//                    callback.getAppInfo("");
-//                }
-//                else {
-//                    int errCode = error.networkResponse.statusCode;
-//                    LogUtil.debug("webservice error:" + String.valueOf(errCode));
-//                    if (errCode == 808) {
-//                        callback.getAppInfo(String.valueOf(808));
-//                    }
-//                }
-//            }
-//        });
     }
-
-
-
-
-
-
 }
 

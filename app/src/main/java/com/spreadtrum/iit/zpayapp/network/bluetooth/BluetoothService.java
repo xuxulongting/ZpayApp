@@ -18,14 +18,14 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.spreadtrum.iit.zpayapp.Log.LogUtil;
-import com.spreadtrum.iit.zpayapp.common.AppConfig;
+import com.spreadtrum.iit.zpayapp.common.AppGlobal;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
+import com.spreadtrum.iit.zpayapp.utils.LogUtil;
 
 import java.util.List;
 import java.util.UUID;
 
-import static com.spreadtrum.iit.zpayapp.network.bluetooth_test.SampleGattAttributes.*;
+import static com.spreadtrum.iit.zpayapp.network.bluetooth_test.SampleGattAttributes.HEART_RATE_MEASUREMENT;
 import static java.lang.Thread.currentThread;
 
 /**
@@ -274,7 +274,7 @@ public class BluetoothService extends android.app.Service{
             intent.putExtra(EXTRA_DATA, String.valueOf(heartRate));
         } else if (action.equals(ACTION_DATA_AVAILABLE)){
             //使用金电手环
-            if (AppConfig.JDBLE) {
+            if (AppGlobal.JDBLE) {
                 final byte[] data = characteristic.getValue();
                 LogUtil.debug(TAG, "receive from ble:" + bytesToHexString(data));
                 if((data[1]==BluetoothControl.SETPARA_RECV) && (data[0]==0x10)){

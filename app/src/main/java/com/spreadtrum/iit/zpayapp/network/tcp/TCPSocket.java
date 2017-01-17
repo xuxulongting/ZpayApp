@@ -1,6 +1,6 @@
 package com.spreadtrum.iit.zpayapp.network.tcp;
 
-import com.spreadtrum.iit.zpayapp.Log.LogUtil;
+import com.spreadtrum.iit.zpayapp.utils.LogUtil;
 
 import java.io.BufferedReader;
 import java.io.IOException;

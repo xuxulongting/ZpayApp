@@ -1,4 +1,4 @@
-package com.spreadtrum.iit.zpayapp.common;
+package com.spreadtrum.iit.zpayapp.utils;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;

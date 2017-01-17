@@ -2,7 +2,7 @@ package com.spreadtrum.iit.zpayapp.message;
 
 import android.util.Xml;
 
-import com.spreadtrum.iit.zpayapp.common.ByteUtil;
+import com.spreadtrum.iit.zpayapp.utils.ByteUtil;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

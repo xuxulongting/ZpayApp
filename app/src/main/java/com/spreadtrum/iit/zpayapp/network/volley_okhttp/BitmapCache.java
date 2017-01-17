@@ -21,7 +21,7 @@ import java.security.NoSuchAlgorithmException;
  */
 public class BitmapCache implements ImageLoader.ImageCache {
     private LruCache<String,Bitmap> cache;
-    private DiskLruCache mDiskCaches;
+//    private DiskLruCache mDiskCaches;
     public BitmapCache() {
 //        int maxSize = 10 * 1024 * 1024;
         int maxMemory = (int) Runtime.getRuntime().maxMemory();

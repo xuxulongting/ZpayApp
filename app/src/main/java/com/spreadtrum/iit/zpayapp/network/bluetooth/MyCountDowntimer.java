@@ -2,7 +2,7 @@ package com.spreadtrum.iit.zpayapp.network.bluetooth;
 
 import android.os.CountDownTimer;
 
-import com.spreadtrum.iit.zpayapp.Log.LogUtil;
+import com.spreadtrum.iit.zpayapp.utils.LogUtil;
 
 /**
  * Created by SPREADTRUM\ting.long on 16-8-29.

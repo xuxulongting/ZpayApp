@@ -1,9 +1,8 @@
 package com.spreadtrum.iit.zpayapp.network.http;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.spreadtrum.iit.zpayapp.Log.LogUtil;
+import com.spreadtrum.iit.zpayapp.utils.LogUtil;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.CustomStringRequest;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.RequestQueueUtils;
 

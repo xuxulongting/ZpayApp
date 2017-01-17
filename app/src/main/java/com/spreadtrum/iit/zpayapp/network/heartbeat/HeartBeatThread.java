@@ -2,12 +2,12 @@ package com.spreadtrum.iit.zpayapp.network.heartbeat;
 
 import android.content.Intent;
 
-import com.spreadtrum.iit.zpayapp.Log.LogUtil;
-import com.spreadtrum.iit.zpayapp.common.ByteUtil;
+import com.spreadtrum.iit.zpayapp.utils.LogUtil;
+import com.spreadtrum.iit.zpayapp.bussiness.BussinessTransaction;
+import com.spreadtrum.iit.zpayapp.utils.ByteUtil;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.message.MessageBuilder;
 import com.spreadtrum.iit.zpayapp.message.TSMRequestData;
-import com.spreadtrum.iit.zpayapp.bussiness.ZAppStoreApi;
 import com.spreadtrum.iit.zpayapp.network.bluetooth.BluetoothControl;
 
 import java.util.Random;
@@ -17,16 +17,16 @@ import java.util.Random;
  */
 
 public class HeartBeatThread extends Thread implements Runnable {
-    private BluetoothControl bluetoothControl;
     private TSMRequestData requestData;
     private boolean bEnded = false;
     private boolean bContinued = false;
     private String requestXml;
-//    public HeartBeatThread(BluetoothControl bluetoothControl,TSMRequestData requestData){
-//        this.bluetoothControl = bluetoothControl;
-//        this.requestData = requestData;
-//    }
 
+    /**
+     * 生成随机数作为session ID
+     * @param byteOfLen
+     * @return
+     */
     private byte[] generateSessionId(int byteOfLen){
         byte[] byteOfRandom = new byte[byteOfLen];
         Random ra =new Random();
@@ -42,8 +42,6 @@ public class HeartBeatThread extends Thread implements Runnable {
         while (true) {
             if (MyApplication.seId.isEmpty())
                 continue;
-//            MyApplication app = (MyApplication) MyApplication.getContextObject();
-//            bluetoothControl = BluetoothControl.getInstance(app, app.getBluetoothDevAddr());
             requestData = new TSMRequestData();
             requestData.setSeId(MyApplication.seId);
             requestData.imei="";
@@ -65,7 +63,7 @@ public class HeartBeatThread extends Thread implements Runnable {
                 }
                 bEnded = true;
                 LogUtil.debug("HEARTBEAT","HeartBeatThread,thread id is:"+currentThread().getId());
-                ZAppStoreApi.transactWithTSMAndSE(requestXml, new HeartBeatResultCallback<String>() {
+                new BussinessTransaction().transactBussinessWithHeartBeat(requestXml, new HeartBeatResultCallback<String>() {
                     @Override
                     public void onApduExcutedSuccess(String responseXml) {
                         requestXml = responseXml;
@@ -111,6 +109,10 @@ public class HeartBeatThread extends Thread implements Runnable {
         }
     }
 
+    /**
+     * 执行完任务（锁定/解锁）后，广播消息，通知应用列表进行刷新
+     * @param action
+     */
     public static void broadcastRMUpdate(String action){
         Intent intent = new Intent();
         intent.setAction(action);

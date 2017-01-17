@@ -25,7 +25,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.spreadtrum.iit.zpayapp.Log.LogUtil;
+import com.spreadtrum.iit.zpayapp.utils.LogUtil;
 import com.spreadtrum.iit.zpayapp.PullToRefreshLayoutTellH.PullToRefreshLayout;
 import com.spreadtrum.iit.zpayapp.R;
 import com.spreadtrum.iit.zpayapp.bussiness.BussinessTransaction;
@@ -34,7 +34,7 @@ import com.spreadtrum.iit.zpayapp.database.AppDisplayDatabaseHelper;
 import com.spreadtrum.iit.zpayapp.database.DatabaseHandler;
 import com.spreadtrum.iit.zpayapp.message.AppInformation;
 import com.spreadtrum.iit.zpayapp.network.heartbeat.HeartBeatThread;
-import com.spreadtrum.iit.zpayapp.common.NetworkUtils;
+import com.spreadtrum.iit.zpayapp.utils.NetworkUtils;
 import com.spreadtrum.iit.zpayapp.bussiness.ResultCallback;
 import com.spreadtrum.iit.zpayapp.bussiness.ZAppStoreApi;
 import com.spreadtrum.iit.zpayapp.register_login.DigtalpwdLoginActivity;

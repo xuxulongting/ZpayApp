@@ -1,4 +1,4 @@
-package com.spreadtrum.iit.zpayapp.Log;
+package com.spreadtrum.iit.zpayapp.utils;
 
 import android.os.ParcelUuid;
 import android.util.Log;
