@@ -449,6 +449,9 @@ public class BluetoothService extends android.app.Service{
                 connectionState = STATE_CONNECTING;
                 return true;
             } else {
+                //蓝牙连接失败
+                bluetoothGatt = null;
+                connectionState = STATE_DISCONNECTED;
                 return false;
             }
         }
@@ -460,11 +463,17 @@ public class BluetoothService extends android.app.Service{
         }
         // We want to directly connect to the device, so we are setting the autoConnect parameter to false.
         bluetoothGatt = device.connectGatt(this, false, bluetoothGattCallback);
-        LogUtil.debug("Trying to create a new connection.");
-        bluetoothDeviceAddress = address;
-        connectionState = STATE_CONNECTING;
+        if (bluetoothGatt==null) {
+            bluetoothDeviceAddress = address;
+            connectionState = STATE_DISCONNECTED;
+            return false;
+        }else {
+            LogUtil.debug("Trying to create a new connection.");
+            bluetoothDeviceAddress = address;
+            connectionState = STATE_CONNECTING;
 
-        return true;
+            return true;
+        }
     }
 
     public boolean discoverServices(){

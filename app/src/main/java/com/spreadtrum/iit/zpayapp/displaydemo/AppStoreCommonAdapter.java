@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
+import com.spreadtrum.iit.zpayapp.common.AppGlobal;
 import com.spreadtrum.iit.zpayapp.utils.LogUtil;
 import com.spreadtrum.iit.zpayapp.R;
 import com.spreadtrum.iit.zpayapp.bussiness.BussinessTransaction;
@@ -127,8 +128,9 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
             @Override
             public void onClick(View v) {
                 //选择BLE设备地址
-                final MyApplication app = (MyApplication) mContext.getApplicationContext();//(MyApplication) getActivity().getApplication();
-                final String bluetoothDevAddr = app.getBluetoothDevAddr();
+//                final MyApplication app = (MyApplication) mContext.getApplicationContext();//(MyApplication) getActivity().getApplication();
+//                final String bluetoothDevAddr = app.getBluetoothDevAddr();
+                final String bluetoothDevAddr = AppGlobal.bluetoothDevAddr;
                 if(bluetoothDevAddr.isEmpty()){
                     new AlertDialog.Builder(mContext)
                             .setTitle("提示")
@@ -174,12 +176,12 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
                         //（2)使用消息方式发送消息到主线程进行操作
 //                       MyApplication.handler.sendEmptyMessage(MyApplication.DOWNLOAD_SUCCESS);
                         //下载成功，断开蓝牙连接
-                        MyApplication.isOperated = false;
+                        AppGlobal.isOperated = false;
                     }
 
                     @Override
                     public void onTaskExecutedFailed() {
-                        if (MyApplication.isOperated==false)
+                        if (AppGlobal.isOperated==false)
                             return;
 
                         AppInformation appInformation = item;
@@ -191,7 +193,7 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
 //                                app.getBluetoothDevAddr());
 //                        if (bluetoothControl!=null)
 //                            bluetoothControl.disconnectBluetooth();
-                        MyApplication.isOperated = false;
+                        AppGlobal.isOperated = false;
                     }
 
                     @Override
@@ -199,7 +201,7 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
 
                         AppInformation appInformation = item;
                         new BussinessBroadcast().broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_NOT_EXECUTED,appInformation,"notexecuted");
-                        MyApplication.isOperated = false;
+                        AppGlobal.isOperated = false;
                     }
                 });
             }
@@ -216,7 +218,7 @@ public class AppStoreCommonAdapter extends CommonAdapter<AppInformation> {
                         tcpSocket.closeSocket();
                         new BussinessBroadcast().broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED,
                                 item,"download");
-                        MyApplication.isOperated = false;
+                        AppGlobal.isOperated = false;
                     }
                 }).start();
 //                //关闭蓝牙连接

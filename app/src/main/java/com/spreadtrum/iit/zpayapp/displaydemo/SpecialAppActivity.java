@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
+import com.spreadtrum.iit.zpayapp.common.AppGlobal;
 import com.spreadtrum.iit.zpayapp.network.tcp.TCPNetParameter;
 import com.spreadtrum.iit.zpayapp.network.tcp.TCPSocket;
 import com.spreadtrum.iit.zpayapp.utils.LogUtil;
@@ -38,7 +39,7 @@ public class SpecialAppActivity extends BaseActivity {
     private Button btnOpera;
     private LinearLayout linearLayoutBar;
     private AppInformation appInformation;
-    private String bussinessType;   //下载/删除业务
+    private String operaType;   //下载/删除业务
     /**
      * 接收来自应用下载或者删除完成的广播消息，主要是为了更新变量appinstalling，appinstalled状态
      */
@@ -52,7 +53,7 @@ public class SpecialAppActivity extends BaseActivity {
 
         String bussinessType = intent.getStringExtra("BUSSINESS_TYPE");
         if(intent.getAction().equals(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS)) {
-            MyApplication.isOperated = false;
+            AppGlobal.isOperated = false;
             if (bussinessType.equals("download")) {
                 appInformation.setAppinstalled("yes");
                 linearLayoutBar.setVisibility(View.INVISIBLE);
@@ -70,7 +71,7 @@ public class SpecialAppActivity extends BaseActivity {
         else
         {
             if (intent.getAction().equals(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED))
-                MyApplication.isOperated = false;
+                AppGlobal.isOperated = false;
             linearLayoutBar.setVisibility(View.INVISIBLE);
             btnOpera.setVisibility(View.VISIBLE);
         }
@@ -119,16 +120,25 @@ public class SpecialAppActivity extends BaseActivity {
 
         if(isInstalling){
             btnOpera.setVisibility(View.INVISIBLE);
-//            progressBar.setVisibility(View.VISIBLE);
+            if (appInstalled.equals("yes"))
+                operaType = "delete";
+            else
+                operaType = "download";
             linearLayoutBar.setVisibility(View.VISIBLE);
         }
         else
         {
             if (appLocked.equals("yes")){
                 btnOpera.setText("已锁定");
+                btnOpera.setEnabled(false);
             }
             else if(appInstalled.equals("yes")) {
                 btnOpera.setText("解绑");
+                btnOpera.setEnabled(true);
+            }
+            else {
+                btnOpera.setText("绑卡");
+                btnOpera.setEnabled(true);
             }
             btnOpera.setVisibility(View.VISIBLE);
 //            progressBar.setVisibility(View.INVISIBLE);
@@ -142,10 +152,11 @@ public class SpecialAppActivity extends BaseActivity {
             public void onClick(View view) {
                 //该点击事件完成绑卡或取消绑卡
                 if(btnOpera.getText().equals("绑卡")){
-                    bussinessType = "download";
+                    operaType = "download";
                     //连接BLE
-                    MyApplication app = (MyApplication) getApplication();
-                    final String bluetoothDevAddr = app.getBluetoothDevAddr();
+//                    MyApplication app = (MyApplication) getApplication();
+//                    final String bluetoothDevAddr = app.getBluetoothDevAddr();
+                    final String bluetoothDevAddr = AppGlobal.bluetoothDevAddr;
                     if(bluetoothDevAddr.isEmpty()){
                         new AlertDialog.Builder(SpecialAppActivity.this)
                                 .setTitle("提示")
@@ -170,7 +181,7 @@ public class SpecialAppActivity extends BaseActivity {
                             new TsmTaskCompleteCallback() {
                                 @Override
                                 public void onTaskExecutedSuccess() {
-                                    MyApplication.isOperated = false;
+                                    AppGlobal.isOperated = false;
                                     new BussinessBroadcast().broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS,appInformation,"download");
                                     MyApplication.handler.sendEmptyMessage(MyApplication.DOWNLOAD_SUCCESS);
                                 }
@@ -178,21 +189,21 @@ public class SpecialAppActivity extends BaseActivity {
                                 @Override
                                 public void onTaskExecutedFailed() {
                                     //如果当前没有下载/删除动作，则该广播无效，主要是蓝牙主动断开连接（下载完成）或意外断开连接
-                                    if (MyApplication.isOperated==false)
+                                    if (AppGlobal.isOperated==false)
                                         return;
-                                    MyApplication.isOperated = false;
+                                    AppGlobal.isOperated = false;
                                     new BussinessBroadcast().broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED,appInformation,"download");
                                     MyApplication.handler.sendEmptyMessage(MyApplication.DOWNLOAD_FAILED);
                                 }
 
                                 @Override
                                 public void onTaskNotExecuted() {
-                                    MyApplication.isOperated = false;
+                                    AppGlobal.isOperated = false;
                                     new BussinessBroadcast().broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_NOT_EXECUTED,appInformation,"notexecuted");
                                 }
                             });
                 }else if (btnOpera.getText().equals("解绑")){
-                    bussinessType = "delete";
+                    operaType = "delete";
                     new AlertDialog.Builder(SpecialAppActivity.this)
                             .setTitle("提示")
                             .setMessage("确认解除绑定?")
@@ -201,8 +212,9 @@ public class SpecialAppActivity extends BaseActivity {
                                 public void onClick(DialogInterface dialogInterface, int i) {
 
                                     //连接BLE
-                                    MyApplication app = (MyApplication) getApplication();
-                                    final String bluetoothDevAddr = app.getBluetoothDevAddr();
+//                                    MyApplication app = (MyApplication) getApplication();
+//                                    final String bluetoothDevAddr = app.getBluetoothDevAddr();
+                                    final String bluetoothDevAddr = AppGlobal.bluetoothDevAddr;
                                     if(bluetoothDevAddr.isEmpty()){
                                         new AlertDialog.Builder(SpecialAppActivity.this)
                                                 .setTitle("提示")
@@ -229,7 +241,7 @@ public class SpecialAppActivity extends BaseActivity {
                                             new TsmTaskCompleteCallback() {
                                                 @Override
                                                 public void onTaskExecutedSuccess() {
-                                                    MyApplication.isOperated=false;
+                                                    AppGlobal.isOperated=false;
                                                     new BussinessBroadcast().broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS,appInformation,"delete");
                                                     MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_SUCCESS);
                                                     //java.lang.RuntimeException: Can't create handler inside thread that has not called Looper.prepare()
@@ -238,9 +250,9 @@ public class SpecialAppActivity extends BaseActivity {
 
                                                 @Override
                                                 public void onTaskExecutedFailed() {
-                                                    if (MyApplication.isOperated==false)
+                                                    if (AppGlobal.isOperated==false)
                                                         return;
-                                                    MyApplication.isOperated=false;
+                                                    AppGlobal.isOperated=false;
                                                     new BussinessBroadcast().broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED,appInformation,"delete");
                                                     MyApplication.handler.sendEmptyMessage(MyApplication.DELETE_FAILED);
 
@@ -248,7 +260,7 @@ public class SpecialAppActivity extends BaseActivity {
 
                                                 @Override
                                                 public void onTaskNotExecuted() {
-                                                    MyApplication.isOperated=false;
+                                                    AppGlobal.isOperated=false;
                                                     new BussinessBroadcast().broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_NOT_EXECUTED,appInformation,"notexecuted");
 
                                                 }
@@ -271,14 +283,14 @@ public class SpecialAppActivity extends BaseActivity {
                     public void run() {
                         TCPSocket tcpSocket =  TCPSocket.getInstance(TCPNetParameter.IPAddress, TCPNetParameter.Port);
                         tcpSocket.closeSocket();
-                        if (bussinessType.equals("download"))
+                        if (operaType.equals("download"))
                             new BussinessBroadcast().broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED,
                                 appInformation,"download");
-                        else if (bussinessType.equals("delete"))
+                        else if (operaType.equals("delete"))
                             new BussinessBroadcast().broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED,
                                     appInformation,"delete");
 
-                        MyApplication.isOperated = false;
+                        AppGlobal.isOperated = false;
                     }
                 }).start();
 //                //关闭蓝牙连接

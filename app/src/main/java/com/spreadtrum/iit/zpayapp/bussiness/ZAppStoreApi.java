@@ -6,6 +6,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.spreadtrum.iit.zpayapp.common.AppGlobal;
 import com.spreadtrum.iit.zpayapp.utils.LogUtil;
 import com.spreadtrum.iit.zpayapp.network.volley_okhttp.NetParameter;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
@@ -168,12 +169,12 @@ public class ZAppStoreApi {
     public static void getListDataFromTSM(String bleDevAddr, final ResultCallback<List<AppInformation>> callback) {
         if (callback == null)
             return;
-        if(MyApplication.seId.isEmpty()) {
+        if(AppGlobal.seId.isEmpty()) {
             LogUtil.debug("seid is empty.");
             WebserviceHelper.getListDataWithoutSeid(bleDevAddr, callback);
         }
         else
-            WebserviceHelper.getListDataWithSeid(MyApplication.seId,callback);
-//        WebserviceHelper.getListDataFromWebService(bleDevAddr, MyApplication.seId, callback);
+            WebserviceHelper.getListDataWithSeid(AppGlobal.seId,callback);
+//        WebserviceHelper.getListDataFromWebService(bleDevAddr, AppGlobal.seId, callback);
     }
 }

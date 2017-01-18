@@ -2,6 +2,7 @@ package com.spreadtrum.iit.zpayapp.network.heartbeat;
 
 import android.content.Intent;
 
+import com.spreadtrum.iit.zpayapp.common.AppGlobal;
 import com.spreadtrum.iit.zpayapp.utils.LogUtil;
 import com.spreadtrum.iit.zpayapp.bussiness.BussinessTransaction;
 import com.spreadtrum.iit.zpayapp.utils.ByteUtil;
@@ -40,10 +41,10 @@ public class HeartBeatThread extends Thread implements Runnable {
     public void run() {
 //        LogUtil.debug("HEARTBEAT","heartbeat thread");
         while (true) {
-            if (MyApplication.seId.isEmpty())
+            if (AppGlobal.seId.isEmpty())
                 continue;
             requestData = new TSMRequestData();
-            requestData.setSeId(MyApplication.seId);
+            requestData.setSeId(AppGlobal.seId);
             requestData.imei="";
             requestData.phone="";
             requestData.taskId="";
@@ -87,7 +88,7 @@ public class HeartBeatThread extends Thread implements Runnable {
                                 LogUtil.debug("HEARTBEAT","onApduEmpty,thread id is:"+currentThread().getId());
                                 try {
                                     //等待300s,发送下一次心跳包
-                                    Thread.sleep(300000);
+                                    Thread.sleep(100000);
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
@@ -99,13 +100,25 @@ public class HeartBeatThread extends Thread implements Runnable {
 
                     @Override
                     public void onNetworkError(String errMsg) {
-                        bEnded = false;
-                        bContinued = false;
+//                        bEnded = false;
+//                        bContinued = false;
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                LogUtil.debug("HEARTBEAT","onApduEmpty,thread id is:"+currentThread().getId());
+                                try {
+                                    //等待300s,发送下一次心跳包
+                                    Thread.sleep(100000);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                                bEnded = false;
+                                bContinued = false;
+                            }
+                        }).start();
                     }
                 });
             }
-//            else
-//                break;
         }
     }
 

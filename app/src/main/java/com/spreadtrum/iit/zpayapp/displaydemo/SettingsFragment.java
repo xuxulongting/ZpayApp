@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.spreadtrum.iit.zpayapp.common.AppGlobal;
 import com.spreadtrum.iit.zpayapp.utils.LogUtil;
 import com.spreadtrum.iit.zpayapp.R;
 import com.spreadtrum.iit.zpayapp.common.ActivityManager;
@@ -282,8 +283,9 @@ public class SettingsFragment extends Fragment {
             LogUtil.debug("onActivityResult");
             if(requestCode == REQUEST_BLUETOOTH_DEVICE && resultCode == RESULT_BLUETOOTH_DEVICE) {
                 String bluetoothDevAddr = data.getStringExtra("BLE_ADDR");
-                MyApplication app = (MyApplication) getActivity().getApplication();
-                app.setBluetoothDevAddr(bluetoothDevAddr);
+//                MyApplication app = (MyApplication) getActivity().getApplication();
+//                app.setBluetoothDevAddr(bluetoothDevAddr);
+                AppGlobal.bluetoothDevAddr = bluetoothDevAddr;
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.spreadtrum.iit.zpayapp.network.tcp;
 
+import com.spreadtrum.iit.zpayapp.common.AppGlobal;
 import com.spreadtrum.iit.zpayapp.utils.LogUtil;
 import com.spreadtrum.iit.zpayapp.bussiness.TsmTaskCompleteCallback;
 import com.spreadtrum.iit.zpayapp.utils.ByteUtil;
@@ -33,7 +34,7 @@ public class TCPTransferData {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                byte []bSeNO = MyApplication.seId.getBytes();
+                byte []bSeNO = AppGlobal.seId.getBytes();
 //                byte[] id = {0x2F, 0x7A};
 //                byte[] taskId = new byte[20];
 //                System.arraycopy(id,0,taskId,18,2);
@@ -67,7 +68,7 @@ public class TCPTransferData {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                byte []bSeNO = MyApplication.seId.getBytes();
+                byte []bSeNO = AppGlobal.seId.getBytes();
 //                byte[] id = {0x2E, 0x6E};
 //                byte[] taskId = new byte[20];
 //                System.arraycopy(id,0,taskId,18,2);
@@ -99,7 +100,7 @@ public class TCPTransferData {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                byte []bSeNO = MyApplication.seId.getBytes();
+                byte []bSeNO = AppGlobal.seId.getBytes();
 //                byte[] id = {0x2F, 0x7A};
 //                byte[] taskId = new byte[20];
 //                System.arraycopy(id,0,taskId,18,2);
@@ -129,7 +130,7 @@ public class TCPTransferData {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                byte []bSeNO = MyApplication.seId.getBytes();
+                byte []bSeNO = AppGlobal.seId.getBytes();
                 byte[] randomNum = generateRandom(12);
                 byte[] input = genAppRequestByte(randomNum,bSeNO,taskId);
                 if(mTcpSocket==null){
@@ -309,7 +310,7 @@ public class TCPTransferData {
     public byte[] genAppRequestByte(byte[] randomNum,byte[] bSeId,byte[] taskId){
         byte[] input = new byte[38+bSeId.length];
         byte[] cmd = {0x01, 0x00, 0x39, 0x24};
-        byte[] bSeNO = MyApplication.seId.getBytes();
+        byte[] bSeNO = AppGlobal.seId.getBytes();
         int paraLength = 1+bSeId.length+20;
         System.arraycopy(maskId, 0, input, 0, maskId.length);
         System.arraycopy(randomNum, 0, input, maskId.length, randomNum.length);

@@ -7,6 +7,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
+import com.spreadtrum.iit.zpayapp.common.AppGlobal;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
 import com.spreadtrum.iit.zpayapp.database.AppDisplayDatabaseHelper;
 import com.spreadtrum.iit.zpayapp.message.APDUInfo;
@@ -55,8 +56,8 @@ public class BussinessTransaction{
     public void transactBussiness(final AppInformation item, String taskType,
                                   final TsmTaskCompleteCallback completeCallback){
         //判断当前是否有任务
-        if (MyApplication.isOperated == false)
-            MyApplication.isOperated = true;
+        if (AppGlobal.isOperated == false)
+            AppGlobal.isOperated = true;
         else {
             Toast.makeText(MyApplication.getContextObject(),"已有任务",Toast.LENGTH_LONG).show();
             completeCallback.onTaskNotExecuted();
@@ -64,7 +65,7 @@ public class BussinessTransaction{
         }
         //获取task id
 //        RequestTaskidEntity entity=MessageBuilder.getRequestTaskidEntity(item, taskType);
-        WebserviceHelper.getTSMTaskid(MyApplication.seId, item,taskType, new TSMInformationCallback() {
+        WebserviceHelper.getTSMTaskid(AppGlobal.seId, item,taskType, new TSMInformationCallback() {
             @Override
             public void getAppInfo(String xml) {
                 //解析xml
@@ -76,9 +77,9 @@ public class BussinessTransaction{
                 System.arraycopy(data,0,bTaskId,20-data.length,data.length);
 //                item.setIndexForlistview(position);//标识在listview中的位置
                 //开始任务
-                MyApplication app = (MyApplication) MyApplication.getContextObject();
+//                MyApplication app = (MyApplication) MyApplication.getContextObject();
                 final BluetoothControl bluetoothControl = BluetoothControl.getInstance(MyApplication.getContextObject(),
-                        app.getBluetoothDevAddr());
+                        AppGlobal.bluetoothDevAddr);
                 if (bluetoothControl==null){
                     completeCallback.onTaskNotExecuted();
                     return;
@@ -155,7 +156,7 @@ public class BussinessTransaction{
                 }
                 MyApplication app = (MyApplication) MyApplication.getContextObject();
                 final BluetoothControl bluetoothControl = BluetoothControl.getInstance(MyApplication.getContextObject(),
-                        app.getBluetoothDevAddr());
+                        AppGlobal.bluetoothDevAddr);
                 if (bluetoothControl==null){
                     callback.onApduEmpty();
                     return;
@@ -168,7 +169,7 @@ public class BussinessTransaction{
                             @Override
                             public void onTransactionSuccess(APDUInfo apduInfo) {
                                 LogUtil.debug("HEARTBEAT","onTransactionSuccess");
-                                String responseXml = MessageBuilder.message_Response_handle(MyApplication.seId,"","","4",sessionId,taskId,apduInfo,"0");
+                                String responseXml = MessageBuilder.message_Response_handle(AppGlobal.seId,"","","4",sessionId,taskId,apduInfo,"0");
                                 LogUtil.debug("HEARTBEAT",responseXml);
                                 callback.onApduExcutedSuccess(responseXml);
                                 //关闭蓝牙
@@ -178,7 +179,8 @@ public class BussinessTransaction{
                             @Override
                             public void onTransactionFailed(APDUInfo apduInfo) {
                                 LogUtil.debug("HEARTBEAT","onTransactionFailed");
-                                String responseXml = MessageBuilder.message_Response_handle(MyApplication.seId,"","","0",sessionId,taskId,apduInfo,"0");
+                                String responseXml = MessageBuilder.message_Response_handle(AppGlobal.seId,"","","4",sessionId,taskId,apduInfo,"0");
+                                LogUtil.debug("HEARTBEAT",responseXml);
                                 callback.onApduExcutedFailed(responseXml);
                                 //关闭蓝牙
                                 if (bluetoothControl!=null)
@@ -260,13 +262,13 @@ public class BussinessTransaction{
         handleApduList(bluetoothControl,apduInfoList,0, new TransactionCallback() {
             @Override
             public void onTransactionSuccess(APDUInfo apduInfo) {
-                String responseXml = MessageBuilder.message_Response_handle(MyApplication.seId,"","",type,sessionId,taskId,apduInfo,"0");
+                String responseXml = MessageBuilder.message_Response_handle(AppGlobal.seId,"","",type,sessionId,taskId,apduInfo,"0");
                 callback.onSuccess(responseXml);
 
             }
             @Override
             public void onTransactionFailed(APDUInfo apduInfo) {
-                String responseXml = MessageBuilder.message_Response_handle(MyApplication.seId,"","",type,sessionId,taskId,apduInfo,"0");
+                String responseXml = MessageBuilder.message_Response_handle(AppGlobal.seId,"","",type,sessionId,taskId,apduInfo,"0");
                 callback.onFailed(responseXml);
             }
         });
@@ -295,8 +297,8 @@ public class BussinessTransaction{
      */
     public void DownloadApplet(BluetoothControl bluetoothControl, byte[] taskId,
                                final AppInformation appInformation, TsmTaskCompleteCallback completeCallback){
-        if (MyApplication.isOperated == false)
-            MyApplication.isOperated = true;
+        if (AppGlobal.isOperated == false)
+            AppGlobal.isOperated = true;
         else {
             Toast.makeText(MyApplication.getContextObject(),"已有任务",Toast.LENGTH_LONG).show();
             completeCallback.onTaskNotExecuted();
@@ -317,8 +319,8 @@ public class BussinessTransaction{
      */
     public void DeleteApplet(BluetoothControl bluetoothControl, byte []taskId,
                                     final AppInformation appInformation,TsmTaskCompleteCallback completeCallback){
-        if (MyApplication.isOperated == false)
-            MyApplication.isOperated = true;
+        if (AppGlobal.isOperated == false)
+            AppGlobal.isOperated = true;
         else {
             Toast.makeText(MyApplication.getContextObject(),"已有任务",Toast.LENGTH_LONG).show();
             completeCallback.onTaskNotExecuted();
@@ -443,7 +445,7 @@ public class BussinessTransaction{
 
             @Override
             public void errorCallback() {
-                callback.onTransactionFailed(apduInfo);
+//                callback.onTransactionFailed(apduInfo);
             }
         });
     }

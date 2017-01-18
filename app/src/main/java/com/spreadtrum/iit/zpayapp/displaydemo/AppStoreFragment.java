@@ -25,6 +25,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.spreadtrum.iit.zpayapp.common.AppGlobal;
 import com.spreadtrum.iit.zpayapp.utils.LogUtil;
 import com.spreadtrum.iit.zpayapp.PullToRefreshLayoutTellH.PullToRefreshLayout;
 import com.spreadtrum.iit.zpayapp.R;
@@ -90,7 +91,7 @@ public class AppStoreFragment extends Fragment {
                 appInformation.setAppinstalling(false);
 
                 if (intent.getAction().equals(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_SUCCESS)) {
-                    MyApplication.isOperated = false;
+                    AppGlobal.isOperated = false;
                     String bussinessType = bundle.getString("BUSSINESS_TYPE");
                     if (bussinessType.equals("download")) {
                         appInformation.setAppinstalled("yes");
@@ -103,12 +104,12 @@ public class AppStoreFragment extends Fragment {
                     busAdapter.notifyDataSetChanged();
                 } else if (intent.getAction().equals(BussinessTransaction.ACTION_BUSSINESS_EXECUTED_FAILED)){
                     //不需要更新appinstalled状态
-                    MyApplication.isOperated = false;
+                    AppGlobal.isOperated = false;
                     //从后台获取列表
                     getListDataFromTSM(MyApplication.getContextObject());
                 }
                 else {
-                    MyApplication.isOperated = false;
+                    AppGlobal.isOperated = false;
 //                    //更新applist
 //                    appList.set(appInformation.getIndexForlistview(), appInformation);
                     //刷新Listview
@@ -312,7 +313,7 @@ public class AppStoreFragment extends Fragment {
         MyApplication app = (MyApplication) MyApplication.getContextObject();
         String bleDevAddr="";
         //检查蓝牙设备地址
-        bleDevAddr = app.getBluetoothDevAddr();
+        bleDevAddr = AppGlobal.bluetoothDevAddr;//app.getBluetoothDevAddr();
         if (bleDevAddr.isEmpty()) {
             Toast.makeText(MyApplication.getContextObject(), "请选择蓝牙设备", Toast.LENGTH_LONG).show();
             //停止刷新，否则下次mRefreshLayout.setRefreshing(true);不再起作用

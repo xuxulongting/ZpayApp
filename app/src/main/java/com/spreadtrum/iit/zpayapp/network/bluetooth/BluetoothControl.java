@@ -11,6 +11,7 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.widget.Toast;
 
+import com.spreadtrum.iit.zpayapp.common.AppGlobal;
 import com.spreadtrum.iit.zpayapp.utils.LogUtil;
 import com.spreadtrum.iit.zpayapp.utils.ByteUtil;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
@@ -248,8 +249,9 @@ public class BluetoothControl {
                 if (bluetoothControl.bluetoothService.getBluetoothGattConnectionState()
                         == bluetoothControl.bluetoothService.STATE_DISCONNECTED) {
                     LogUtil.debug("getBluetoothGattConnectionState:STATE_DISCONNECTED");
-                    MyApplication app = (MyApplication) MyApplication.getContextObject();
-                    if (!bluetoothControl.bluetoothService.connect(app.getBluetoothDevAddr()))
+//                    MyApplication app = (MyApplication) MyApplication.getContextObject();
+                    String bluetoothDevAddr = AppGlobal.bluetoothDevAddr;
+                    if (!bluetoothControl.bluetoothService.connect(bluetoothDevAddr))
                         return null;
                 } else if (bluetoothControl.bluetoothService.getBluetoothGattConnectionState()
                         == bluetoothControl.bluetoothService.STATE_CONNECTING ||
@@ -296,7 +298,7 @@ public class BluetoothControl {
                         } else if (bluetoothControl.bluetoothService.getBluetoothGattConnectionState()
                                 == bluetoothControl.bluetoothService.STATE_DISCONNECTED) {
                             MyApplication app = (MyApplication) MyApplication.getContextObject();
-                            bluetoothControl.bluetoothService.connect(app.getBluetoothDevAddr());
+                            bluetoothControl.bluetoothService.connect(AppGlobal.bluetoothDevAddr);
                             LogUtil.debug("getBluetoothGattConnectionState:STATE_DISCONNECTED");
                         }
                     }

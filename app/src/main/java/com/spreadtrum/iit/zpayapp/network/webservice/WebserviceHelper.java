@@ -2,6 +2,7 @@ package com.spreadtrum.iit.zpayapp.network.webservice;
 
 import android.util.Base64;
 
+import com.spreadtrum.iit.zpayapp.common.AppGlobal;
 import com.spreadtrum.iit.zpayapp.utils.LogUtil;
 import com.spreadtrum.iit.zpayapp.utils.ByteUtil;
 import com.spreadtrum.iit.zpayapp.common.MyApplication;
@@ -57,12 +58,12 @@ public class WebserviceHelper {
                     @Override
                     public void callbackTSM(byte[] responseData, int responseLen) {
 
-//                        MyApplication.seId = new String(responseData,0,responseData.length-2);
+//                        AppGlobal.seId = new String(responseData,0,responseData.length-2);
                         //69168380826800042200000300000001255255
                         //45105350524400041600000300000001FFFF
-                        MyApplication.seId = ByteUtil.bytesToHexString(responseData,responseLen-2);
-                        callback.onSuccess(MyApplication.seId);
-                        LogUtil.debug("SeId:"+MyApplication.seId);
+                        AppGlobal.seId = ByteUtil.bytesToHexString(responseData,responseLen-2);
+                        callback.onSuccess(AppGlobal.seId);
+                        LogUtil.debug("SeId:"+AppGlobal.seId);
                     }
 
                     @Override
@@ -119,9 +120,9 @@ public class WebserviceHelper {
                                     //45105350524400041600000300000001FFFF
                                     //断开蓝牙连接
                                     bluetoothControl.disconnectBluetooth();
-                                    MyApplication.seId = ByteUtil.bytesToHexString(responseData,responseLen-2);
-                                    getListDataWithSeid(MyApplication.seId,callback);
-                                    LogUtil.debug("SeId:"+MyApplication.seId);
+                                    AppGlobal.seId = ByteUtil.bytesToHexString(responseData,responseLen-2);
+                                    getListDataWithSeid(AppGlobal.seId,callback);
+                                    LogUtil.debug("SeId:"+AppGlobal.seId);
                                 }
 
                                 @Override

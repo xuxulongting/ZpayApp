@@ -1,8 +1,4 @@
 package com.spreadtrum.iit.zpayapp.common;
-
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Created by SPREADTRUM\ting.long on 16-11-7.
  */
@@ -10,14 +6,10 @@ import java.util.Map;
 public class AppGlobal {
     //使用金电（JD）蓝牙手环
     public static final boolean JDBLE =true;
-
-    private static String bluetoothDevAddr="";
+    //蓝牙诋毁i
+    public static String bluetoothDevAddr="";
+    //SE当前是否有任务
     public static boolean isOperated = false;
-
-    public static void setBluetoothDevAddr(String devAddr){
-        bluetoothDevAddr = devAddr;
-    }
-    public static String getBluetoothDevAddr(){
-        return bluetoothDevAddr;
-    }
+    //SE id
+    public static String seId="";//"451000000000000020160328000000010003";
 }

@@ -19,8 +19,8 @@ import java.util.Map;
  */
 public class MyApplication extends Application {
     private static Context context;
-    private String bluetoothDevAddr="";
-    public static boolean isOperated = false;
+//    private String bluetoothDevAddr="";
+//    public static boolean isOperated = false;
     public static Map<String,Boolean> appInstalling = new HashMap<>();
     public static MyApplication getInstance(){
         return new MyApplication();
@@ -39,12 +39,12 @@ public class MyApplication extends Application {
     public static Context getContextObject(){
         return context;
     }
-    public void setBluetoothDevAddr(String devAddr){
-        bluetoothDevAddr = devAddr;
-    }
-    public String getBluetoothDevAddr(){
-        return bluetoothDevAddr;
-    }
+//    public void setBluetoothDevAddr(String devAddr){
+//        bluetoothDevAddr = devAddr;
+//    }
+//    public String getBluetoothDevAddr(){
+//        return bluetoothDevAddr;
+//    }
     public static Handler handler = new Handler(){
         public void handleMessage(Message msg){
            switch (msg.what){
@@ -84,5 +84,5 @@ public class MyApplication extends Application {
     public static final int DELETE_SUCCESS=2;
     public static final int DELETE_FAILED=3;
 
-    public static String seId="";//"451000000000000020160328000000010003";
+//    public static String seId="";//"451000000000000020160328000000010003";
 }

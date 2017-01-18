@@ -16,9 +16,9 @@
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="7twHwNlPMjm3ICKUdPLbZu8iytwvZUtV" />
-        <activity android:name=".register.MainLoginActivity">
+        <!--<activity android:name=".register.MainLoginActivity">-->
 
-        </activity>
+        <!--</activity>-->
         <activity
             android:name=".register_login.RegisterActivity"
             android:windowSoftInputMode="adjustNothing|stateHidden"
@@ -35,16 +35,12 @@
             <span style="white-space:pre"></span>
 
         </activity>
-        <activity android:name=".register.RegisterActivity_1"></activity>
-        <activity android:name=".login.UserDigitalPwdLoginActivity">
-
-        </activity>
-        <activity android:name=".login.UserZhiwenLoginActivity"></activity>
-        <activity android:name=".display.ApplicationActivity"></activity>
-        <activity android:name=".display.SpecialApplicationActivity"></activity>
-        <activity android:name=".network.RxJava_Retrofit.TestActivity">
-
-        </activity>
+        <!--<activity android:name=".register.RegisterActivity_1"></activity>-->
+        <!--<activity android:name=".login.UserDigitalPwdLoginActivity"></activity>-->
+        <!--<activity android:name=".login.UserZhiwenLoginActivity"></activity>-->
+        <!--<activity android:name=".display.ApplicationActivity"></activity>-->
+        <!--<activity android:name=".display.SpecialApplicationActivity"></activity>-->
+        <activity android:name=".network.RxJava_Retrofit.TestActivity"></activity>
         <activity android:name=".displaydemo.WelcomeActivity">
 
         </activity>
@@ -90,10 +86,11 @@
         </meta-data>
 
     </application>
-    <!--允许应用程序发现蓝牙设备-->
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+
     <!--允许应用程序连接蓝牙设备-->
     <uses-permission android:name="android.permission.BLUETOOTH" />
+    <!--允许应用程序发现蓝牙设备-->
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     <!--允许访问NFC-->
     <uses-permission android:name="android.permission.NFC"/>
     <!--允许访问存储设备-->
