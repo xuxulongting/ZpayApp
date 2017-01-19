@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.Thread.currentThread;
+import static java.lang.Thread.sleep;
 
 
 /**
@@ -249,7 +250,6 @@ public class BluetoothControl {
                 if (bluetoothControl.bluetoothService.getBluetoothGattConnectionState()
                         == bluetoothControl.bluetoothService.STATE_DISCONNECTED) {
                     LogUtil.debug("getBluetoothGattConnectionState:STATE_DISCONNECTED");
-//                    MyApplication app = (MyApplication) MyApplication.getContextObject();
                     String bluetoothDevAddr = AppGlobal.bluetoothDevAddr;
                     if (!bluetoothControl.bluetoothService.connect(bluetoothDevAddr))
                         return null;
@@ -266,16 +266,26 @@ public class BluetoothControl {
                 }
                 else {
                     LogUtil.debug("getBluetoothGattConnectionState:STATE_CONNECTED");
-//                    return bluetoothControl;
-//                    new BussinessTransaction().broadcastUpdate(BussinessTransaction.ACTION_BUSSINESS_NOT_EXECUTED,new AppInformation(),"notexecuted");
                     if (!bluetoothControl.bluetoothService.isBlluetoothEnabled()){
                         bluetoothControl.bluetoothService.setBluetoothGattConnectionState(
                                 bluetoothControl.bluetoothService.STATE_DISCONNECTED);
+                        return null;
                     }
-                    return null;
+//                    return null;
+                    //STATE_CONNECTED,且当前蓝牙enabled
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                sleep(500);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            bluetoothControl.blePreparedCallbackListener.onBLEPrepared();
+                        }
+                    }).start();
                 }
             }
-
         }
         return bluetoothControl;
     }
@@ -297,14 +307,12 @@ public class BluetoothControl {
                             bluetoothControl.blePreparedCallbackListener.onBLEPrepared();
                         } else if (bluetoothControl.bluetoothService.getBluetoothGattConnectionState()
                                 == bluetoothControl.bluetoothService.STATE_DISCONNECTED) {
-                            MyApplication app = (MyApplication) MyApplication.getContextObject();
                             bluetoothControl.bluetoothService.connect(AppGlobal.bluetoothDevAddr);
                             LogUtil.debug("getBluetoothGattConnectionState:STATE_DISCONNECTED");
                         }
                     }
                 } catch (InterruptedException e) {
                     LogUtil.debug(e.getMessage());
-//                    e.printStackTrace();
                 }
             }
         }).start();

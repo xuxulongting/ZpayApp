@@ -88,7 +88,10 @@ public class WebserviceHelper {
     public static void getListDataWithoutSeid(String bleDevAddr,final ResultCallback callback){
         //与蓝牙建立连接
         final BluetoothControl bluetoothControl = BluetoothControl.getInstance(MyApplication.getContextObject(),bleDevAddr);
-        if (bluetoothControl!=null){
+        if (bluetoothControl==null){
+           callback.onFailed("bluetooth connection error");
+        }
+        else {
             bluetoothControl.setBlePreparedCallbackListener(new BLEPreparedCallbackListener() {
                 @Override
                 public void onBLEPrepared() {
@@ -119,7 +122,7 @@ public class WebserviceHelper {
                                     //69168380826800042200000300000001255255
                                     //45105350524400041600000300000001FFFF
                                     //断开蓝牙连接
-                                    bluetoothControl.disconnectBluetooth();
+//                                    bluetoothControl.disconnectBluetooth();
                                     AppGlobal.seId = ByteUtil.bytesToHexString(responseData,responseLen-2);
                                     getListDataWithSeid(AppGlobal.seId,callback);
                                     LogUtil.debug("SeId:"+AppGlobal.seId);
@@ -127,14 +130,14 @@ public class WebserviceHelper {
 
                                 @Override
                                 public void errorCallback() {
-
+                                    callback.onFailed("bluetooth connection error");
                                 }
                             });
                         }
 
                         @Override
                         public void errorCallback() {
-
+                            callback.onFailed("bluetooth connection error");
                         }
                     });
                 }

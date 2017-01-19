@@ -12,4 +12,6 @@ public class AppGlobal {
     public static boolean isOperated = false;
     //SE id
     public static String seId="";//"451000000000000020160328000000010003";
+    //SE形式
+    public static String SE = "wearable"; //"sSE"
 }

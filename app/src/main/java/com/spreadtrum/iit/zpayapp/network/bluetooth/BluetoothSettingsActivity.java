@@ -83,6 +83,8 @@ public class BluetoothSettingsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //启动发现蓝牙设备
+                btDevicesNameList.clear();
+                btDeviceAddressList.clear();
                 bluetoothGetVisible();
             }
         });

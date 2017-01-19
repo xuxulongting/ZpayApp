@@ -46,7 +46,7 @@ public class TCPTransferData {
                         if(callback!=null){
                             callback.onTaskExecutedFailed();
                             //关闭蓝牙连接
-                            bluetoothControl.disconnectBluetooth();
+//                            bluetoothControl.disconnectBluetooth();
                         }
                     }
                     else
@@ -159,7 +159,7 @@ public class TCPTransferData {
             LogUtil.debug("socket is null");
             tsmTaskCompleteCallback.onTaskExecutedFailed();
             //关闭蓝牙连接
-            bluetoothControl.disconnectBluetooth();
+//            bluetoothControl.disconnectBluetooth();
             return;
         }
         new TCPRequest().TCPByteRequest(tcpSocket, input, new TCPResponse.Listener<byte[]>() {
@@ -179,7 +179,7 @@ public class TCPTransferData {
 //                    tsmTaskCompleteListener.onTaskExecutedSuccess();
                     tsmTaskCompleteCallback.onTaskExecutedSuccess();
                     //关闭蓝牙连接
-                    bluetoothControl.disconnectBluetooth();
+//                    bluetoothControl.disconnectBluetooth();
                     return;
                 }
                 ///////////////////////////////
@@ -197,7 +197,7 @@ public class TCPTransferData {
 //                    tsmTaskCompleteListener.onTaskExecutedFailed();
                     tsmTaskCompleteCallback.onTaskExecutedFailed();
                     //关闭蓝牙连接
-                    bluetoothControl.disconnectBluetooth();
+//                    bluetoothControl.disconnectBluetooth();
                     return;
                 }
                 if(response[14]==CMD_SERVER_APDU){
@@ -220,7 +220,7 @@ public class TCPTransferData {
 //                        tsmTaskCompleteListener.onTaskExecutedSuccess();
                         tsmTaskCompleteCallback.onTaskExecutedSuccess();
                         //关闭蓝牙连接
-                        bluetoothControl.disconnectBluetooth();
+//                        bluetoothControl.disconnectBluetooth();
                     }
                     else {
                         tcpSocket.closeSocket();
@@ -230,7 +230,7 @@ public class TCPTransferData {
 //                        tsmTaskCompleteListener.onTaskExecutedFailed();
                         tsmTaskCompleteCallback.onTaskExecutedFailed();
                         //关闭蓝牙连接
-                        bluetoothControl.disconnectBluetooth();
+//                        bluetoothControl.disconnectBluetooth();
                     }
                     return;
 
@@ -247,7 +247,7 @@ public class TCPTransferData {
 //                    tsmTaskCompleteListener.onTaskExecutedFailed();
                     tsmTaskCompleteCallback.onTaskExecutedFailed();
                     //关闭蓝牙连接
-                    bluetoothControl.disconnectBluetooth();
+//                    bluetoothControl.disconnectBluetooth();
                 }
                 //LogUtil.debug(TAG,bytesToHexString(response,responseLen));
             }
@@ -258,7 +258,7 @@ public class TCPTransferData {
 //                tsmTaskCompleteListener.onTaskExecutedFailed();
                 tsmTaskCompleteCallback.onTaskExecutedFailed();
                 //关闭蓝牙连接
-                bluetoothControl.disconnectBluetooth();
+//                bluetoothControl.disconnectBluetooth();
             }
         });
     }
@@ -293,7 +293,7 @@ public class TCPTransferData {
 //                    tsmTaskCompleteListener.onTaskExecutedFailed();
                     tsmTaskCompleteCallback.onTaskExecutedFailed();
                     //关闭蓝牙连接
-                    bluetoothControl.disconnectBluetooth();
+//                    bluetoothControl.disconnectBluetooth();
                     LogUtil.debug("tsmTaskCompleteCallback.onTaskExecutedFailed();");
                 }
             });

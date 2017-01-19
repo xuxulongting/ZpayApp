@@ -173,7 +173,7 @@ public class BussinessTransaction{
                                 LogUtil.debug("HEARTBEAT",responseXml);
                                 callback.onApduExcutedSuccess(responseXml);
                                 //关闭蓝牙
-                                bluetoothControl.disconnectBluetooth();
+//                                bluetoothControl.disconnectBluetooth();
 
                             }
                             @Override
@@ -183,8 +183,8 @@ public class BussinessTransaction{
                                 LogUtil.debug("HEARTBEAT",responseXml);
                                 callback.onApduExcutedFailed(responseXml);
                                 //关闭蓝牙
-                                if (bluetoothControl!=null)
-                                    bluetoothControl.disconnectBluetooth();
+//                                if (bluetoothControl!=null)
+//                                    bluetoothControl.disconnectBluetooth();
                             }
                         });
                     }

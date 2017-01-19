@@ -367,6 +367,9 @@ public class AppStoreFragment extends Fragment {
                         startActivity(intent);
                     }
                 }
+                else if (error.equals("bluetooth connection error")){
+                    Toast.makeText(MyApplication.getContextObject(),"蓝牙连接出现问题",Toast.LENGTH_LONG).show();
+                }
                 else{
                     //检查网络状态
                     if (!NetworkUtils.isNetworkConnected(MyApplication.getContextObject()))
